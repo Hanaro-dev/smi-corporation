@@ -6,6 +6,8 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
 
+  css: ['~/assets/css/style.css'],
+
   modules: [
     '@nuxt/content',
     '@nuxt/eslint',
