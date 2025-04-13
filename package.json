@@ -26,6 +26,7 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@iconify-json/lucide": "^1.2.35",
     "husky": "^9.1.7"
   }
 }
