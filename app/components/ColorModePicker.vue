@@ -47,8 +47,7 @@ ul {
 }
 ul li {
   display: inline-block;
-  padding: 5px;
-  margin-right: 10px;
+  padding: 3px;
   line-height: 0;
 }
 p {

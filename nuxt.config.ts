@@ -65,5 +65,8 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@nuxt/image",
     "@nuxt/ui",
+    "@pinia/nuxt",
+    "nuxt-auth-utils",
+    "nuxt-csurf",
   ],
 });

@@ -34,6 +34,6 @@
 
 <style scoped>
 .button {
-  margin: 0.15rem;
+  margin: 0.1rem;
 }
 </style>
