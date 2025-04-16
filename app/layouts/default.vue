@@ -1,7 +1,7 @@
 <template>
   <UContainer>
     <HeaderBar />
-    <Toast />
+    <ToastNotification />
     <main class="maint-content">
       <slot />
     </main>
@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import Toast from "~/components/ToastNotification.vue"
+import ToastNotification from "~/components/ToastNotification.vue"
 
 </script>
 
