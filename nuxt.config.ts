@@ -44,7 +44,10 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
 
-  css: ["~/assets/css/main.css"],
+  css: [
+    "~/assets/css/main.css",
+    "@fortawesome/fontawesome-free/css/all.min.css"
+  ],
 
   colorMode: {
     preference: "system", // default value of $colorMode.preference
