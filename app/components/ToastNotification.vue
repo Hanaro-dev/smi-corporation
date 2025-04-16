@@ -1,73 +1,35 @@
 <template>
-  <div class="toast-container">
+  <div class="fixed top-4 right-4 z-[1000]">
     <div
       v-for="toast in toasts"
       :key="toast.id"
-      :class="['toast', toast.type]"
+      :class="[
+        'flex items-center mb-2 px-4 py-3 rounded text-white font-bold shadow-lg animate-fade-in',
+        toast.type === 'success' && 'bg-green-600',
+        toast.type === 'error' && 'bg-red-600',
+        toast.type === 'info' && 'bg-blue-600',
+        toast.type === 'warning' && 'bg-orange-500'
+      ]"
     >
-      <span class="icon">
+      <span class="mr-2 text-xl">
         <i v-if="toast.type === 'success'" class="fas fa-check-circle" />
         <i v-else-if="toast.type === 'error'" class="fas fa-times-circle" />
         <i v-else-if="toast.type === 'info'" class="fas fa-info-circle" />
         <i v-else-if="toast.type === 'warning'" class="fas fa-exclamation-circle" />
       </span>
-      <span class="message">{{ toast.message }}</span>
+      <span class="flex-1">{{ toast.message }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useToast } from "~/composables/useToast";
+import { useAppToast } from "~/composables/useAppToast";
 
-const { toasts } = useToast();
+const { toasts } = useAppToast();
 </script>
 
 <style scoped>
-.toast-container {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1000;
-}
-
-.toast {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  padding: 1rem;
-  border-radius: 5px;
-  color: white;
-  font-weight: bold;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  animation: fadeIn 0.3s ease-out;
-}
-
-.toast.success {
-  background-color: #4caf50; /* Vert */
-}
-
-.toast.error {
-  background-color: #f44336; /* Rouge */
-}
-
-.toast.info {
-  background-color: #2196f3; /* Bleu */
-}
-
-.toast.warning {
-  background-color: #ff9800; /* Orange */
-}
-
-.icon {
-  margin-right: 0.5rem;
-  font-size: 1.5rem;
-}
-
-.message {
-  flex: 1;
-}
-
-@keyframes fadeIn {
+@keyframes fade-in {
   from {
     opacity: 0;
     transform: translateY(-10px);
@@ -76,5 +38,8 @@ const { toasts } = useToast();
     opacity: 1;
     transform: translateY(0);
   }
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
 }
 </style>

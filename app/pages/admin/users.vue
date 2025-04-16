@@ -31,14 +31,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import { useToast } from "~/composables/useToast";
 
 const users = ref([]);
 const showCreateForm = ref(false);
 const newUser = ref({ name: "", role: "" });
 const errors = ref({ name: "", role: "" });
-
-const { addToast } = useToast();
 
 definePageMeta({
   middleware: "auth",
