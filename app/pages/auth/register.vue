@@ -1,13 +1,7 @@
 <template>
-  <div
-    class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900"
-  >
-    <div
-      class="w-full max-w-md p-8 bg-white rounded-lg shadow-md dark:bg-gray-800"
-    >
-      <h1
-        class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center"
-      >
+  <div class="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div class="w-full max-w-md p-8 bg-white rounded-lg shadow-md dark:bg-gray-800">
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 text-center">
         Inscription
       </h1>
       <form @submit.prevent="handleRegister">
@@ -62,10 +56,21 @@
         <button
           type="submit"
           class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
+          :disabled="loading"
         >
-          S'inscrire
+          <span v-if="loading" class="flex items-center justify-center">
+            <svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            </svg>
+            Inscription...
+          </span>
+          <span v-else>S'inscrire</span>
         </button>
       </form>
+      <p v-if="error" class="mt-4 text-sm text-center text-red-600 dark:text-red-400">
+        {{ error }}
+      </p>
       <p class="mt-4 text-sm text-center text-gray-600 dark:text-gray-400">
         Vous avez déjà un compte ?
         <NuxtLink
@@ -81,16 +86,33 @@
 
 <script setup>
 import { ref } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
 
 const username = ref("");
 const email = ref("");
 const password = ref("");
+const loading = ref(false);
+const error = ref("");
+const router = useRouter();
 
-const handleRegister = () => {
-  // Ajoutez ici la logique d'enregistrement (API, validation, etc.)
-  console.log("Nom d'utilisateur:", username.value);
-  console.log("Email:", email.value);
-  console.log("Mot de passe:", password.value);
+const handleRegister = async () => {
+  error.value = "";
+  loading.value = true;
+  try {
+    // Exemple d'appel API (à adapter selon ton backend)
+    await axios.post("/api/auth/register", {
+      username: username.value,
+      email: email.value,
+      password: password.value,
+    });
+    // Redirection après inscription réussie
+    router.push("/auth/login");
+  } catch (e) {
+    error.value = e.response?.data?.message || "Erreur lors de l'inscription.";
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 

@@ -1,6 +1,6 @@
 let pages = [
-  { id: 1, title: "Accueil" },
-  { id: 2, title: "Contact" },
+  { id: 1, title: "Accueil", content: "Bienvenue sur la page d'accueil." },
+  { id: 2, title: "Contact", content: "Contactez-nous via ce formulaire." },
 ];
 
 export default defineEventHandler(async (event) => {
@@ -15,7 +15,11 @@ export default defineEventHandler(async (event) => {
   // POST /api/pages
   if (method === "POST" && url === "/api/pages") {
     const body = await readBody(event);
-    const newPage = { id: Date.now(), title: body.title };
+    const newPage = {
+      id: Date.now(),
+      title: body.title,
+      content: body.content || "",
+    };
     pages.push(newPage);
     return newPage;
   }
@@ -27,6 +31,7 @@ export default defineEventHandler(async (event) => {
     const page = pages.find((p) => p.id === id);
     if (page) {
       page.title = body.title;
+      page.content = body.content || "";
       return page;
     }
     event.node.res.statusCode = 404;

@@ -16,6 +16,7 @@
             class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
             placeholder="Entrez votre e-mail"
             required
+            autocomplete="username"
           >
         </div>
         <div class="mb-6">
@@ -29,15 +30,27 @@
             class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
             placeholder="Entrez votre mot de passe"
             required
+            autocomplete="current-password"
           >
         </div>
         <button
           type="submit"
           class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-800"
+          :disabled="loading"
         >
-          Se connecter
+          <span v-if="loading" class="flex items-center justify-center">
+            <svg class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            </svg>
+            Connexion...
+          </span>
+          <span v-else>Se connecter</span>
         </button>
       </form>
+      <p v-if="error" class="mt-4 text-sm text-center text-red-600 dark:text-red-400">
+        {{ error }}
+      </p>
       <p class="mt-4 text-sm text-center text-gray-600 dark:text-gray-400">
         Pas encore de compte ?
         <NuxtLink to="/auth/register" class="text-blue-600 hover:underline dark:text-blue-400">
@@ -49,16 +62,33 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from 'vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 
-const email = ref('');
-const password = ref('');
+const email = ref('')
+const password = ref('')
+const loading = ref(false)
+const error = ref('')
+const router = useRouter()
 
-const handleLogin = () => {
-  // Ajoutez ici la logique de connexion (API, validation, etc.)
-  console.log('Email:', email.value);
-  console.log('Password:', password.value);
-};
+const handleLogin = async () => {
+  error.value = ''
+  loading.value = true
+  try {
+    // Exemple d'appel API (à adapter selon ton backend)
+    await axios.post('/api/auth/login', {
+      email: email.value,
+      password: password.value
+    })
+    // Redirection après connexion réussie
+    router.push('/admin/users')
+  } catch (e) {
+    error.value = e.response?.data?.message || "Identifiants invalides."
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>
