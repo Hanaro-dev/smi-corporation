@@ -1,7 +1,7 @@
 const { User } = require("./models");
 
 export default defineEventHandler(async (event) => {
-  const method = getMethod(event);
+  const method = event.method;
 
   if (method === "GET") {
     // Récupérer tous les utilisateurs
