@@ -86,7 +86,6 @@
 
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
 import { useRouter } from "vue-router";
 
 const username = ref("");
@@ -100,16 +99,19 @@ const handleRegister = async () => {
   error.value = "";
   loading.value = true;
   try {
-    // Exemple d'appel API (à adapter selon ton backend)
-    await axios.post("/api/auth/register", {
-      username: username.value,
-      email: email.value,
-      password: password.value,
+    // Remplacement de axios par $fetch
+    await $fetch("/api/auth/register", {
+      method: "POST",
+      body: {
+        username: username.value,
+        email: email.value,
+        password: password.value,
+      },
     });
     // Redirection après inscription réussie
     router.push("/auth/login");
   } catch (e) {
-    error.value = e.response?.data?.message || "Erreur lors de l'inscription.";
+    error.value = e.data?.message || "Erreur lors de l'inscription.";
   } finally {
     loading.value = false;
   }

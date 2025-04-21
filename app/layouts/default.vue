@@ -17,6 +17,6 @@ import ToastNotification from "~/components/ToastNotification.vue"
 <style scoped>
 .main-content {
   height: 100%;
-  margin-top: 4rem;
+  margin-top: 2rem;
 }
 </style>

@@ -47,18 +47,16 @@ const onFileChange = (e) => {
 };
 
 const uploadImage = async () => {
-  if (!file.value) {
-    addToast("Aucun fichier sélectionné.", "error", 4000);
-    return;
-  }
   const formData = new FormData();
   formData.append("image", file.value);
   try {
-    const res = await axios.post("/api/images", formData);
-    imageUrl.value = res.data.url;
-    addToast("Image uploadée avec succès.", "success", 4000);
+    const res = await $fetch("/api/images", {
+      method: "POST",
+      body: formData,
+    });
+    imageUrl.value = res.url;
   } catch (e) {
-    addToast("Erreur lors de l'upload.", "error", 4000);
+    console.error(e);
   }
 };
 

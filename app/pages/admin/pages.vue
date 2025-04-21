@@ -3,8 +3,7 @@
     <h1 class="text-2xl font-bold mb-4">Gestion des Pages</h1>
     <button
       class="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      @click="showCreateForm = true"
-    >
+      @click="showCreateForm = true">
       Créer une nouvelle page
     </button>
     <ul>
@@ -20,38 +19,32 @@
           v-model="editTitle"
           class="flex-1 px-2 py-1 border rounded mr-2"
           @keyup.enter="updatePage(page.id)"
-          @blur="cancelEdit"
-        />
+          @blur="cancelEdit" />
         <textarea
           v-model="editContent"
           placeholder="Contenu de la page"
-          class="px-2 py-1 border rounded min-h-[120px]"
-        />
+          class="px-2 py-1 border rounded min-h-[120px]" />
         <button
           v-if="editId !== page.id"
           class="ml-2 px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-          @click="startEdit(page)"
-        >
+          @click="startEdit(page)">
           Modifier
         </button>
         <button
           v-if="editId === page.id"
           class="ml-2 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-          @click="updatePage(page.id)"
-        >
+          @click="updatePage(page.id)">
           Enregistrer
         </button>
         <button
           v-if="editId === page.id"
           class="ml-2 px-2 py-1 bg-gray-400 text-white rounded hover:bg-gray-500"
-          @click="cancelEdit"
-        >
+          @click="cancelEdit">
           Annuler
         </button>
         <button
           class="ml-2 px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-          @click="deletePage(page.id)"
-        >
+          @click="deletePage(page.id)">
           Supprimer
         </button>
       </li>
@@ -62,21 +55,18 @@
         <input
           v-model="newTitle"
           placeholder="Titre de la page"
-          class="px-2 py-1 border rounded"
-        />
+          class="px-2 py-1 border rounded" />
         <TipTapEditor v-model="newContent" />
         <div class="flex gap-2">
           <button
             type="submit"
-            class="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+            class="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
             Créer
           </button>
           <button
             type="button"
             class="px-4 py-1 bg-gray-400 text-white rounded hover:bg-gray-500"
-            @click="showCreateForm = false"
-          >
+            @click="showCreateForm = false">
             Annuler
           </button>
         </div>
@@ -88,7 +78,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import DOMPurify from "dompurify";
-import axios from "axios";
 import { useToast } from "~/composables/useAppToast";
 import { html2bbcode } from "html-to-bbcode";
 import bbcode2html from "bbcode-to-html";
@@ -106,9 +95,9 @@ const { addToast } = useToast();
 
 onMounted(async () => {
   try {
-    const res = await axios.get("/api/pages");
+    const res = await $fetch("/api/pages");
     // Convertir le BBCode stocké en HTML pour affichage/édition
-    pages.value = res.data.map((page) => ({
+    pages.value = res.map((page) => ({
       ...page,
       contentHtml: bbcode2html(page.content || ""),
     }));
@@ -130,12 +119,15 @@ const createPage = async () => {
   try {
     // Convertir le HTML de l’éditeur en BBCode avant envoi à l’API
     const bbcode = html2bbcode(newContent.value);
-    const res = await axios.post("/api/pages", {
-      title: newTitle.value,
-      content: bbcode,
+    const res = await $fetch("/api/pages", {
+      method: "POST",
+      body: {
+        title: newTitle.value,
+        content: bbcode,
+      },
     });
     // Stocker aussi la version HTML pour affichage immédiat
-    pages.value.push({ ...res.data, contentHtml: newContent.value });
+    pages.value.push({ ...res, contentHtml: newContent.value });
     addToast("Page créée avec succès.", "success", 4000);
     newTitle.value = "";
     newContent.value = "";
@@ -160,13 +152,16 @@ const updatePage = async (id) => {
   try {
     // Convertir le HTML de l’éditeur en BBCode avant envoi à l’API
     const bbcode = html2bbcode(editContent.value);
-    const res = await axios.put(`/api/pages/${id}`, {
-      title: editTitle.value,
-      content: bbcode,
+    const res = await $fetch(`/api/pages/${id}`, {
+      method: "PUT",
+      body: {
+        title: editTitle.value,
+        content: bbcode,
+      },
     });
     const idx = pages.value.findIndex((p) => p.id === id);
     if (idx !== -1)
-      pages.value[idx] = { ...res.data, contentHtml: editContent.value };
+      pages.value[idx] = { ...res, contentHtml: editContent.value };
     addToast("Page modifiée.", "success", 4000);
     editId.value = null;
     editTitle.value = "";
@@ -184,7 +179,9 @@ const cancelEdit = () => {
 
 const deletePage = async (id) => {
   try {
-    await axios.delete(`/api/pages/${id}`);
+    await $fetch(`/api/pages/${id}`, {
+      method: "DELETE",
+    });
     pages.value = pages.value.filter((page) => page.id !== id);
     addToast("Page supprimée.", "warning", 4000);
   } catch (e) {

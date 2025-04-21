@@ -7,7 +7,10 @@
         {{ user.name }} ({{ user.role }})
         <button @click="editUser(user)">Modifier</button>
         <button @click="deleteUser(user.id)">Supprimer</button>
-        <button class="ml-2 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Action</button>
+        <button
+          class="ml-2 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
+          Action
+        </button>
       </li>
     </ul>
 
@@ -15,11 +18,13 @@
       <h2>Créer un utilisateur</h2>
       <form @submit.prevent="validateAndCreateUser">
         <div>
-          <input v-model="newUser.name" placeholder="Nom">
-          <span v-if="errors.name" class="text-red-600 text-sm ml-2">{{ errors.name }}</span>
+          <input v-model="newUser.name" placeholder="Nom" />
+          <span v-if="errors.name" class="text-red-600 text-sm ml-2">{{
+            errors.name
+          }}</span>
         </div>
         <div>
-          <input v-model="newUser.role" placeholder="Rôle">
+          <input v-model="newUser.role" placeholder="Rôle" />
           <span v-if="errors.role" class="error">{{ errors.role }}</span>
         </div>
         <button type="submit">Créer</button>
@@ -42,10 +47,8 @@ definePageMeta({
   permission: "manage_users", // Permission requise
 });
 
-
 onMounted(async () => {
-  const response = await axios.get("/api/users");
-  users.value = response.data;
+  users.value = await $fetch("/api/users");
 
   // Notification d'information
   addToast("Chargement des données en cours...", "info", 3000);
