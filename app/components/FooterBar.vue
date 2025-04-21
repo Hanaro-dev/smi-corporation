@@ -1,19 +1,17 @@
 <template>
-  <div class="footer">
-    Footer <UIcon name="i-lucide-smile" />
+  <USeparator
+    label="S.M.I. Corporation"
+    size="lg"
+    type="dotted"
+    color="secondary" />
+  <div
+    class="flex justify-center items-center h-16">
+    Footer
   </div>
 </template>
 
-<script setup>
+<script setup></script>
 
-</script>
-
-<style>
-.footer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 60px;
-  border-top: 1px solid #99aabb;
-}
+<style scoped>
+/* Aucun style personnalisé nécessaire, TailwindCSS gère tout */
 </style>

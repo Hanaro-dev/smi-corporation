@@ -96,7 +96,6 @@ const handleLogin = async () => {
   error.value = "";
   loading.value = true;
   try {
-    // Remplacement de axios par $fetch
     await $fetch("/api/auth/login", {
       method: "POST",
       body: {
@@ -104,7 +103,7 @@ const handleLogin = async () => {
         password: password.value,
       },
     });
-    // Redirection après connexion réussie
+
     router.push("/admin/users");
   } catch (e) {
     error.value = e.data?.message || "Identifiants invalides.";

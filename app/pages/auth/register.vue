@@ -99,7 +99,6 @@ const handleRegister = async () => {
   error.value = "";
   loading.value = true;
   try {
-    // Remplacement de axios par $fetch
     await $fetch("/api/auth/register", {
       method: "POST",
       body: {
@@ -108,7 +107,6 @@ const handleRegister = async () => {
         password: password.value,
       },
     });
-    // Redirection après inscription réussie
     router.push("/auth/login");
   } catch (e) {
     error.value = e.data?.message || "Erreur lors de l'inscription.";

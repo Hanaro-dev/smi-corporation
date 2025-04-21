@@ -2,8 +2,9 @@
   <div>
     <h1>Gestion des Utilisateurs</h1>
     <button @click="showCreateForm = true">Créer un nouvel utilisateur</button>
+    <div v-if="isLoading">Chargement...</div>
     <ul>
-      <li v-for="user in users" :key="user.id">
+      <li v-for="user in paginatedUsers" :key="user.id">
         {{ user.name }} ({{ user.role }})
         <button @click="editUser(user)">Modifier</button>
         <button @click="deleteUser(user.id)">Supprimer</button>
@@ -13,91 +14,128 @@
         </button>
       </li>
     </ul>
+    <button @click="currentPage--" :disabled="currentPage === 1">
+      Précédent
+    </button>
+    <button
+      @click="currentPage++"
+      :disabled="currentPage * itemsPerPage >= users.length">
+      Suivant
+    </button>
+
+    <button @click="fetchUsers" :disabled="isLoading">
+      <span v-if="isLoading">Chargement...</span>
+      <span v-else>Charger les utilisateurs</span>
+    </button>
 
     <div v-if="showCreateForm">
       <h2>Créer un utilisateur</h2>
-      <form @submit.prevent="validateAndCreateUser">
-        <div>
-          <input v-model="newUser.name" placeholder="Nom" />
-          <span v-if="errors.name" class="text-red-600 text-sm ml-2">{{
-            errors.name
-          }}</span>
-        </div>
-        <div>
-          <input v-model="newUser.role" placeholder="Rôle" />
-          <span v-if="errors.role" class="error">{{ errors.role }}</span>
-        </div>
-        <button type="submit">Créer</button>
+      <UserForm
+        :user="newUser"
+        :errors="errors"
+        submitLabel="Créer"
+        :handleSubmit="validateAndCreateUser" />
+    </div>
+
+    <div v-if="selectedUser">
+      <h2>Modifier l'utilisateur</h2>
+      <form @submit.prevent="updateUser">
+        <input v-model="selectedUser.name" placeholder="Nom" />
+        <select v-model="selectedUser.role">
+          <option value="admin">Admin</option>
+          <option value="editor">Éditeur</option>
+          <option value="viewer">Lecteur</option>
+        </select>
+        <button type="submit">Mettre à jour</button>
       </form>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import axios from "axios";
+import { ref, onMounted, computed } from "vue";
+import { validateUser } from "~/utils/validators";
 
 const users = ref([]);
 const showCreateForm = ref(false);
 const newUser = ref({ name: "", role: "" });
 const errors = ref({ name: "", role: "" });
+const isLoading = ref(false);
+const selectedUser = ref(null);
+
+const currentPage = ref(1);
+const itemsPerPage = 10;
+const totalUsers = ref(0);
+
+const paginatedUsers = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return users.value.slice(start, end);
+});
 
 definePageMeta({
   middleware: "auth",
   permission: "manage_users", // Permission requise
 });
 
-onMounted(async () => {
-  users.value = await $fetch("/api/users");
+const fetchUsers = async () => {
+  isLoading.value = true;
+  try {
+    const res = await $fetch(
+      `/api/users?page=${currentPage.value}&limit=${itemsPerPage}`
+    );
+    users.value = res.users;
+    totalUsers.value = res.total;
+  } catch (error) {
+    console.error("Erreur lors du chargement des utilisateurs :", error);
+  } finally {
+    isLoading.value = false;
+  }
+};
 
-  // Notification d'information
-  addToast("Chargement des données en cours...", "info", 3000);
+onMounted(async () => {
+  await fetchUsers();
 });
 
 // Fonction pour valider les champs du formulaire
 const validateAndCreateUser = async () => {
-  // Réinitialiser les erreurs
-  errors.value = { name: "", role: "" };
-
-  // Valider le champ "name"
-  if (!newUser.value.name) {
-    errors.value.name = "Le nom est requis.";
-  } else if (newUser.value.name.length < 3) {
-    errors.value.name = "Le nom doit contenir au moins 3 caractères.";
+  const errors = validateUser(newUser.value);
+  if (Object.keys(errors).length > 0) {
+    console.error(errors);
+    return;
   }
-
-  // Valider le champ "role"
-  if (!newUser.value.role) {
-    errors.value.role = "Le rôle est requis.";
-  }
-
-  // Si aucune erreur, soumettre le formulaire
-  if (!errors.value.name && !errors.value.role) {
-    try {
-      const response = await axios.post("/api/users", newUser.value);
-      users.value.push(response.data);
-      newUser.value = { name: "", role: "" }; // Réinitialiser le formulaire
-      showCreateForm.value = false;
-
-      // Afficher une notification de succès
-      addToast("Utilisateur créé avec succès !", "success", 5000);
-    } catch (error) {
-      // Afficher une notification d'erreur
-      addToast("Erreur lors de la création de l'utilisateur.", "error", 7000);
-    }
-  }
+  // Créer l'utilisateur
 };
 
 const editUser = (user) => {
-  alert(`Modifier l'utilisateur ${user.id}`);
+  selectedUser.value = { ...user };
+};
 
-  // Notification d'avertissement
-  addToast("Attention : action irréversible.", "warning", 4000);
+const updateUser = async () => {
+  try {
+    const updatedUser = await $fetch(`/api/users/${selectedUser.value.id}`, {
+      method: "PUT",
+      body: selectedUser.value,
+    });
+    const index = users.value.findIndex((u) => u.id === updatedUser.id);
+    users.value[index] = updatedUser;
+    selectedUser.value = null;
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour de l'utilisateur :", error);
+  }
 };
 
 const deleteUser = async (id) => {
-  await axios.delete(`/api/users/${id}`);
-  users.value = users.value.filter((user) => user.id !== id);
+  try {
+    await $fetch(`/api/users/${id}`, {
+      method: "DELETE",
+    });
+    users.value = users.value.filter((user) => user.id !== id);
+    addToast("Utilisateur supprimé avec succès.", "success", 5000);
+  } catch (error) {
+    console.error("Erreur lors de la suppression de l'utilisateur :", error);
+    addToast("Erreur lors de la suppression de l'utilisateur.", "error", 7000);
+  }
 };
 </script>
 

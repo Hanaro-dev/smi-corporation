@@ -9,7 +9,7 @@
         accept="image/*"
         class="block"
         @change="onFileChange"
-      />
+      >
       <button
         type="submit"
         class="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -22,7 +22,7 @@
         :src="imageUrl"
         alt="Image uploadée"
         class="max-w-xs rounded shadow"
-      />
+      >
       <button
         class="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700"
         @click="deleteImage"
@@ -35,7 +35,6 @@
 
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
 import { useToast } from "~/composables/useAppToast";
 
 const file = ref(null);
@@ -55,17 +54,23 @@ const uploadImage = async () => {
       body: formData,
     });
     imageUrl.value = res.url;
+    addToast("Image uploadée avec succès.", "success", 4000);
   } catch (e) {
     console.error(e);
+    addToast("Erreur lors de l'upload de l'image.", "error", 4000);
   }
 };
 
 const deleteImage = async () => {
   try {
-    await axios.delete("/api/images", { data: { url: imageUrl.value } });
+    await $fetch("/api/images", {
+      method: "DELETE",
+      body: { url: imageUrl.value },
+    });
     imageUrl.value = "";
     addToast("Image supprimée.", "warning", 4000);
   } catch (e) {
+    console.error(e);
     addToast("Erreur lors de la suppression.", "error", 4000);
   }
 };

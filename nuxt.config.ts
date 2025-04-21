@@ -46,7 +46,7 @@ export default defineNuxtConfig({
 
   css: [
     "~/assets/css/main.css",
-    "@fortawesome/fontawesome-free/css/all.min.css"
+    "@fortawesome/fontawesome-free/css/all.min.css",
   ],
 
   colorMode: {
@@ -72,4 +72,22 @@ export default defineNuxtConfig({
     "nuxt-auth-utils",
     "nuxt-csurf",
   ],
+
+  runtimeConfig: {
+    public: {
+      apiBase: "/api",
+    },
+  },
+  hooks: {
+    "vue:errorCaptured": (error) => {
+      console.error("Erreur capturée :", error);
+    },
+  },
+  nitro: {
+    hooks: {
+      error: (error) => {
+        console.error("Erreur API :", error);
+      },
+    },
+  },
 });
