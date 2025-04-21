@@ -1,27 +1,11 @@
-let users = [
-  { id: 1, name: "Alice", role: "admin" },
-  { id: 2, name: "Bob", role: "editor" },
-  { id: 3, name: "Charlie", role: "viewer" },
-];
-
-const validRoles = ["admin", "editor", "viewer"];
+const { User } = require("./models");
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
 
   if (method === "GET") {
-    const query = getQuery(event);
-    const page = parseInt(query.page) || 1;
-    const limit = parseInt(query.limit) || 10;
-    const start = (page - 1) * limit;
-    const end = start + limit;
-
-    return {
-      users: users.slice(start, end),
-      total: users.length,
-      page,
-      limit,
-    };
+    // Récupérer tous les utilisateurs
+    return await User.findAll();
   }
 
   if (method === "POST") {
@@ -33,21 +17,24 @@ export default defineEventHandler(async (event) => {
     if (!name || name.length < 3) {
       throw createError({ statusCode: 400, message: "Nom invalide." });
     }
-    if (!validRoles.includes(role)) {
+    if (!["admin", "editor", "viewer"].includes(role)) {
       throw createError({ statusCode: 400, message: "Rôle invalide." });
     }
 
-    const newUser = { id: users.length + 1, name, role };
-    users.push(newUser);
-    return newUser;
+    return await User.create({ name, role });
   }
 
   if (method === "DELETE") {
     // Supprimer un utilisateur
-    const body = await readBody(event);
-    const { id } = body;
-
-    users = users.filter((user) => user.id !== id);
+    const id = event.context.params.id;
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw createError({
+        statusCode: 404,
+        message: "Utilisateur non trouvé.",
+      });
+    }
+    await user.destroy();
     return { message: "Utilisateur supprimé avec succès." };
   }
 

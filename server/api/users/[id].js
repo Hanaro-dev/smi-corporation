@@ -1,10 +1,10 @@
-const validRoles = ["admin", "editor", "viewer"];
+const { User } = require("../models");
 
 export default defineEventHandler(async (event) => {
-  const id = parseInt(event.context.params.id);
+  const id = event.context.params.id;
   const body = await readBody(event);
 
-  const user = users.find((u) => u.id === id);
+  const user = await User.findByPk(id);
   if (!user) {
     throw createError({ statusCode: 404, message: "Utilisateur non trouvé." });
   }
@@ -15,11 +15,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: "Nom invalide." });
   }
 
-  if (body.role && validRoles.includes(body.role)) {
+  if (body.role && ["admin", "editor", "viewer"].includes(body.role)) {
     user.role = body.role;
   } else {
     throw createError({ statusCode: 400, message: "Rôle invalide." });
   }
 
+  await user.save();
   return user;
 });

@@ -14,16 +14,16 @@
         </button>
       </li>
     </ul>
-    <button @click="currentPage--" :disabled="currentPage === 1">
+    <button :disabled="currentPage === 1" @click="currentPage--">
       Précédent
     </button>
     <button
-      @click="currentPage++"
-      :disabled="currentPage * itemsPerPage >= users.length">
+      :disabled="currentPage * itemsPerPage >= users.length"
+      @click="currentPage++">
       Suivant
     </button>
 
-    <button @click="fetchUsers" :disabled="isLoading">
+    <button :disabled="isLoading" @click="fetchUsers">
       <span v-if="isLoading">Chargement...</span>
       <span v-else>Charger les utilisateurs</span>
     </button>
@@ -33,14 +33,14 @@
       <UserForm
         :user="newUser"
         :errors="errors"
-        submitLabel="Créer"
-        :handleSubmit="validateAndCreateUser" />
+        submit-label="Créer"
+        :handle-submit="validateAndCreateUser" />
     </div>
 
     <div v-if="selectedUser">
       <h2>Modifier l'utilisateur</h2>
       <form @submit.prevent="updateUser">
-        <input v-model="selectedUser.name" placeholder="Nom" />
+        <input v-model="selectedUser.name" placeholder="Nom" >
         <select v-model="selectedUser.role">
           <option value="admin">Admin</option>
           <option value="editor">Éditeur</option>

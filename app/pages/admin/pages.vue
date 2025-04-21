@@ -19,7 +19,7 @@
           v-model="editTitle"
           class="flex-1 px-2 py-1 border rounded mr-2"
           @keyup.enter="updatePage(page.id)"
-          @blur="cancelEdit" />
+          @blur="cancelEdit" >
         <textarea
           v-model="editContent"
           placeholder="Contenu de la page"
@@ -55,7 +55,7 @@
         <input
           v-model="newTitle"
           placeholder="Titre de la page"
-          class="px-2 py-1 border rounded" />
+          class="px-2 py-1 border rounded" >
         <TipTapEditor v-model="newContent" />
         <div class="flex gap-2">
           <button

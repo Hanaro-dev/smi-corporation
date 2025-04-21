@@ -1,5 +1,17 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("./database"); // Assurez-vous que votre instance Sequelize est configurée ici
+const sequelize = require("./database");
+
+// Modèle Utilisateur
+const User = sequelize.define("User", {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  role: {
+    type: DataTypes.ENUM("admin", "editor", "viewer"),
+    allowNull: false,
+  },
+});
 
 // Modèle Role
 const Role = sequelize.define("Role", {
@@ -23,4 +35,4 @@ const Permission = sequelize.define("Permission", {
 Role.belongsToMany(Permission, { through: "RolePermissions" });
 Permission.belongsToMany(Role, { through: "RolePermissions" });
 
-module.exports = { Role, Permission };
+module.exports = { User, Role, Permission };

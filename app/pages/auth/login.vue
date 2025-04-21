@@ -21,7 +21,7 @@
             class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
             placeholder="Entrez votre e-mail"
             required
-            autocomplete="username" />
+            autocomplete="username" >
         </div>
         <div class="mb-6">
           <label
@@ -36,7 +36,7 @@
             class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
             placeholder="Entrez votre mot de passe"
             required
-            autocomplete="current-password" />
+            autocomplete="current-password" >
         </div>
         <button
           type="submit"

@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="handleSubmit">
     <div>
-      <input v-model="user.name" placeholder="Nom" />
+      <input v-model="user.name" placeholder="Nom" >
       <span v-if="errors.name" class="text-red-600 text-sm ml-2">{{
         errors.name
       }}</span>
