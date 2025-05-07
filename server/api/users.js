@@ -1,37 +1,37 @@
-const { User } = require("./models");
+import { ERROR_MESSAGES } from "../constants/messages";
+import { User } from "../models";
 
 export default defineEventHandler(async (event) => {
-  const method = event.method;
+  const method = getMethod(event);
 
   if (method === "GET") {
-    // Récupérer tous les utilisateurs
-    return await User.findAll();
+    const { page = 1, limit = 10 } = getQuery(event);
+    const offset = (page - 1) * limit;
+    const { count, rows } = await User.findAndCountAll({ offset, limit });
+    return { users: rows, total: count };
   }
 
   if (method === "POST") {
-    // Ajouter un nouvel utilisateur
     const body = await readBody(event);
-    const { name, role } = body;
+    const { name, role_id } = body;
 
-    // Validation
     if (!name || name.length < 3) {
-      throw createError({ statusCode: 400, message: "Nom invalide." });
-    }
-    if (!["admin", "editor", "viewer"].includes(role)) {
-      throw createError({ statusCode: 400, message: "Rôle invalide." });
+      throw createError({
+        statusCode: 400,
+        message: ERROR_MESSAGES.INVALID_NAME,
+      });
     }
 
-    return await User.create({ name, role });
+    return await User.create({ name, role_id });
   }
 
   if (method === "DELETE") {
-    // Supprimer un utilisateur
-    const id = event.context.params.id;
+    const { id } = getQuery(event);
     const user = await User.findByPk(id);
     if (!user) {
       throw createError({
         statusCode: 404,
-        message: "Utilisateur non trouvé.",
+        message: ERROR_MESSAGES.USER_NOT_FOUND,
       });
     }
     await user.destroy();

@@ -2,7 +2,7 @@
   <UContainer>
     <HeaderBar />
     <ToastNotification />
-    <main class="maint-content">
+    <main class="h-full mt-8">
       <slot />
     </main>
     <FooterBar />
@@ -10,13 +10,5 @@
 </template>
 
 <script setup>
-import ToastNotification from "~/components/ToastNotification.vue"
-
+import ToastNotification from "~/components/ToastNotification.vue";
 </script>
-
-<style scoped>
-.main-content {
-  height: 100%;
-  margin-top: 2rem;
-}
-</style>

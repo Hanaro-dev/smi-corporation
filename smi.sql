@@ -4,9 +4,10 @@ USE smi_corporation;
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    role ENUM('admin', 'editor', 'viewer') NOT NULL,
+    role_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
 CREATE TABLE roles (
@@ -48,12 +49,12 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES
 (2, 4), -- editor peut voir des utilisateurs
 (3, 4); -- viewer peut voir des utilisateurs
 
-INSERT INTO users (name, role) VALUES 
-('Alice', 'admin'),
-('Bob', 'editor'),
-('Charlie', 'viewer');
+INSERT INTO users (name, role_id) VALUES 
+('Alice', 1),
+('Bob', 2),
+('Charlie', 3);
 
-SELECT users.id, users.name, users.role, users.created_at
+SELECT users.id, users.name, users.role_id, users.created_at
 FROM users;
 
 SELECT permissions.name
@@ -63,7 +64,7 @@ WHERE role_permissions.role_id = 1; -- ID du rôle
 
 SELECT p.name AS permission
 FROM users u
-JOIN roles r ON u.role = r.name
+JOIN roles r ON u.role_id = r.id
 JOIN role_permissions rp ON r.id = rp.role_id
 JOIN permissions p ON rp.permission_id = p.id
 WHERE u.id = 1; -- ID de l'utilisateur

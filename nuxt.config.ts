@@ -73,6 +73,11 @@ export default defineNuxtConfig({
     "nuxt-csurf",
   ],
 
+  csurf: {
+    cookieKey: "XSRF-TOKEN",
+    methods: ["POST", "PUT", "DELETE"],
+  },
+
   runtimeConfig: {
     public: {
       apiBase: "/api",

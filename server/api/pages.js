@@ -1,9 +1,16 @@
+import { defineEventHandler, useRuntimeConfig } from "h3";
+
 let pages = [
   { id: 1, title: "Accueil", content: "Bienvenue sur la page d'accueil." },
   { id: 2, title: "Contact", content: "Contactez-nous via ce formulaire." },
 ];
 
 export default defineEventHandler(async (event) => {
+  const user = event.context.user;
+  if (!user) {
+    throw createError({ statusCode: 401, message: "Non autorisé." });
+  }
+
   const method = event.node.req.method;
   const url = event.node.req.url;
 
