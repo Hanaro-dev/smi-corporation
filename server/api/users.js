@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES } from "../constants/messages";
-import { User } from "../models";
+import { User } from "../models.js";
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);

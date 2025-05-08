@@ -1,9 +1,9 @@
 const sequelize = require("./database");
-const { User, Role, Permission } = require("./models");
+const { User, Role, Permission } = require("./models").default;
 
 (async () => {
   try {
-    await sequelize.sync({ force: true }); // Utilisez { force: true } pour recréer les tables
+    await sequelize.sync({ alter: true }); // Utilisez { alter: true } pour éviter de recréer les tables
     console.log("Les modèles ont été synchronisés avec succès.");
   } catch (error) {
     console.error("Erreur lors de la synchronisation des modèles :", error);

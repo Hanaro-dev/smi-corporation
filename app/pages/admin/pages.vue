@@ -57,6 +57,7 @@
           placeholder="Titre de la page"
           class="px-2 py-1 border rounded" >
         <TipTapEditor v-model="newContent" />
+        <p v-if="errorMessage" class="text-red-600">{{ errorMessage }}</p>
         <div class="flex gap-2">
           <button
             type="submit"
@@ -90,17 +91,14 @@ const newContent = ref("");
 const editId = ref(null);
 const editTitle = ref("");
 const editContent = ref("");
+const errorMessage = ref("");
 
 const { addToast } = useToast();
 
 onMounted(async () => {
   try {
     const res = await $fetch("/api/pages");
-    // Convertir le BBCode stocké en HTML pour affichage/édition
-    pages.value = res.map((page) => ({
-      ...page,
-      contentHtml: bbcode2html(page.content || ""),
-    }));
+    pages.value = res.pages;
   } catch (e) {
     addToast("Erreur lors du chargement des pages.", "error", 4000);
   }

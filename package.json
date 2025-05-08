@@ -19,16 +19,16 @@
     "@nuxt/fonts": "^0.11.2",
     "@nuxt/icon": "^1.12.0",
     "@nuxt/image": "^1.10.0",
-    "@nuxt/ui": "^3.1.0",
+    "@nuxt/ui": "^3.1.1",
     "@pinia/nuxt": "^0.11.0",
-    "@tiptap/starter-kit": "^2.11.7",
-    "@tiptap/vue-3": "^2.11.7",
+    "@tiptap/starter-kit": "^2.12.0",
+    "@tiptap/vue-3": "^2.12.0",
     "bcryptjs": "^3.0.2",
     "dompurify": "^3.2.5",
-    "eslint": "^9.25.1",
+    "eslint": "^9.26.0",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.14.0",
-    "nuxt": "^3.16.2",
+    "mysql2": "^3.14.1",
+    "nuxt": "^3.17.2",
     "nuxt-auth-utils": "^0.5.20",
     "nuxt-csurf": "^1.6.5",
     "pinia": "^3.0.2",
@@ -38,10 +38,10 @@
     "vue": "^3.5.13",
     "vue-router": "^4.5.1",
     "yup": "^1.6.1",
-    "zod": "^3.24.3"
+    "zod": "^3.24.4"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.39",
+    "@iconify-json/lucide": "^1.2.41",
     "husky": "^9.1.7"
   }
 }

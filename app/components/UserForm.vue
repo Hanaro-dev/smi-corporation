@@ -49,5 +49,3 @@
 <script setup>
 defineProps(["user", "errors", "submitLabel", "handleSubmit", "roles"]);
 </script>
-
-<style></style>

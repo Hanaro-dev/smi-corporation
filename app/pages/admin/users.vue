@@ -9,6 +9,7 @@
       Créer un nouvel utilisateur
     </button>
     <div v-if="isLoading" class="text-center text-gray-500">Chargement...</div>
+    <p v-if="errorMessage" class="text-red-600">{{ errorMessage }}</p>
     <ul class="space-y-4">
       <li
         v-for="user in users"
@@ -33,13 +34,15 @@
       <button
         :disabled="currentPage === 1"
         class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50"
-        @click="currentPage--">
+        @click="currentPage--"
+      >
         Précédent
       </button>
       <button
         :disabled="currentPage * itemsPerPage >= totalUsers"
         class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50"
-        @click="currentPage++">
+        @click="currentPage++"
+      >
         Suivant
       </button>
     </div>
@@ -66,6 +69,7 @@ const showCreateForm = ref(false);
 const selectedUser = ref(null);
 const newUser = ref({ name: "", role_id: null });
 const errors = ref({});
+const errorMessage = ref("");
 
 const fetchUsers = async () => {
   isLoading.value = true;
@@ -77,6 +81,7 @@ const fetchUsers = async () => {
     totalUsers.value = res.total;
   } catch (error) {
     console.error("Erreur lors du chargement des utilisateurs :", error);
+    errorMessage.value = "Erreur lors du chargement des utilisateurs.";
   } finally {
     isLoading.value = false;
   }
@@ -96,6 +101,7 @@ const deleteUser = async (id) => {
     fetchUsers();
   } catch (error) {
     console.error("Erreur lors de la suppression de l'utilisateur :", error);
+    errorMessage.value = "Erreur lors de la suppression de l'utilisateur.";
   }
 };
 
