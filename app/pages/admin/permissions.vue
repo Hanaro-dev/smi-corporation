@@ -4,7 +4,7 @@
     <form @submit.prevent="assignPermission">
       <div>
         <label for="role">Rôle</label>
-        <select v-model="selectedRole" id="role">
+        <select id="role" v-model="selectedRole">
           <option value="" disabled>Choisissez un rôle</option>
           <option v-for="role in roles" :key="role.id" :value="role.name">
             {{ role.name }}
@@ -13,7 +13,7 @@
       </div>
       <div>
         <label for="permission">Permission</label>
-        <select v-model="selectedPermission" id="permission">
+        <select id="permission" v-model="selectedPermission">
           <option value="" disabled>Choisissez une permission</option>
           <option v-for="permission in permissions" :key="permission.id" :value="permission.name">
             {{ permission.name }}

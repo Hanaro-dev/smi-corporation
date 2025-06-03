@@ -1,5 +1,5 @@
 const sequelize = require("./database");
-const { User, Role, Permission } = require("./models").default;
+require("./models").default;
 
 (async () => {
   try {

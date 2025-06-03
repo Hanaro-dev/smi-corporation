@@ -1,6 +1,7 @@
-import { defineEventHandler, useRuntimeConfig } from "h3";
+import { defineEventHandler } from "h3";
 import DOMPurify from "dompurify";
 import { validatePageInput } from "../utils/validators";
+import auth from "../middleware/auth.js";
 
 let pages = [
   { id: 1, title: "Accueil", content: "Bienvenue sur la page d'accueil." },
@@ -8,6 +9,8 @@ let pages = [
 ];
 
 export default defineEventHandler(async (event) => {
+  await auth(event);
+
   const user = event.context.user;
   if (!user) {
     throw createError({ statusCode: 401, message: "Non autorisé." });

@@ -6,7 +6,7 @@
       >
       <input
         id="name"
-        v-model="user.name"
+        v-model="formData.name"
         placeholder="Nom"
         aria-describedby="name-error"
         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" >
@@ -23,7 +23,7 @@
       >
       <select
         id="role"
-        v-model="user.role_id"
+        v-model="formData.role_id"
         aria-describedby="role-error"
         class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
         <option value="" disabled>Choisissez un rôle</option>
@@ -47,5 +47,34 @@
 </template>
 
 <script setup>
-defineProps(["user", "errors", "submitLabel", "handleSubmit", "roles"]);
+import { ref, watch } from 'vue';
+
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true
+  },
+  errors: {
+    type: Object,
+    default: () => ({})
+  },
+  submitLabel: {
+    type: String,
+    default: "Soumettre"
+  },
+  handleSubmit: {
+    type: Function,
+    required: true
+  },
+  roles: {
+    type: Array,
+    default: () => ([])
+  }
+});
+
+const formData = ref({ ...props.user });
+
+watch(() => props.user, (newUser) => {
+  formData.value = { ...newUser };
+}, { deep: true });
 </script>

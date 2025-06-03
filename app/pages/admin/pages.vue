@@ -99,7 +99,8 @@ onMounted(async () => {
   try {
     const res = await $fetch("/api/pages");
     pages.value = res.pages;
-  } catch (e) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_e) {
     addToast("Erreur lors du chargement des pages.", "error", 4000);
   }
 });
@@ -130,7 +131,8 @@ const createPage = async () => {
     newTitle.value = "";
     newContent.value = "";
     showCreateForm.value = false;
-  } catch (e) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_e) {
     addToast("Erreur lors de la création.", "error", 4000);
   }
 };
@@ -164,7 +166,8 @@ const updatePage = async (id) => {
     editId.value = null;
     editTitle.value = "";
     editContent.value = "";
-  } catch (e) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_e) {
     addToast("Erreur lors de la modification.", "error", 4000);
   }
 };
@@ -182,7 +185,8 @@ const deletePage = async (id) => {
     });
     pages.value = pages.value.filter((page) => page.id !== id);
     addToast("Page supprimée.", "warning", 4000);
-  } catch (e) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_e) {
     addToast("Erreur lors de la suppression.", "error", 4000);
   }
 };
