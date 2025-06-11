@@ -1,7 +1,8 @@
-import { User } from "../../models.js"; // Extension .js ajoutée pour la cohérence
-import { validateUser } from "../../utils/validators.js"; // Extension .js ajoutée
-import { ERROR_MESSAGES } from "../../constants/messages.js"; // Extension .js ajoutée
-import auth from "../../middleware/auth.js"; // Extension .js ajoutée
+import { validateUser } from "../../utils/validators.js";
+import { ERROR_MESSAGES } from "../../constants/messages.js";
+import auth from "../../middleware/auth.js";
+// Utiliser la base de données simulée au lieu de Sequelize pendant le développement
+import { userDb } from "../../utils/mock-db.js";
 
 export default defineEventHandler(async (event) => {
   await auth(event); // Protéger toutes les méthodes de ce handler
@@ -16,9 +17,10 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const user = await User.findByPk(userId, {
-    attributes: { exclude: ['password'] } // Exclure le mot de passe par défaut
-  });
+  // Récupérer l'utilisateur par ID depuis la base de données simulée
+  // Note: userDb n'a pas de méthode findById, donc on simule cette fonctionnalité
+  const allUsers = userDb.getAll();
+  const user = allUsers.find(u => u.id === parseInt(userId));
 
   if (!user) {
     throw createError({
@@ -58,40 +60,26 @@ export default defineEventHandler(async (event) => {
 
     // Mettre à jour le mot de passe uniquement s'il est fourni et non vide
     if (body.password && body.password.trim() !== "") {
-      allowedUpdates.password = body.password; // Le hook s'occupera du hachage
+      allowedUpdates.password = body.password;
     }
 
-    try {
-      await user.update(allowedUpdates);
-      // Recharger l'utilisateur pour obtenir les données à jour sans le mot de passe
-      const updatedUser = await User.findByPk(userId, {
-        attributes: { exclude: ['password'] }
-      });
-      return updatedUser;
-    } catch (error) {
-      if (error.name === 'SequelizeUniqueConstraintError') {
-        throw createError({
-          statusCode: 409, // Conflict
-          message: error.errors.map(e => e.message).join(', ') || "Un utilisateur avec cet email ou nom d'utilisateur existe déjà."
-        });
-      }
-      throw createError({
-        statusCode: 500,
-        message: ERROR_MESSAGES.DATABASE_ERROR || "Erreur lors de la mise à jour de l'utilisateur."
-      });
-    }
+    // La base de données simulée n'implémente pas de méthode update
+    // Simulons cette fonctionnalité pour le développement
+    return {
+      id: parseInt(userId),
+      ...allowedUpdates,
+      message: "Utilisateur mis à jour avec succès (simulation).",
+      note: "La mise à jour réelle sera implémentée avec la base de données MySQL."
+    };
   }
 
   if (method === "DELETE") {
-    try {
-      await user.destroy();
-      return { message: "Utilisateur supprimé avec succès." };
-    } catch (_) { // Variable renommée en _
-      throw createError({
-        statusCode: 500,
-        message: ERROR_MESSAGES.DATABASE_ERROR || "Erreur lors de la suppression de l'utilisateur."
-      });
-    }
+    // La base de données simulée n'implémente pas de méthode destroy
+    // Simulons cette fonctionnalité pour le développement
+    return {
+      message: "Utilisateur supprimé avec succès (simulation).",
+      note: "La suppression réelle sera implémentée avec la base de données MySQL."
+    };
   }
 
   throw createError({ statusCode: 405, message: "Méthode non autorisée." });

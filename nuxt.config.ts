@@ -70,13 +70,14 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "@pinia/nuxt",
     "nuxt-auth-utils",
-    "nuxt-csurf",
+    // "nuxt-csurf", // Désactivé temporairement pour le développement
   ],
 
-  csurf: {
-    cookieKey: "XSRF-TOKEN",
-    methods: ["POST", "PUT", "DELETE"],
-  },
+  // Désactivé temporairement pour le développement sans BDD
+  // csurf: {
+  //   cookieKey: "XSRF-TOKEN",
+  //   methods: ["POST", "PUT", "DELETE"],
+  // },
 
   runtimeConfig: {
     public: {

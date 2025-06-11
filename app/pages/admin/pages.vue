@@ -80,7 +80,7 @@
 import { ref, onMounted } from "vue";
 import DOMPurify from "dompurify";
 import { useToast } from "~/composables/useAppToast";
-import { html2bbcode } from "html-to-bbcode";
+import html2bbcode from "html2bbcode";
 import bbcode2html from "bbcode-to-html";
 import TipTapEditor from "~/components/TipTapEditor.vue";
 
@@ -99,7 +99,6 @@ onMounted(async () => {
   try {
     const res = await $fetch("/api/pages");
     pages.value = res.pages;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_e) {
     addToast("Erreur lors du chargement des pages.", "error", 4000);
   }
@@ -131,7 +130,6 @@ const createPage = async () => {
     newTitle.value = "";
     newContent.value = "";
     showCreateForm.value = false;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_e) {
     addToast("Erreur lors de la création.", "error", 4000);
   }
@@ -166,7 +164,6 @@ const updatePage = async (id) => {
     editId.value = null;
     editTitle.value = "";
     editContent.value = "";
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_e) {
     addToast("Erreur lors de la modification.", "error", 4000);
   }
@@ -185,7 +182,6 @@ const deletePage = async (id) => {
     });
     pages.value = pages.value.filter((page) => page.id !== id);
     addToast("Page supprimée.", "warning", 4000);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (_e) {
     addToast("Erreur lors de la suppression.", "error", 4000);
   }

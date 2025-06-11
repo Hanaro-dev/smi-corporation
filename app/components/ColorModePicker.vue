@@ -14,9 +14,10 @@ function iconName(theme) {
         v-for="theme of ['system', 'light', 'dark', 'sepia']"
         :key="theme"
         :class="{
-          preferred: !$colorMode.unknown && theme === $colorMode.preference,
-          selected: !$colorMode.unknown && theme === $colorMode.value,
+          'preferred': $colorMode.preference === theme,
+          'selected': $colorMode.value === theme
         }"
+        class=""
       >
         <UIcon
           :name="iconName(theme)"
