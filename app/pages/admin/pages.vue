@@ -79,7 +79,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import DOMPurify from "dompurify";
-import { useToast } from "~/composables/useAppToast";
+import { useAppToast } from "~/composables/useAppToast";
 import html2bbcode from "html2bbcode";
 import bbcode2html from "bbcode-to-html";
 import TipTapEditor from "~/components/TipTapEditor.vue";
@@ -93,7 +93,7 @@ const editTitle = ref("");
 const editContent = ref("");
 const errorMessage = ref("");
 
-const { addToast } = useToast();
+const { addToast } = useAppToast();
 
 onMounted(async () => {
   try {
