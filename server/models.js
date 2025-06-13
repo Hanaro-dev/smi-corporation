@@ -215,9 +215,28 @@ Role.hasMany(User, { foreignKey: "role_id" });
 Role.belongsToMany(Permission, { through: "RolePermissions" });
 Permission.belongsToMany(Role, { through: "RolePermissions" });
 
-// Fonction de synchronisation
+// Fonction de synchronisation avec gestion d'erreur améliorée
 export const syncDatabase = async () => {
   try {
+    // Vérifier d'abord la connectivité avec la base de données
+    try {
+      await sequelize.authenticate();
+      console.log("Connexion à la base de données établie avec succès.");
+    } catch (connError) {
+      console.error("Impossible de se connecter à la base de données :", connError);
+      console.warn("ATTENTION: L'application pourrait utiliser la base de données simulée.");
+      
+      // Log des détails de configuration pour le diagnostic
+      console.log("Vérifiez que le serveur MySQL est démarré et accessible.");
+      console.log("Vérifiez aussi les variables d'environnement pour la connexion:");
+      console.log("- DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_DIALECT");
+      
+      // On ne lève pas l'erreur ici pour permettre à l'application de continuer
+      // potentiellement avec la base de données simulée
+      return;
+    }
+    
+    // Si la connexion réussit, on synchronise la base de données
     await sequelize.sync({ alter: true });
     console.log("Base de données synchronisée avec succès.");
   } catch (error) {
@@ -225,6 +244,7 @@ export const syncDatabase = async () => {
       "Erreur lors de la synchronisation de la base de données :",
       error
     );
+    console.warn("L'application pourrait fonctionner de manière limitée.");
   }
 };
 

@@ -5,13 +5,31 @@ import auth from "../middleware/auth.js";
 import { Page, sequelize } from "../models.js";
 import { Op } from "sequelize";
 
-export default defineEventHandler(async (event) => {
-  await auth(event);
-
-  const user = event.context.user;
-  if (!user) {
-    throw createError({ statusCode: 401, message: "Non autorisé." });
+// Fonction utilitaire pour gérer les erreurs de connexion à la base de données
+const handleDbConnectionError = (error) => {
+  console.error("Erreur de connexion à la base de données:", error);
+  
+  if (error.name === 'SequelizeConnectionRefusedError' ||
+      error.name === 'SequelizeConnectionError' ||
+      error.name === 'SequelizeHostNotFoundError' ||
+      error.name === 'SequelizeConnectionTimedOutError') {
+    return createError({
+      statusCode: 503,
+      message: "Le service de base de données est temporairement indisponible. Veuillez réessayer ultérieurement."
+    });
   }
+  
+  return error;
+};
+
+export default defineEventHandler(async (event) => {
+  try {
+    await auth(event);
+
+    const user = event.context.user;
+    if (!user) {
+      throw createError({ statusCode: 401, message: "Non autorisé." });
+    }
 
   const method = event.node.req.method;
   const url = new URL(event.node.req.url, `http://${event.node.req.headers.host}`);
@@ -440,4 +458,13 @@ export default defineEventHandler(async (event) => {
 
   // Route non trouvée
   throw createError({ statusCode: 404, message: "Route non trouvée." });
+  
+  } catch (error) {
+    // Intercepter les erreurs de connexion à la base de données
+    if (error.name && error.name.startsWith('Sequelize')) {
+      throw handleDbConnectionError(error);
+    }
+    // Laisser passer les autres erreurs
+    throw error;
+  }
 });
