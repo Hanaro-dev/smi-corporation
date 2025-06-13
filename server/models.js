@@ -112,6 +112,102 @@ const Permission = sequelize.define(
   { timestamps: true }
 );
 
+// Modèle Page
+const Page = sequelize.define(
+  "Page",
+  {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: "Le titre ne peut pas être vide.",
+        },
+        len: {
+          args: [3, 255],
+          msg: "Le titre doit contenir entre 3 et 255 caractères.",
+        },
+      },
+    },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: {
+        msg: "Cette URL est déjà utilisée.",
+      },
+      validate: {
+        is: {
+          args: /^[a-z0-9-]+$/i,
+          msg: "Le slug ne peut contenir que des lettres, des chiffres et des tirets.",
+        },
+      },
+    },
+    status: {
+      type: DataTypes.ENUM('draft', 'published'),
+      defaultValue: 'draft',
+      allowNull: false,
+    },
+    parentId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Pages',
+        key: 'id'
+      }
+    },
+    order: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    level: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      validate: {
+        max: {
+          args: [2],
+          msg: "Le niveau de profondeur ne peut pas dépasser 2 (max 3 niveaux).",
+        },
+      },
+    },
+  },
+  {
+    timestamps: true,
+    hooks: {
+      beforeValidate: async (page) => {
+        // Générer automatiquement un slug à partir du titre si non fourni
+        if (!page.slug && page.title) {
+          page.slug = page.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+        }
+        
+        // Ajuster le niveau en fonction du parent
+        if (page.parentId) {
+          try {
+            const parent = await Page.findByPk(page.parentId);
+            if (parent) {
+              page.level = parent.level + 1;
+            }
+          } catch (error) {
+            console.error("Erreur lors de la vérification du parent:", error);
+          }
+        } else {
+          page.level = 0;
+        }
+      }
+    }
+  }
+);
+
+// Relations des pages (auto-relation)
+Page.hasMany(Page, { foreignKey: 'parentId', as: 'children' });
+Page.belongsTo(Page, { foreignKey: 'parentId', as: 'parent' });
+
 // Relations
 User.belongsTo(Role, { foreignKey: "role_id" });
 Role.hasMany(User, { foreignKey: "role_id" });
@@ -133,4 +229,4 @@ export const syncDatabase = async () => {
 };
 
 // Export des modèles et de l'instance Sequelize
-export { User, Role, Permission, sequelize };
+export { User, Role, Permission, Page, sequelize };

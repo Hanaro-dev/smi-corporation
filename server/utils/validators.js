@@ -65,11 +65,46 @@ export const validateLoginInput = (input) => {
 
 export const validatePageInput = (body) => {
   const errors = {};
+  
+  // Validation du titre
   if (!body.title || body.title.trim().length < 3) {
     errors.title = "Le titre doit contenir au moins 3 caractères.";
   }
+  
+  // Validation du contenu
   if (!body.content || body.content.trim().length === 0) {
     errors.content = "Le contenu est requis.";
   }
+  
+  // Validation du slug (si fourni)
+  if (body.slug !== undefined) {
+    if (body.slug.trim().length === 0) {
+      errors.slug = "Le slug ne peut pas être vide.";
+    } else if (!/^[a-z0-9-]+$/i.test(body.slug.trim())) {
+      errors.slug = "Le slug ne peut contenir que des lettres, des chiffres et des tirets.";
+    }
+  }
+  
+  // Validation du statut (si fourni)
+  if (body.status !== undefined) {
+    if (!['draft', 'published'].includes(body.status)) {
+      errors.status = "Le statut doit être 'draft' ou 'published'.";
+    }
+  }
+  
+  // Validation du parent (si fourni)
+  if (body.parentId !== undefined && body.parentId !== null) {
+    if (isNaN(parseInt(body.parentId)) || !Number.isInteger(Number(body.parentId))) {
+      errors.parentId = "L'ID parent doit être un nombre entier.";
+    }
+  }
+  
+  // Validation de l'ordre (si fourni)
+  if (body.order !== undefined) {
+    if (isNaN(parseInt(body.order)) || !Number.isInteger(Number(body.order))) {
+      errors.order = "L'ordre doit être un nombre entier.";
+    }
+  }
+  
   return errors;
 };
