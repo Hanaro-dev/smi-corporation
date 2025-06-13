@@ -248,5 +248,124 @@ export const syncDatabase = async () => {
   }
 };
 
+// Modèle Image
+const Image = sequelize.define(
+  "Image",
+  {
+    filename: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    originalFilename: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    path: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    size: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    width: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    height: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    format: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    mimeType: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    altText: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    hash: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Users',
+        key: 'id'
+      }
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Modèle ImageVariant
+const ImageVariant = sequelize.define(
+  "ImageVariant",
+  {
+    filename: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    path: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    size: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    width: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    height: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    format: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    type: {
+      type: DataTypes.ENUM('thumbnail', 'small', 'medium', 'large', 'webp'),
+      allowNull: false,
+    },
+    imageId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Images',
+        key: 'id'
+      }
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Définir les relations
+Image.hasMany(ImageVariant, { foreignKey: 'imageId', as: 'variants' });
+ImageVariant.belongsTo(Image, { foreignKey: 'imageId' });
+User.hasMany(Image, { foreignKey: 'userId' });
+Image.belongsTo(User, { foreignKey: 'userId' });
+
 // Export des modèles et de l'instance Sequelize
-export { User, Role, Permission, Page, sequelize };
+export { User, Role, Permission, Page, Image, ImageVariant, sequelize };
