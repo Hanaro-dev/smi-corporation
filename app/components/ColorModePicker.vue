@@ -3,7 +3,6 @@ function iconName(theme) {
   if (theme === "system") return "i-lucide-laptop";
   if (theme === "light") return "i-lucide-sun";
   if (theme === "dark") return "i-lucide-moon";
-  return "i-lucide-coffee";
 }
 </script>
 
@@ -11,7 +10,7 @@ function iconName(theme) {
   <div>
     <ul>
       <li
-        v-for="theme of ['system', 'light', 'dark', 'sepia']"
+        v-for="theme of ['system', 'light', 'dark']"
         :key="theme"
         :class="{
           'preferred': $colorMode.preference === theme,

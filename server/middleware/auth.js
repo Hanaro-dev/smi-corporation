@@ -1,4 +1,11 @@
 import { userDb, sessionDb } from '../utils/mock-db.js';
+import dotenv from 'dotenv';
+
+// Charger les variables d'environnement
+dotenv.config();
+
+// Vérifier si on utilise la base de données simulée
+const useMockDb = process.env.USE_MOCK_DB === 'true';
 
 export default defineEventHandler(async (event) => {
   const publicRoutes = [
