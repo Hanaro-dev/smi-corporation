@@ -10,7 +10,13 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepare": "husky"
+    "prepare": "husky",
+    "commit": "cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-customizable"
+    }
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
@@ -57,7 +63,12 @@
     "zod": "^3.25.65"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@iconify-json/lucide": "^1.2.49",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "cz-customizable": "^7.4.0",
     "husky": "^9.1.7"
   }
 }
