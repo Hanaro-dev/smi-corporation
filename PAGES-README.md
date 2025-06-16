@@ -27,13 +27,13 @@ app/
 │   ├── error.vue                 # Page d'erreur générique
 │   ├── page.vue                  # Page dynamique pour le rendu des pages
 │   └── admin/
-│       └── pages.vue             # Interface d'administration des pages
-server/
-├── api/
-│   └── pages.js                  # API de gestion des pages
-├── models.js                     # Modèle de données Page
-└── utils/
-    └── db-setup.js              # Utilitaire pour la migration BDD
+│       └── pages.vue             # Interface d'administration des pages 
+└── server/
+    │   └── pages.js                  # API de gestion des pages
+    ├── models.js                     # Modèle de données Page
+    ├── utils/
+    └── api/
+        └── db-setup.js              # Utilitaire pour la migration BDD
 ```
 
 ## Utilisation du système
