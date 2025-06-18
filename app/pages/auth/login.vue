@@ -85,26 +85,44 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useAppToast } from "~/composables/useAppToast";
 
 const email = ref("");
 const password = ref("");
 const loading = ref(false);
 const error = ref("");
 const router = useRouter();
+const { showToast } = useAppToast();
+
+// Récupérer l'URL de redirection depuis la query string ou utiliser la page d'accueil par défaut
+const route = useRoute();
+const redirectTo = ref(route.query.redirect || "/");
 
 const handleLogin = async () => {
   error.value = "";
   loading.value = true;
   try {
-    await $fetch("/api/auth/login", {
+    const response = await $fetch("/api/auth/login", {
       method: "POST",
       body: {
         email: email.value,
         password: password.value,
+        redirect: redirectTo.value // Envoyer l'URL de redirection souhaitée
       },
     });
 
-    router.push("/admin/users");
+    // Utiliser la redirection fournie par l'API ou la redirection par défaut
+    const destination = response.redirect || "/";
+    
+    // Afficher un toast de succès
+    showToast({
+      message: `Bienvenue, ${response.user.name}!`,
+      type: "success",
+      timeout: 3000
+    });
+    
+    // Rediriger l'utilisateur
+    router.push(destination);
   } catch (e) {
     error.value = e.data?.message || "Identifiants invalides.";
   } finally {

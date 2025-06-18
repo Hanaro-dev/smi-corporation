@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  const { email, password } = body;
+  const { email, password, redirect = "/" } = body;
 
   // Vérification des paramètres requis
   if (!email || !password) {
@@ -69,11 +69,20 @@ export default defineEventHandler(async (event) => {
       // secure: true, // Activer en production avec HTTPS
     });
 
+    // Déterminer la redirection appropriée selon le rôle
+    let redirectTo = redirect;
+    if (role.name === 'admin') {
+      redirectTo = "/admin";
+    } else if (role.name === 'editor') {
+      redirectTo = "/admin/pages";
+    }
+
     return {
       success: true,
       user: userWithoutPassword,
       token,
-      expiresIn: 24 * 60 * 60 // 24 heures en secondes
+      expiresIn: 24 * 60 * 60, // 24 heures en secondes
+      redirect: redirectTo // URL de redirection après connexion
     };
   }
 

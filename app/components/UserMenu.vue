@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative user-menu">
     <!-- Bouton du menu utilisateur -->
     <button
       @click="toggleMenu"
@@ -35,8 +35,12 @@
     >
       <div class="px-4 py-2 text-sm text-gray-700 border-b border-gray-200 dark:text-gray-200 dark:border-gray-700">
         Connecté en tant que <span class="font-bold">{{ userName }}</span>
+        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          Rôle: {{ userRole }}
+        </div>
       </div>
       
+      <!-- Tableau de bord (visible pour tous les utilisateurs connectés) -->
       <NuxtLink
         to="/admin"
         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -45,6 +49,37 @@
         Tableau de bord
       </NuxtLink>
       
+      <!-- Gestion des utilisateurs (visible pour admin ou avec permission) -->
+      <NuxtLink
+        v-if="canManageUsers"
+        to="/admin/users"
+        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+        @click="isOpen = false"
+      >
+        Gestion des utilisateurs
+      </NuxtLink>
+      
+      <!-- Gestion des rôles (visible pour admin ou avec permission) -->
+      <NuxtLink
+        v-if="canManageRoles"
+        to="/admin/permissions"
+        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+        @click="isOpen = false"
+      >
+        Rôles et permissions
+      </NuxtLink>
+      
+      <!-- Gestion des pages (visible pour admin ou éditeurs) -->
+      <NuxtLink
+        v-if="canEditContent"
+        to="/admin/pages"
+        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+        @click="isOpen = false"
+      >
+        Gestion des pages
+      </NuxtLink>
+      
+      <!-- Profil utilisateur -->
       <NuxtLink
         to="/admin/profile"
         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -53,6 +88,7 @@
         Mon profil
       </NuxtLink>
       
+      <!-- Déconnexion -->
       <button
         @click="handleLogout"
         class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -65,22 +101,21 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { storeToRefs } from 'pinia';
 import { useAuthStore } from '~/stores/auth';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const auth = useAuthStore();
-const { user } = storeToRefs(auth);
+const authStore = useAuthStore();
+const { $auth } = useNuxtApp();
 
 const isOpen = ref(false);
 
 // Calculer les initiales de l'utilisateur pour l'avatar
 const userInitials = computed(() => {
-  if (!user.value || !user.value.name) return '?';
+  if (!authStore.user || !authStore.user.name) return '?';
   
   // Extraire les initiales (première lettre de chaque mot du nom)
-  return user.value.name
+  return authStore.user.name
     .split(' ')
     .map(word => word.charAt(0).toUpperCase())
     .join('')
@@ -89,7 +124,25 @@ const userInitials = computed(() => {
 
 // Nom d'utilisateur pour l'affichage
 const userName = computed(() => {
-  return user.value?.name || user.value?.username || 'Utilisateur';
+  return authStore.username;
+});
+
+// Rôle de l'utilisateur pour l'affichage
+const userRole = computed(() => {
+  return authStore.role ? authStore.role.charAt(0).toUpperCase() + authStore.role.slice(1) : 'Utilisateur';
+});
+
+// Vérifier les permissions pour l'affichage conditionnel des liens
+const canManageUsers = computed(() => {
+  return authStore.hasAnyPermission(['admin', 'manage_users']);
+});
+
+const canManageRoles = computed(() => {
+  return authStore.hasAnyPermission(['admin', 'manage_roles', 'manage_permissions']);
+});
+
+const canEditContent = computed(() => {
+  return authStore.hasAnyPermission(['admin', 'edit']);
 });
 
 // Basculer l'état du menu
@@ -100,9 +153,9 @@ const toggleMenu = () => {
 // Gérer la déconnexion
 const handleLogout = async () => {
   try {
-    await $fetch('/api/auth/logout', { method: 'POST' });
-    auth.logout();
-    router.push('/auth/login');
+    // Utiliser la méthode de déconnexion du plugin auth
+    await $auth.logout();
+    // La redirection est gérée par le plugin
   } catch (error) {
     console.error('Erreur lors de la déconnexion', error);
   }
@@ -110,12 +163,8 @@ const handleLogout = async () => {
 
 // Fermer le menu si on clique en dehors
 const handleClickOutside = (event) => {
-  // Obtenir l'élément parent qui contient ce composant
-  const menu = event.target.closest('.user-menu');
-  const button = event.target.closest('button');
-  
-  // Si le clic n'est pas dans le menu ou sur le bouton qui l'ouvre, fermer le menu
-  if (isOpen.value && !menu && !button) {
+  // Si le menu est ouvert et que le clic n'est pas dans le composant user-menu
+  if (isOpen.value && !event.target.closest('.user-menu')) {
     isOpen.value = false;
   }
 };
