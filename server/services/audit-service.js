@@ -1,167 +1,162 @@
-// Service d'audit pour journaliser les actions importantes
-import fs from 'fs/promises';
-import path from 'path';
-import { formatISO } from 'date-fns';
-
-// Configuration
-const AUDIT_LOG_ENABLED = process.env.AUDIT_LOG_ENABLED !== 'false';
-const AUDIT_LOG_PATH = process.env.AUDIT_LOG_PATH || './logs/audit';
-const MAX_LOG_SIZE = 10 * 1024 * 1024; // 10 MB
+import { auditDb } from '../utils/mock-db.js';
 
 /**
- * Enregistre une action dans le journal d'audit
- * @param {Object} data - Les données à journaliser
- * @param {string} data.action - Type d'action (création, modification, suppression, etc.)
- * @param {string} data.entity - Entité concernée (rôle, permission, utilisateur, etc.)
- * @param {string} data.entityId - Identifiant de l'entité
- * @param {string} data.userId - Identifiant de l'utilisateur ayant effectué l'action
- * @param {string} data.userName - Nom de l'utilisateur ayant effectué l'action
- * @param {Object} data.details - Détails supplémentaires sur l'action
+ * Journalise une action sur un utilisateur
+ * @param {string} actionType - Type d'action (create, update, delete, login, logout)
+ * @param {number} userId - ID de l'utilisateur concerné
+ * @param {number} performedBy - ID de l'utilisateur qui a effectué l'action
+ * @param {Object} details - Détails supplémentaires sur l'action
+ * @returns {Object} - L'entrée de journal créée
  */
-export const logAuditAction = async (data) => {
-  if (!AUDIT_LOG_ENABLED) return;
-
-  try {
-    const timestamp = formatISO(new Date());
-    const logEntry = {
-      timestamp,
-      ...data,
-    };
-
-    // Créer le répertoire de logs s'il n'existe pas
-    await fs.mkdir(AUDIT_LOG_PATH, { recursive: true });
-
-    // Nom du fichier de log basé sur la date
-    const logDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const logFilePath = path.join(AUDIT_LOG_PATH, `audit-${logDate}.log`);
-
-    // Vérifier si le fichier existe déjà
-    let stats;
-    try {
-      stats = await fs.stat(logFilePath);
-    } catch (err) {
-      // Le fichier n'existe pas encore
-    }
-
-    // Si le fichier est trop grand, créer un nouveau fichier avec timestamp
-    if (stats && stats.size > MAX_LOG_SIZE) {
-      const timestamp = new Date().toISOString().replace(/:/g, '-');
-      const newLogFilePath = path.join(AUDIT_LOG_PATH, `audit-${logDate}-${timestamp}.log`);
-      await fs.appendFile(newLogFilePath, JSON.stringify(logEntry) + '\n', 'utf8');
-    } else {
-      // Ajouter l'entrée au fichier de log existant ou créer un nouveau
-      await fs.appendFile(logFilePath, JSON.stringify(logEntry) + '\n', 'utf8');
-    }
-  } catch (error) {
-    // En cas d'erreur, ne pas bloquer l'application mais logger l'erreur
-    console.error('Erreur lors de l\'enregistrement dans le journal d\'audit:', error);
-  }
+export const logUserAction = async (actionType, userId, performedBy, details = {}) => {
+  return auditDb.log(
+    actionType,
+    'user',
+    userId,
+    performedBy,
+    details
+  );
 };
 
 /**
- * Enregistre une action liée aux rôles
+ * Journalise une action sur un rôle
+ * @param {string} actionType - Type d'action (create, update, delete)
+ * @param {number} roleId - ID du rôle concerné
+ * @param {string} roleName - Nom du rôle
+ * @param {number} performedBy - ID de l'utilisateur qui a effectué l'action
+ * @param {Object} details - Détails supplémentaires sur l'action
+ * @returns {Object} - L'entrée de journal créée
  */
-export const logRoleAction = async (action, roleId, roleName, userId, userName, details = {}) => {
-  await logAuditAction({
-    action,
-    entity: 'role',
-    entityId: roleId,
-    entityName: roleName,
-    userId,
-    userName,
-    details,
-  });
+export const logRoleAction = async (actionType, roleId, roleName, performedBy, details = {}) => {
+  return auditDb.log(
+    actionType,
+    'role',
+    roleId,
+    performedBy,
+    { roleName, ...details }
+  );
 };
 
 /**
- * Enregistre une action liée aux permissions
+ * Journalise une action sur une permission
+ * @param {string} actionType - Type d'action (create, update, delete)
+ * @param {number} permissionId - ID de la permission concernée
+ * @param {string} permissionName - Nom de la permission
+ * @param {number} performedBy - ID de l'utilisateur qui a effectué l'action
+ * @param {Object} details - Détails supplémentaires sur l'action
+ * @returns {Object} - L'entrée de journal créée
  */
-export const logPermissionAction = async (action, permissionId, permissionName, userId, userName, details = {}) => {
-  await logAuditAction({
-    action,
-    entity: 'permission',
-    entityId: permissionId,
-    entityName: permissionName,
-    userId,
-    userName,
-    details,
-  });
+export const logPermissionAction = async (actionType, permissionId, permissionName, performedBy, details = {}) => {
+  return auditDb.log(
+    actionType,
+    'permission',
+    permissionId,
+    performedBy,
+    { permissionName, ...details }
+  );
 };
 
 /**
- * Enregistre une action liée à l'attribution de permissions
+ * Journalise une action sur l'attribution d'une permission à un rôle
+ * @param {string} actionType - Type d'action (assign, remove)
+ * @param {number} roleId - ID du rôle
+ * @param {string} roleName - Nom du rôle
+ * @param {number} permissionId - ID de la permission
+ * @param {string} permissionName - Nom de la permission
+ * @param {number} performedBy - ID de l'utilisateur qui a effectué l'action
+ * @param {Object} details - Détails supplémentaires sur l'action
+ * @returns {Object} - L'entrée de journal créée
  */
-export const logRolePermissionAction = async (action, roleId, roleName, permissionId, permissionName, userId, userName) => {
-  await logAuditAction({
-    action,
-    entity: 'role_permission',
-    entityId: `${roleId}_${permissionId}`,
-    userId,
-    userName,
-    details: {
-      roleId,
+export const logRolePermissionAction = async (
+  actionType,
+  roleId,
+  roleName,
+  permissionId,
+  permissionName,
+  performedBy,
+  details = {}
+) => {
+  return auditDb.log(
+    actionType,
+    'role_permission',
+    roleId,
+    performedBy,
+    { 
       roleName,
       permissionId,
       permissionName,
-    },
-  });
+      ...details
+    }
+  );
 };
 
 /**
- * Récupère les entrées récentes du journal d'audit (pour l'interface d'administration)
- * @param {number} limit - Nombre maximum d'entrées à récupérer
- * @param {string} entityType - Type d'entité à filtrer (optionnel)
- * @returns {Promise<Array>} - Entrées du journal d'audit
+ * Récupère les journaux d'audit avec pagination
+ * @param {number} page - Numéro de page (commence à 1)
+ * @param {number} limit - Nombre d'éléments par page
+ * @param {Object} filters - Filtres à appliquer (entityType, action, entityId, userId)
+ * @returns {Object} - { logs, total, page, limit, totalPages }
  */
-export const getRecentAuditLogs = async (limit = 100, entityType = null) => {
-  if (!AUDIT_LOG_ENABLED) return [];
+export const getAuditLogs = (page = 1, limit = 20, filters = {}) => {
+  const offset = (page - 1) * limit;
+  
+  const options = {
+    limit,
+    offset,
+    where: {}
+  };
+  
+  // Appliquer les filtres
+  if (filters.entityType) options.where.entityType = filters.entityType;
+  if (filters.action) options.where.action = filters.action;
+  if (filters.entityId) options.where.entityId = parseInt(filters.entityId);
+  if (filters.userId) options.where.userId = parseInt(filters.userId);
+  
+  // Récupérer les logs
+  const logs = auditDb.findAll(options);
+  
+  // Compter le total pour la pagination
+  const allLogs = auditDb.findAll({ where: options.where });
+  
+  return {
+    logs,
+    total: allLogs.length,
+    page,
+    limit,
+    totalPages: Math.ceil(allLogs.length / limit)
+  };
+};
 
-  try {
-    // Créer le répertoire de logs s'il n'existe pas
-    await fs.mkdir(AUDIT_LOG_PATH, { recursive: true });
+/**
+ * Récupère les dernières actions pour un utilisateur spécifique
+ * @param {number} userId - ID de l'utilisateur
+ * @param {number} limit - Nombre maximum d'actions à retourner
+ * @returns {Array} - Liste des dernières actions de l'utilisateur
+ */
+export const getUserActivityLog = (userId, limit = 10) => {
+  const options = {
+    where: { userId: parseInt(userId) },
+    limit
+  };
+  
+  return auditDb.findAll(options);
+};
 
-    // Lister tous les fichiers de log
-    const files = await fs.readdir(AUDIT_LOG_PATH);
-    
-    // Filtrer pour ne garder que les fichiers de log d'audit et les trier par date (du plus récent au plus ancien)
-    const logFiles = files
-      .filter(file => file.startsWith('audit-') && file.endsWith('.log'))
-      .sort()
-      .reverse();
-
-    // Lire les entrées des fichiers les plus récents
-    const entries = [];
-    for (const file of logFiles) {
-      if (entries.length >= limit) break;
-
-      const filePath = path.join(AUDIT_LOG_PATH, file);
-      const content = await fs.readFile(filePath, 'utf8');
-      
-      // Chaque ligne est une entrée JSON
-      const fileEntries = content
-        .split('\n')
-        .filter(line => line.trim())
-        .map(line => {
-          try {
-            return JSON.parse(line);
-          } catch (e) {
-            console.error('Erreur lors du parsing d\'une entrée de log:', e);
-            return null;
-          }
-        })
-        .filter(entry => entry !== null && (!entityType || entry.entity === entityType));
-
-      entries.push(...fileEntries);
-      
-      // Ne garder que le nombre d'entrées demandé
-      if (entries.length > limit) {
-        entries.length = limit;
-      }
-    }
-
-    return entries;
-  } catch (error) {
-    console.error('Erreur lors de la récupération des logs d\'audit:', error);
-    return [];
-  }
+/**
+ * Récupère l'historique des modifications pour une entité spécifique
+ * @param {string} entityType - Type d'entité (user, role, permission, role_permission)
+ * @param {number} entityId - ID de l'entité
+ * @param {number} limit - Nombre maximum d'entrées à retourner
+ * @returns {Array} - Liste des modifications de l'entité
+ */
+export const getEntityHistory = (entityType, entityId, limit = 20) => {
+  const options = {
+    where: {
+      entityType,
+      entityId: parseInt(entityId)
+    },
+    limit
+  };
+  
+  return auditDb.findAll(options);
 };

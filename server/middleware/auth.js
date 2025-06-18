@@ -1,5 +1,6 @@
-import { userDb, sessionDb } from '../utils/mock-db.js';
+import { userDb, sessionDb, roleDb } from '../utils/mock-db.js';
 import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 
 // Charger les variables d'environnement
 dotenv.config();
@@ -28,14 +29,13 @@ export default defineEventHandler(async (event) => {
     return; // Permettre l'accès aux icônes sans authentification
   }
 
-  // Rendre l'upload d'images public pour l'instant
-  if (requestUrl === '/api/images' && requestMethod === 'POST') {
-    console.log("[Auth Middleware] Skipping auth for /api/images POST");
+  // Permettre l'accès aux pages publiques
+  if (requestUrl.startsWith('/page/')) {
     return;
   }
 
   // Vérifier si la route est publique
-  if (publicRoutes.includes(requestUrl)) {
+  if (publicRoutes.some(route => requestUrl === route || requestUrl.startsWith(route + '?'))) {
     console.log(`[Auth Middleware] Public route: ${requestUrl}`);
     return; // Ne pas vérifier l'authentification pour les routes publiques
   }
@@ -46,31 +46,77 @@ export default defineEventHandler(async (event) => {
     return;
   }
 
-  // Sinon, vérifier le token d'authentification
-  const token = getCookie(event, "auth_token");
+  // Vérifier le token d'authentification (cookie ou header)
+  const token = getCookie(event, "auth_token") || 
+                event.node.req.headers.authorization?.replace('Bearer ', '');
+  
   if (!token) {
     console.log(`[Auth Middleware] Protected route: ${requestUrl}. No auth token, throwing 401.`);
-    throw createError({ statusCode: 401, message: "Non autorisé." });
+    throw createError({ 
+      statusCode: 401, 
+      message: "Authentification requise." 
+    });
   }
 
-  // Vérifier si la session existe
-  const session = sessionDb.findByToken(token);
-  if (!session) {
-    console.log(`[Auth Middleware] Protected route: ${requestUrl}. Invalid session, throwing 401.`);
-    throw createError({ statusCode: 401, message: "Session invalide." });
+  try {
+    // Vérifier si la session existe dans notre stockage
+    const session = sessionDb.findByToken(token);
+    if (!session) {
+      console.log(`[Auth Middleware] Protected route: ${requestUrl}. Invalid session, throwing 401.`);
+      throw createError({ 
+        statusCode: 401, 
+        message: "Session invalide ou expirée." 
+      });
+    }
+
+    // Vérifier la validité du token JWT
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET || "YOUR_FALLBACK_JWT_SECRET");
+    } catch (error) {
+      // Token JWT invalide ou expiré, supprimer la session
+      sessionDb.delete(token);
+      throw createError({ 
+        statusCode: 401, 
+        message: "Token expiré ou invalide." 
+      });
+    }
+
+    // Récupérer l'utilisateur
+    const user = userDb.findById(session.userId);
+    if (!user) {
+      console.log(`[Auth Middleware] Protected route: ${requestUrl}. User not found, throwing 401.`);
+      throw createError({ 
+        statusCode: 401, 
+        message: "Utilisateur non trouvé." 
+      });
+    }
+
+    // Récupérer le rôle de l'utilisateur avec ses permissions
+    const role = roleDb.findByPk(user.role_id);
+    if (!role) {
+      console.log(`[Auth Middleware] Protected route: ${requestUrl}. Role not found, throwing 500.`);
+      throw createError({ 
+        statusCode: 500, 
+        message: "Rôle utilisateur non trouvé." 
+      });
+    }
+
+    // Mettre l'utilisateur dans le contexte (sans mot de passe)
+    const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
+    delete userWithoutPassword.password;
+    
+    // Ajouter les informations de rôle et permissions directement dans le contexte
+    event.context.user = userWithoutPassword;
+    event.context.userRole = role;
+    event.context.permissions = role.getPermissions();
+
+    console.log(`[Auth Middleware] Protected route: ${requestUrl}. User authenticated: ${user.name} (Role: ${role.name})`);
+  } catch (error) {
+    // En cas d'erreur non gérée, renvoyer une erreur 401 ou l'erreur spécifiée
+    throw createError({ 
+      statusCode: error.statusCode || 401, 
+      message: error.message || "Erreur d'authentification." 
+    });
   }
-
-  // Récupérer l'utilisateur
-  const user = userDb.findById(session.userId);
-  if (!user) {
-    console.log(`[Auth Middleware] Protected route: ${requestUrl}. User not found, throwing 401.`);
-    throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
-  }
-
-  // Mettre l'utilisateur dans le contexte (sans mot de passe)
-  const userWithoutPassword = { ...user };
-  delete userWithoutPassword.password;
-  event.context.user = userWithoutPassword;
-
-  console.log(`[Auth Middleware] Protected route: ${requestUrl}. User authenticated: ${user.name}`);
 });

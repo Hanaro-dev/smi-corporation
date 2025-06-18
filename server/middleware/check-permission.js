@@ -1,5 +1,4 @@
-import { checkPermission, hasRole } from '../utils/permission-utils.js';
-import { Role, Permission } from '../models.js';
+import { roleDb, permissionDb, auditDb } from '../utils/mock-db.js';
 
 /**
  * Middleware pour vérifier si l'utilisateur a une permission spécifique
@@ -9,11 +8,61 @@ import { Role, Permission } from '../models.js';
 export const requirePermission = (permissionName) => {
   return defineEventHandler(async (event) => {
     try {
-      await checkPermission(event, permissionName);
-    } catch (error) {
+      // Si l'utilisateur n'est pas dans le contexte, il n'est pas authentifié
+      if (!event.context.user) {
+        throw createError({
+          statusCode: 401,
+          message: "Authentification requise"
+        });
+      }
+
+      const user = event.context.user;
+      const userRole = event.context.userRole || null;
+      
+      // Si on n'a pas le rôle dans le contexte, le récupérer
+      if (!userRole && user.role_id) {
+        const role = roleDb.findByPk(user.role_id);
+        if (!role) {
+          throw createError({
+            statusCode: 403,
+            message: "Aucun rôle attribué à cet utilisateur"
+          });
+        }
+        event.context.userRole = role;
+      }
+      
+      const role = event.context.userRole;
+      
+      // Vérifier si le rôle a la permission requise ou est admin
+      if (role.hasPermission('admin') || role.hasPermission(permissionName)) {
+        return; // Permission accordée
+      }
+      
+      // Journaliser le refus d'accès
+      auditDb.log(
+        'permission_denied',
+        'access',
+        null,
+        user.id,
+        {
+          permission: permissionName,
+          role: role.name,
+          url: event.node.req.url,
+          method: event.node.req.method
+        }
+      );
+      
       throw createError({
-        statusCode: error.statusCode || 403,
-        message: error.message || "Accès refusé",
+        statusCode: 403,
+        message: "Vous n'avez pas la permission requise pour effectuer cette action"
+      });
+    } catch (error) {
+      if (error.statusCode) throw error; // Renvoyer nos erreurs personnalisées
+      
+      console.error("Erreur lors de la vérification des permissions :", error);
+      throw createError({
+        statusCode: 500,
+        message: "Erreur serveur lors de la vérification des permissions"
       });
     }
   });
@@ -27,11 +76,61 @@ export const requirePermission = (permissionName) => {
 export const requireRole = (roleName) => {
   return defineEventHandler(async (event) => {
     try {
-      await hasRole(event, roleName);
-    } catch (error) {
+      // Si l'utilisateur n'est pas dans le contexte, il n'est pas authentifié
+      if (!event.context.user) {
+        throw createError({
+          statusCode: 401,
+          message: "Authentification requise"
+        });
+      }
+
+      const user = event.context.user;
+      const userRole = event.context.userRole || null;
+      
+      // Si on n'a pas le rôle dans le contexte, le récupérer
+      if (!userRole && user.role_id) {
+        const role = roleDb.findByPk(user.role_id);
+        if (!role) {
+          throw createError({
+            statusCode: 403,
+            message: "Aucun rôle attribué à cet utilisateur"
+          });
+        }
+        event.context.userRole = role;
+      }
+      
+      const role = event.context.userRole;
+      
+      // Vérifier si l'utilisateur a le rôle requis ou est admin
+      if (role.name === 'admin' || role.name === roleName) {
+        return; // Rôle autorisé
+      }
+      
+      // Journaliser le refus d'accès
+      auditDb.log(
+        'role_denied',
+        'access',
+        null,
+        user.id,
+        {
+          requiredRole: roleName,
+          userRole: role.name,
+          url: event.node.req.url,
+          method: event.node.req.method
+        }
+      );
+      
       throw createError({
-        statusCode: error.statusCode || 403,
-        message: error.message || "Accès refusé",
+        statusCode: 403,
+        message: "Vous n'avez pas le rôle requis pour effectuer cette action"
+      });
+    } catch (error) {
+      if (error.statusCode) throw error; // Renvoyer nos erreurs personnalisées
+      
+      console.error("Erreur lors de la vérification du rôle :", error);
+      throw createError({
+        statusCode: 500,
+        message: "Erreur serveur lors de la vérification du rôle"
       });
     }
   });
@@ -44,72 +143,75 @@ export const requireRole = (roleName) => {
  */
 export const requireAnyPermission = (permissionNames) => {
   return defineEventHandler(async (event) => {
-    // Si l'utilisateur n'est pas dans le contexte, il n'est pas authentifié
-    if (!event.context.user) {
-      throw createError({
-        statusCode: 401,
-        message: "Authentification requise",
-      });
-    }
-
-    const user = event.context.user;
-    let hasAnyPermission = false;
-
-    // Si on utilise la base de données simulée
-    if (process.env.USE_MOCK_DB === 'true') {
-      // En mode simulé, les permissions sont directement sur l'utilisateur
-      if (user.permissions) {
-        // Vérifier si l'utilisateur a au moins une des permissions requises
-        hasAnyPermission = permissionNames.some(permission => 
-          user.permissions.includes(permission)
-        );
-
-        // Si l'utilisateur est admin, il a toutes les permissions
-        if (user.permissions.includes('admin')) {
-          hasAnyPermission = true;
-        }
-      }
-    } 
-    else {
-      try {
-        // Récupérer le rôle de l'utilisateur avec ses permissions
-        const userRole = await Role.findByPk(user.role_id, {
-          include: [{ model: Permission }]
+    try {
+      // Si l'utilisateur n'est pas dans le contexte, il n'est pas authentifié
+      if (!event.context.user) {
+        throw createError({
+          statusCode: 401,
+          message: "Authentification requise"
         });
-        
-        if (!userRole) {
+      }
+
+      const user = event.context.user;
+      const userRole = event.context.userRole || null;
+      
+      // Si on n'a pas le rôle dans le contexte, le récupérer
+      if (!userRole && user.role_id) {
+        const role = roleDb.findByPk(user.role_id);
+        if (!role) {
           throw createError({
             statusCode: 403,
-            message: "Aucun rôle attribué à cet utilisateur",
+            message: "Aucun rôle attribué à cet utilisateur"
           });
         }
-        
-        // Vérifier si le rôle a au moins une des permissions requises
-        hasAnyPermission = permissionNames.some(permName => 
-          userRole.Permissions.some(permission => permission.name === permName)
-        );
-        
-        // Vérifier si le rôle a la permission 'admin' qui donne accès à tout
-        const isAdmin = userRole.Permissions.some(
-          permission => permission.name === 'admin'
-        );
-        
-        if (isAdmin) {
-          hasAnyPermission = true;
-        }
-      } catch (error) {
-        console.error("Erreur lors de la vérification des permissions :", error);
-        throw createError({
-          statusCode: 500,
-          message: "Erreur serveur lors de la vérification des permissions",
-        });
+        event.context.userRole = role;
       }
-    }
-
-    if (!hasAnyPermission) {
+      
+      const role = event.context.userRole;
+      
+      // Si l'utilisateur est admin, il a toutes les permissions
+      if (role.hasPermission('admin')) {
+        return; // Permission accordée
+      }
+      
+      // Vérifier si le rôle a au moins une des permissions requises
+      let hasAnyPermission = false;
+      for (const permName of permissionNames) {
+        if (role.hasPermission(permName)) {
+          hasAnyPermission = true;
+          break;
+        }
+      }
+      
+      if (hasAnyPermission) {
+        return; // Permission accordée
+      }
+      
+      // Journaliser le refus d'accès
+      auditDb.log(
+        'permission_denied',
+        'access',
+        null,
+        user.id,
+        {
+          requiredPermissions: permissionNames,
+          role: role.name,
+          url: event.node.req.url,
+          method: event.node.req.method
+        }
+      );
+      
       throw createError({
         statusCode: 403,
-        message: "Vous n'avez pas les permissions requises pour effectuer cette action",
+        message: "Vous n'avez pas les permissions requises pour effectuer cette action"
+      });
+    } catch (error) {
+      if (error.statusCode) throw error; // Renvoyer nos erreurs personnalisées
+      
+      console.error("Erreur lors de la vérification des permissions :", error);
+      throw createError({
+        statusCode: 500,
+        message: "Erreur serveur lors de la vérification des permissions"
       });
     }
   });
@@ -125,10 +227,17 @@ export const logPermissionAction = () => {
     const url = event.node.req.url;
     const user = event.context.user;
     
-    // Enregistrer l'action dans les logs
-    console.log(`[${new Date().toISOString()}] Action sur les permissions - Utilisateur: ${user?.name || 'Anonyme'} (ID: ${user?.id || 'N/A'}) - Méthode: ${method} - URL: ${url}`);
-    
-    // Dans un environnement de production, on pourrait stocker ces logs dans une base de données
-    // ou un service de logging externe
+    // Enregistrer l'action dans le système d'audit
+    auditDb.log(
+      'permission_action',
+      'permission',
+      null,
+      user?.id || null,
+      {
+        method,
+        url,
+        user: user ? `${user.name} (${user.id})` : 'Anonyme'
+      }
+    );
   });
 };
