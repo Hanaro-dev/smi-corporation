@@ -1,19 +1,14 @@
 // Base de données simulée en mémoire pour le développement
 // Ce fichier sert uniquement pendant le développement en l'absence de base de données réelle
 import bcrypt from 'bcryptjs';
-import dotenv from 'dotenv';
-
-// Charger les variables d'environnement
-dotenv.config();
+import { config } from './env-validation.js';
 
 // Vérifier si on doit utiliser la base de données simulée
-const useMockDb = process.env.USE_MOCK_DB === 'true';
+const useMockDb = config.database.useMock;
 
 // Fonction pour hacher un mot de passe
 const hashPassword = (plainPassword) => {
-  // En développement, on utilise un coût faible pour la rapidité
-  // En production, utilisez un coût plus élevé (10-12)
-  const salt = bcrypt.genSaltSync(5);
+  const salt = bcrypt.genSaltSync(config.security.bcryptRounds);
   return bcrypt.hashSync(plainPassword, salt);
 };
 

@@ -1,14 +1,11 @@
 import { DataTypes } from "sequelize";
 import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
 import sequelizeImport from "./database.js";
 import { pageDb } from './utils/mock-db.js';
-
-// Charger les variables d'environnement
-dotenv.config();
+import { config } from './utils/env-validation.js';
 
 // Vérifier si on doit utiliser la base de données simulée
-const useMockDb = process.env.USE_MOCK_DB === 'true';
+const useMockDb = config.database.useMock;
 
 // Créer un objet pour stocker tous nos modèles et Sequelize
 const db = {};
@@ -170,13 +167,13 @@ if (useMockDb) {
       hooks: {
         beforeCreate: async (user) => {
           if (user.password) {
-            const salt = await bcrypt.genSalt(10);
+            const salt = await bcrypt.genSalt(config.security.bcryptRounds);
             user.password = await bcrypt.hash(user.password, salt);
           }
         },
         beforeUpdate: async (user) => {
           if (user.changed('password')) {
-            const salt = await bcrypt.genSalt(10);
+            const salt = await bcrypt.genSalt(config.security.bcryptRounds);
             user.password = await bcrypt.hash(user.password, salt);
           }
         },

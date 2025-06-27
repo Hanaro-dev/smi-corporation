@@ -1,11 +1,9 @@
 import { Sequelize } from "sequelize";
-import dotenv from "dotenv";
-
-// Charger les variables d'environnement
-dotenv.config();
+import { config } from "./utils/env-validation.js";
+import { poolConfig, DatabaseHealthMonitor } from "./utils/db-helpers.js";
 
 // Vérifier si on doit utiliser la base de données simulée
-const useMockDb = process.env.USE_MOCK_DB === 'true';
+const useMockDb = config.database.useMock;
 
 // Ajout de logs pour le diagnostic
 console.log("Configuration de la connexion à la base de données :");
@@ -13,10 +11,10 @@ console.log(`Mode: ${useMockDb ? 'Base de données simulée (définie dans model
 
 // Si on est en mode base de données réelle, afficher les informations de connexion
 if (!useMockDb) {
-  console.log(`DB_NAME: ${process.env.DB_NAME || '(non défini)'}`);
-  console.log(`DB_USER: ${process.env.DB_USER || '(non défini)'}`);
-  console.log(`DB_HOST: ${process.env.DB_HOST || 'localhost'}`);
-  console.log(`DB_DIALECT: ${process.env.DB_DIALECT || 'mysql'}`);
+  console.log(`DB_NAME: ${config.database.name || '(non défini)'}`);
+  console.log(`DB_USER: ${config.database.user || '(non défini)'}`);
+  console.log(`DB_HOST: ${config.database.host}`);
+  console.log(`DB_DIALECT: ${config.database.dialect}`);
 }
 
 // Créer un objet db qui contiendra l'instance Sequelize
@@ -28,17 +26,30 @@ const db = {
 if (!useMockDb) {
   try {
     db.sequelize = new Sequelize(
-      process.env.DB_NAME,
-      process.env.DB_USER,
-      process.env.DB_PASSWORD,
+      config.database.name,
+      config.database.user,
+      config.database.password,
       {
-        host: process.env.DB_HOST || "localhost",
-        dialect: process.env.DB_DIALECT || "mysql",
-        logging: false,
+        host: config.database.host,
+        dialect: config.database.dialect,
+        logging: process.env.NODE_ENV === 'development' ? console.log : false,
+        pool: poolConfig,
+        dialectOptions: {
+          charset: 'utf8mb4',
+          collate: 'utf8mb4_unicode_ci'
+        },
+        define: {
+          charset: 'utf8mb4',
+          collate: 'utf8mb4_unicode_ci'
+        }
       }
     );
     
     console.log("Instance Sequelize créée, tentative de connexion...");
+    
+    // Initialize health monitoring
+    db.healthMonitor = new DatabaseHealthMonitor(db.sequelize);
+    
   } catch (error) {
     console.error("Erreur lors de la création de l'instance Sequelize:", error);
     throw error;

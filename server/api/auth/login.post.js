@@ -1,17 +1,37 @@
 import { userDb, sessionDb, roleDb, auditDb } from '../../utils/mock-db.js';
 import jwt from 'jsonwebtoken';
+import { config } from '../../utils/env-validation.js';
+import { validateUserLogin, checkRateLimit, ValidationError } from '../../utils/input-validation.js';
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
-  const { email, password, redirect = "/" } = body;
-
-  // Vérification des paramètres requis
-  if (!email || !password) {
+  const clientIP = getClientIP(event);
+  
+  // Rate limiting check
+  if (!checkRateLimit(clientIP, 5, 60000)) {
     throw createError({
-      statusCode: 400,
-      message: "Email et mot de passe requis",
+      statusCode: 429,
+      message: "Trop de tentatives de connexion. Veuillez réessayer dans une minute.",
     });
   }
+
+  const body = await readBody(event);
+  const { redirect = "/" } = body;
+
+  // Validate and sanitize input
+  let validatedData;
+  try {
+    validatedData = validateUserLogin(body);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      throw createError({
+        statusCode: 400,
+        message: error.message,
+      });
+    }
+    throw error;
+  }
+
+  const { email, password } = validatedData;
 
   // Recherche de l'utilisateur par email
   const user = userDb.findByEmail(email);
@@ -35,12 +55,12 @@ export default defineEventHandler(async (event) => {
         role_id: user.role_id,
         role: role.name
       },
-      process.env.JWT_SECRET || "YOUR_FALLBACK_JWT_SECRET",
-      { expiresIn: "24h" }
+      config.jwt.secret,
+      { expiresIn: config.jwt.expiresIn }
     );
     
-    // Enregistrer la session avec durée de vie de 7 jours
-    sessionDb.create(user.id, token, 7 * 24 * 60 * 60 * 1000);
+    // Enregistrer la session avec durée de vie configurable
+    sessionDb.create(user.id, token, config.security.sessionMaxAge);
     
     // Préparer la réponse utilisateur sans le mot de passe
     const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
@@ -64,9 +84,9 @@ export default defineEventHandler(async (event) => {
     setCookie(event, "auth_token", token, {
       httpOnly: true,
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 1 semaine
+      maxAge: config.security.cookieMaxAge,
       sameSite: "strict",
-      // secure: true, // Activer en production avec HTTPS
+      secure: process.env.NODE_ENV === 'production',
     });
 
     // Déterminer la redirection appropriée selon le rôle
@@ -81,8 +101,8 @@ export default defineEventHandler(async (event) => {
       success: true,
       user: userWithoutPassword,
       token,
-      expiresIn: 24 * 60 * 60, // 24 heures en secondes
-      redirect: redirectTo // URL de redirection après connexion
+      expiresIn: config.security.cookieMaxAge,
+      redirect: redirectTo
     };
   }
 
