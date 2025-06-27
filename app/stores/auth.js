@@ -68,8 +68,10 @@ export const useAuthStore = defineStore("auth", {
       this.permissions = [];
       this.tokenExpiry = null;
       
-      // Supprimer les données du localStorage
-      localStorage.removeItem('auth');
+      // Supprimer les données du localStorage (côté client uniquement)
+      if (import.meta.client && window.localStorage) {
+        localStorage.removeItem('auth');
+      }
     },
     
     // Mettre à jour les données utilisateur
@@ -89,33 +91,39 @@ export const useAuthStore = defineStore("auth", {
         tokenExpiry: this.tokenExpiry
       };
       
-      localStorage.setItem('auth', JSON.stringify(authData));
+      // Sauvegarder dans localStorage (côté client uniquement)
+      if (import.meta.client && window.localStorage) {
+        localStorage.setItem('auth', JSON.stringify(authData));
+      }
     },
     
     // Charger les données d'authentification depuis le localStorage
     loadAuth() {
-      const authData = localStorage.getItem('auth');
-      if (!authData) return;
-      
-      const parsedData = JSON.parse(authData);
-      
-      // Vérifier si le token est expiré
-      if (parsedData.tokenExpiry) {
-        const expiryDate = new Date(parsedData.tokenExpiry);
-        if (expiryDate <= new Date()) {
-          // Token expiré, supprimer les données
-          localStorage.removeItem('auth');
-          return;
+      // Vérifier si on est côté client (où localStorage est disponible)
+      if (import.meta.client && window.localStorage) {
+        const authData = localStorage.getItem('auth');
+        if (!authData) return;
+        
+        const parsedData = JSON.parse(authData);
+        
+        // Vérifier si le token est expiré
+        if (parsedData.tokenExpiry) {
+          const expiryDate = new Date(parsedData.tokenExpiry);
+          if (expiryDate <= new Date()) {
+            // Token expiré, supprimer les données
+            localStorage.removeItem('auth');
+            return;
+          }
         }
+        
+        // Charger les données
+        this.isAuthenticated = parsedData.isAuthenticated;
+        this.user = parsedData.user;
+        this.token = parsedData.token;
+        this.role = parsedData.role;
+        this.permissions = parsedData.permissions;
+        this.tokenExpiry = parsedData.tokenExpiry;
       }
-      
-      // Charger les données
-      this.isAuthenticated = parsedData.isAuthenticated;
-      this.user = parsedData.user;
-      this.token = parsedData.token;
-      this.role = parsedData.role;
-      this.permissions = parsedData.permissions;
-      this.tokenExpiry = parsedData.tokenExpiry;
     },
     
     // Vérifier si l'utilisateur peut accéder à une ressource

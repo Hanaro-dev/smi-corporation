@@ -1,5 +1,6 @@
 // Database query optimization helpers
 import { userCache, pageCache, roleCache, cacheKeys } from './cache.js';
+import { Op } from 'sequelize';
 
 /**
  * Optimized user queries with caching
@@ -299,14 +300,20 @@ class DatabaseHealthMonitor {
     if (this.sequelize.connectionManager && this.sequelize.connectionManager.pool) {
       const pool = this.sequelize.connectionManager.pool;
       
-      pool.on('acquire', () => {
-        this.stats.connections++;
-      });
-      
-      pool.on('error', (error) => {
-        console.error('Database pool error:', error);
-        this.stats.errors++;
-      });
+      // Vérifier si pool.on est une fonction avant de l'utiliser
+      if (typeof pool.on === 'function') {
+        pool.on('acquire', () => {
+          this.stats.connections++;
+        });
+        
+        pool.on('error', (error) => {
+          console.error('Database pool error:', error);
+          this.stats.errors++;
+        });
+      } else {
+        // Log alternatif quand pool.on n'est pas disponible
+        console.log('Mode de simulation: pool.on non disponible, monitoring désactivé');
+      }
     }
   }
 

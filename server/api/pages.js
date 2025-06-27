@@ -5,6 +5,7 @@ import auth from "../middleware/auth.js";
 import { Page, sequelize } from "../models.js";
 import dotenv from "dotenv";
 import { pageDb } from '../utils/mock-db.js';
+import { Op as SequelizeOp } from "sequelize";
 
 // Charger les variables d'environnement
 dotenv.config();
@@ -12,7 +13,7 @@ dotenv.config();
 // Vérifier si on utilise la base de données simulée
 const useMockDb = process.env.USE_MOCK_DB === 'true';
 
-// Importer Op à partir de Sequelize ou le créer si on est en mode simulé
+// Utiliser SequelizeOp ou créer un mock pour le mode simulé
 let Op;
 if (useMockDb) {
   // Créer un mock de Op pour le mode simulé
@@ -24,21 +25,8 @@ if (useMockDb) {
     lt: Symbol('lt')
   };
 } else {
-  // Importer normalement depuis Sequelize
-  try {
-    const { Op: SequelizeOp } = require("sequelize");
-    Op = SequelizeOp;
-  } catch (error) {
-    console.error("Erreur lors de l'importation de Op:", error);
-    // Fallback sur le mock
-    Op = {
-      like: Symbol('like'),
-      eq: Symbol('eq'),
-      ne: Symbol('ne'),
-      gt: Symbol('gt'),
-      lt: Symbol('lt')
-    };
-  }
+  // Utiliser l'import standard
+  Op = SequelizeOp;
 }
 
 // Fonction utilitaire pour gérer les erreurs de connexion à la base de données

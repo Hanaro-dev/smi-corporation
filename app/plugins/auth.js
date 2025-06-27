@@ -4,8 +4,10 @@ export default defineNuxtPlugin(async () => {
   const authStore = useAuthStore();
   const router = useRouter();
   
-  // 1. D'abord charger les données d'authentification depuis localStorage
-  authStore.loadAuth();
+  // 1. Charger les données d'authentification depuis localStorage (côté client uniquement)
+  if (import.meta.client) {
+    authStore.loadAuth();
+  }
   
   // 2. Ensuite, vérifier la session serveur pour valider
   try {

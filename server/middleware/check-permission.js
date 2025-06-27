@@ -241,3 +241,29 @@ export const logPermissionAction = () => {
     );
   });
 };
+
+/**
+ * Exportation par défaut pour le middleware de permissions
+ * Utilise requirePermission comme fonction principale
+ */
+export default defineEventHandler(async (event) => {
+  // Ce middleware par défaut peut être personnalisé selon vos besoins
+  // Par exemple, vérifier une permission de base ou journaliser toutes les requêtes
+  
+  // Journaliser l'accès
+  if (event.context.user) {
+    auditDb.log(
+      'access',
+      'general',
+      null,
+      event.context.user.id,
+      {
+        url: event.node.req.url,
+        method: getMethod(event)
+      }
+    );
+  }
+  
+  // Pas de blocage par défaut, juste logging
+  return;
+});
