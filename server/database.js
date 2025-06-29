@@ -7,19 +7,25 @@ const useMockDb = config.database.useMock;
 
 // Ajout de logs pour le diagnostic
 console.log("Configuration de la connexion à la base de données :");
-console.log(`Mode: ${useMockDb ? 'Base de données simulée (définie dans models.js)' : 'Base de données réelle'}`);
+console.log(
+  `Mode: ${
+    useMockDb
+      ? "Base de données simulée (définie dans models.js)"
+      : "Base de données réelle"
+  }`
+);
 
 // Si on est en mode base de données réelle, afficher les informations de connexion
 if (!useMockDb) {
-  console.log(`DB_NAME: ${config.database.name || '(non défini)'}`);
-  console.log(`DB_USER: ${config.database.user || '(non défini)'}`);
+  console.log(`DB_NAME: ${config.database.name || "(non défini)"}`);
+  console.log(`DB_USER: ${config.database.user || "(non défini)"}`);
   console.log(`DB_HOST: ${config.database.host}`);
   console.log(`DB_DIALECT: ${config.database.dialect}`);
 }
 
 // Créer un objet db qui contiendra l'instance Sequelize
 const db = {
-  sequelize: null
+  sequelize: null,
 };
 
 // Créer l'instance Sequelize (uniquement en mode réel)
@@ -32,24 +38,23 @@ if (!useMockDb) {
       {
         host: config.database.host,
         dialect: config.database.dialect,
-        logging: process.env.NODE_ENV === 'development' ? console.log : false,
+        logging: process.env.NODE_ENV === "development" ? console.log : false,
         pool: poolConfig,
         dialectOptions: {
-          charset: 'utf8mb4',
-          collate: 'utf8mb4_unicode_ci'
+          charset: "utf8mb4",
+          collate: "utf8mb4_unicode_ci",
         },
         define: {
-          charset: 'utf8mb4',
-          collate: 'utf8mb4_unicode_ci'
-        }
+          charset: "utf8mb4",
+          collate: "utf8mb4_unicode_ci",
+        },
       }
     );
-    
+
     console.log("Instance Sequelize créée, tentative de connexion...");
-    
+
     // Initialize health monitoring
     db.healthMonitor = new DatabaseHealthMonitor(db.sequelize);
-    
   } catch (error) {
     console.error("Erreur lors de la création de l'instance Sequelize:", error);
     throw error;
