@@ -7,7 +7,9 @@ export const useAuthStore = defineStore("auth", {
     token: null,
     role: null,
     permissions: [],
-    tokenExpiry: null
+    tokenExpiry: null,
+    loading: false,
+    error: null
   }),
   
   getters: {
@@ -40,26 +42,36 @@ export const useAuthStore = defineStore("auth", {
   },
   
   actions: {
-    // Connecter l'utilisateur
+    // Connecter l'utilisateur avec gestion d'erreur
     login(userData) {
-      this.isAuthenticated = true;
-      this.user = userData.user;
-      this.token = userData.token;
-      this.role = userData.user.Role?.name || null;
-      this.permissions = userData.user.Role?.Permissions?.map(p => p.name) || [];
-      
-      // Calculer la date d'expiration du token
-      if (userData.expiresIn) {
-        const expiryDate = new Date();
-        expiryDate.setSeconds(expiryDate.getSeconds() + userData.expiresIn);
-        this.tokenExpiry = expiryDate.toISOString();
+      try {
+        this.error = null;
+        this.loading = false;
+        this.isAuthenticated = true;
+        this.user = userData.user;
+        this.token = userData.token;
+        this.role = userData.user.Role?.name || null;
+        this.permissions = userData.user.Role?.Permissions?.map(p => p.name) || [];
+        
+        // Calculer la date d'expiration du token
+        if (userData.expiresIn) {
+          const expiryDate = new Date();
+          expiryDate.setSeconds(expiryDate.getSeconds() + userData.expiresIn);
+          this.tokenExpiry = expiryDate.toISOString();
+        }
+        
+        // Persister les données dans le localStorage
+        this.persistAuth();
+        
+        return true;
+      } catch (error) {
+        this.error = 'Erreur lors de la connexion';
+        console.error('Login error:', error);
+        return false;
       }
-      
-      // Persister les données dans le localStorage
-      this.persistAuth();
     },
     
-    // Déconnecter l'utilisateur
+    // Déconnecter l'utilisateur avec nettoyage complet
     logout() {
       this.isAuthenticated = false;
       this.user = null;
@@ -67,6 +79,8 @@ export const useAuthStore = defineStore("auth", {
       this.role = null;
       this.permissions = [];
       this.tokenExpiry = null;
+      this.loading = false;
+      this.error = null;
       
       // Supprimer les données du localStorage (côté client uniquement)
       if (import.meta.client && window.localStorage) {
@@ -97,33 +111,48 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     
-    // Charger les données d'authentification depuis le localStorage
+    // Charger les données d'authentification avec validation
     loadAuth() {
       // Vérifier si on est côté client (où localStorage est disponible)
       if (import.meta.client && window.localStorage) {
-        const authData = localStorage.getItem('auth');
-        if (!authData) return;
-        
-        const parsedData = JSON.parse(authData);
-        
-        // Vérifier si le token est expiré
-        if (parsedData.tokenExpiry) {
-          const expiryDate = new Date(parsedData.tokenExpiry);
-          if (expiryDate <= new Date()) {
-            // Token expiré, supprimer les données
+        try {
+          const authData = localStorage.getItem('auth');
+          if (!authData) return false;
+          
+          const parsedData = JSON.parse(authData);
+          
+          // Validation des données
+          if (!parsedData.user || !parsedData.token) {
             localStorage.removeItem('auth');
-            return;
+            return false;
           }
+          
+          // Vérifier si le token est expiré
+          if (parsedData.tokenExpiry) {
+            const expiryDate = new Date(parsedData.tokenExpiry);
+            if (expiryDate <= new Date()) {
+              // Token expiré, supprimer les données
+              localStorage.removeItem('auth');
+              return false;
+            }
+          }
+          
+          // Charger les données
+          this.isAuthenticated = parsedData.isAuthenticated;
+          this.user = parsedData.user;
+          this.token = parsedData.token;
+          this.role = parsedData.role;
+          this.permissions = parsedData.permissions || [];
+          this.tokenExpiry = parsedData.tokenExpiry;
+          
+          return true;
+        } catch (error) {
+          console.error('Error loading auth data:', error);
+          localStorage.removeItem('auth');
+          return false;
         }
-        
-        // Charger les données
-        this.isAuthenticated = parsedData.isAuthenticated;
-        this.user = parsedData.user;
-        this.token = parsedData.token;
-        this.role = parsedData.role;
-        this.permissions = parsedData.permissions;
-        this.tokenExpiry = parsedData.tokenExpiry;
       }
+      return false;
     },
     
     // Vérifier si l'utilisateur peut accéder à une ressource

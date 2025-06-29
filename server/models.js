@@ -4,17 +4,21 @@ import sequelizeImport from "./database.js";
 import { pageDb } from './utils/mock-db.js';
 import { config } from './utils/env-validation.js';
 
+// Sequential ID generator for mock models
+let mockIdCounter = 1;
+const generateSequentialId = () => mockIdCounter++;
+
 // Vérifier si on doit utiliser la base de données simulée
 const useMockDb = config.database.useMock;
 
 // Créer un objet pour stocker tous nos modèles et Sequelize
 const db = {};
 
-// Fonction pour créer des mocks de modèles
+// Factory function for creating mock models with better ID generation
 const createMockModel = (name) => {
-  // Créer une fonction constructeur
+  // Constructor with predictable ID generation
   function MockModel(data = {}) {
-    Object.assign(this, { id: Math.floor(Math.random() * 1000), ...data });
+    Object.assign(this, { id: generateSequentialId(), ...data });
   }
   
   // Pour le modèle Page, utiliser pageDb
@@ -57,8 +61,13 @@ const createMockModel = (name) => {
   MockModel.belongsTo = () => {};
   MockModel.belongsToMany = () => {};
   
-  // Méthodes d'instance
+  // Instance methods with proper validation for mock models
   MockModel.prototype.validPassword = async function(password) {
+    // In mock mode, validate against actual stored password if available
+    if (this.password && name === 'User') {
+      const bcrypt = await import('bcryptjs');
+      return await bcrypt.default.compare(password, this.password);
+    }
     return true;
   };
   MockModel.prototype.toJSON = function() {
@@ -77,7 +86,7 @@ const createMockModel = (name) => {
 
 // Configurer Sequelize et les modèles en fonction du mode
 if (useMockDb) {
-  console.log("Mode simulé: Utilisation de modèles mock...");
+  console.log("⚠️  Mode simulé: Utilisation de modèles mock...");
   
   // Créer un objet sequelize simulé
   db.sequelize = { 
@@ -113,7 +122,7 @@ if (useMockDb) {
   db.Permission.belongsToMany(db.Role, { through: "RolePermissions" });
   
 } else {
-  console.log("Mode normal: Chargement des modèles réels...");
+  console.log("✅ Mode normal: Chargement des modèles réels...");
   
   // Utiliser l'instance de base de données importée
   db.sequelize = sequelizeImport;

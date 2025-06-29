@@ -1,6 +1,4 @@
-import { userDb, sessionDb, roleDb, auditDb } from '../../utils/mock-db.js';
-import jwt from 'jsonwebtoken';
-import { config } from '../../utils/env-validation.js';
+import { AuthService } from '../../services/auth-service.js';
 import { validateUserLogin, checkRateLimit, ValidationError } from '../../utils/input-validation.js';
 
 export default defineEventHandler(async (event) => {

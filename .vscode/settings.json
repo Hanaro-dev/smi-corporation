@@ -13,5 +13,12 @@
   "tailwindCSS.classAttributes": ["class", "ui"],
   "tailwindCSS.experimental.classRegex": [
     ["ui:\\s*{([^)]*)\\s*}", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
-  ]
+  ],
+  "terminal.integrated.profiles.linux": {
+  "zsh": {
+    "path": "/usr/bin/zsh",
+    "args": ["-l"]
+  }
+},
+"terminal.integrated.defaultProfile.linux": "zsh"
 }

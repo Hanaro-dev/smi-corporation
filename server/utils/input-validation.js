@@ -33,9 +33,10 @@ const purify = createSimplePurify();
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Password validation regex (at least 8 chars, one uppercase, one lowercase, one number)
+ * Enhanced password validation regex
+ * At least 8 chars, one uppercase, one lowercase, one number, one special char
  */
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,128}$/;
 
 /**
  * Username validation regex (alphanumeric and underscores only)
@@ -75,17 +76,19 @@ function sanitizeHtml(html) {
 }
 
 /**
- * Sanitizes plain text input
+ * Sanitizes plain text input with configurable length
  * @param {string} text - Raw text input
+ * @param {number} maxLength - Maximum allowed length
  * @returns {string} Sanitized text
  */
-function sanitizeText(text) {
+function sanitizeText(text, maxLength = 1000) {
   if (!text || typeof text !== 'string') return '';
   
   return text
     .trim()
-    .replace(/[<>]/g, '') // Remove potential HTML tags
-    .substring(0, 1000); // Limit length
+    .replace(/[<>"'&]/g, '') // Remove potential HTML and quote chars
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .substring(0, maxLength);
 }
 
 /**
@@ -146,7 +149,7 @@ function validateUserRegistration(userData) {
   // Validate password
   if (!isValidPassword(password)) {
     throw new ValidationError(
-      'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre',
+      'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (@$!%*?&)',
       'password'
     );
   }
@@ -229,12 +232,51 @@ function validatePageData(pageData) {
 }
 
 /**
- * Rate limiting store (simple in-memory implementation)
+ * Rate limiting store with automatic cleanup
  */
-const rateLimitStore = new Map();
+class RateLimitStore {
+  constructor() {
+    this.store = new Map();
+    this.maxSize = 1000;
+    // Auto-cleanup every 5 minutes
+    this.cleanupInterval = setInterval(() => this.cleanup(), 300000);
+  }
+  
+  cleanup() {
+    const now = Date.now();
+    const cutoff = now - 120000; // 2 minutes
+    
+    for (const [key, data] of this.store) {
+      if (data.timestamp < cutoff) {
+        this.store.delete(key);
+      }
+    }
+  }
+  
+  get(key) {
+    const data = this.store.get(key);
+    return data ? data.count : 0;
+  }
+  
+  set(key, count, timestamp = Date.now()) {
+    this.store.set(key, { count, timestamp });
+    
+    // Trigger cleanup if store gets too large
+    if (this.store.size > this.maxSize) {
+      this.cleanup();
+    }
+  }
+  
+  destroy() {
+    clearInterval(this.cleanupInterval);
+    this.store.clear();
+  }
+}
+
+const rateLimitStore = new RateLimitStore();
 
 /**
- * Check rate limit for an IP address
+ * Enhanced rate limiting with better performance
  * @param {string} ip - IP address
  * @param {number} maxRequests - Maximum requests allowed
  * @param {number} windowMs - Time window in milliseconds
@@ -242,21 +284,11 @@ const rateLimitStore = new Map();
  */
 function checkRateLimit(ip, maxRequests = 5, windowMs = 60000) {
   const now = Date.now();
-  const key = `${ip}:${Math.floor(now / windowMs)}`;
+  const windowStart = Math.floor(now / windowMs);
+  const key = `${ip}:${windowStart}`;
   
-  const count = rateLimitStore.get(key) || 0;
-  rateLimitStore.set(key, count + 1);
-  
-  // Clean up old entries
-  if (rateLimitStore.size > 1000) {
-    const cutoff = now - windowMs * 2;
-    for (const [k] of rateLimitStore) {
-      const timestamp = parseInt(k.split(':')[1]) * windowMs;
-      if (timestamp < cutoff) {
-        rateLimitStore.delete(k);
-      }
-    }
-  }
+  const count = rateLimitStore.get(key);
+  rateLimitStore.set(key, count + 1, now);
   
   return count < maxRequests;
 }

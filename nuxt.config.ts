@@ -70,30 +70,65 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "@pinia/nuxt",
     "nuxt-auth-utils",
-    // "nuxt-csurf", // Désactivé temporairement pour le développement
+    // "nuxt-csurf", // Disabled temporarily for development
   ],
 
-  // Désactivé temporairement pour le développement sans BDD
+  // Performance optimizations
+  experimental: {
+    payloadExtraction: false,
+    typedPages: true
+  },
+
+  // Build optimizations
+  build: {
+    transpile: process.env.NODE_ENV === 'production' ? ['vue-toastification'] : []
+  },
+
+  // CSRF protection (disabled for development without DB)
   // csurf: {
   //   cookieKey: "XSRF-TOKEN",
   //   methods: ["POST", "PUT", "DELETE"],
+  //   https: process.env.NODE_ENV === 'production'
   // },
 
   runtimeConfig: {
     public: {
       apiBase: "/api",
+      appName: "SMI Corporation",
+      appVersion: process.env.npm_package_version || "1.0.0"
     },
+    // Server-only keys
+    jwtSecret: process.env.JWT_SECRET,
+    useMockDb: process.env.USE_MOCK_DB === 'true'
   },
+  // Enhanced error handling and performance
   hooks: {
-    "vue:errorCaptured": (error) => {
-      console.error("Erreur capturée :", error);
+    "vue:errorCaptured": (error, instance, info) => {
+      console.error("[Vue Error]", {
+        error: error.message,
+        component: instance?.$options.name || 'Unknown',
+        info,
+        stack: error.stack
+      });
     },
+    "build:error": (error) => {
+      console.error("[Build Error]", error);
+    }
   },
   nitro: {
+    experimental: {
+      wasm: true
+    },
     hooks: {
-      error: (error) => {
-        console.error("Erreur API :", error);
+      error: (error, event) => {
+        console.error("[API Error]", {
+          url: event?.node?.req?.url,
+          method: event?.node?.req?.method,
+          error: error.message,
+          stack: error.stack
+        });
       },
     },
+    compressPublicAssets: true
   },
 });
