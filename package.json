@@ -10,7 +10,6 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prepare": "husky",
     "commit": "cz"
   },
   "config": {
@@ -31,6 +30,7 @@
     "@tiptap/vue-3": "^2.14.0",
     "bbcode-to-html": "^1.0.2",
     "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.2.0",
     "crypto": "^1.0.1",
     "dompurify": "^3.2.6",
     "eslint": "^9.29.0",
@@ -69,6 +69,6 @@
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
     "cz-customizable": "^7.4.0",
-    "husky": "^9.1.7"
+    "husky": "^9.1.4"
   }
 }
