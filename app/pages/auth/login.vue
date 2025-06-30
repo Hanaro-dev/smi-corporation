@@ -86,6 +86,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAppToast } from "~/composables/useAppToast";
+import { loginApi, handleApiError } from "~/utils/api";
 
 const email = ref("");
 const password = ref("");
@@ -101,14 +102,12 @@ const redirectTo = ref(route.query.redirect || "/");
 const handleLogin = async () => {
   error.value = "";
   loading.value = true;
+  
   try {
-    const response = await $fetch("/api/auth/login", {
-      method: "POST",
-      body: {
-        email: email.value,
-        password: password.value,
-        redirect: redirectTo.value // Envoyer l'URL de redirection souhaitée
-      },
+    const response = await loginApi({
+      email: email.value,
+      password: password.value,
+      redirect: redirectTo.value
     });
 
     // Utiliser la redirection fournie par l'API ou la redirection par défaut
@@ -124,7 +123,10 @@ const handleLogin = async () => {
     // Rediriger l'utilisateur
     router.push(destination);
   } catch (e) {
-    error.value = e.data?.message || "Identifiants invalides.";
+    // Use centralized error handling
+    handleApiError(e, (message) => {
+      error.value = message;
+    });
   } finally {
     loading.value = false;
   }

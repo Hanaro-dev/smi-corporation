@@ -9,7 +9,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "docs": "echo 'Documentation disponible dans le dossier docs/ - Consultez docs/README.md'"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",

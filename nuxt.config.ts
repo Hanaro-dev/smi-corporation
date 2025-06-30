@@ -70,7 +70,7 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "@pinia/nuxt",
     "nuxt-auth-utils",
-    // "nuxt-csurf", // Disabled temporarily for development
+    "nuxt-csurf",
   ],
 
   // Performance optimizations
@@ -84,12 +84,21 @@ export default defineNuxtConfig({
     transpile: process.env.NODE_ENV === 'production' ? ['vue-toastification'] : []
   },
 
-  // CSRF protection (disabled for development without DB)
-  // csurf: {
-  //   cookieKey: "XSRF-TOKEN",
-  //   methods: ["POST", "PUT", "DELETE"],
-  //   https: process.env.NODE_ENV === 'production'
-  // },
+  // CSRF protection configuration
+  csurf: {
+    cookieKey: "XSRF-TOKEN",
+    cookieHttpOnly: true,
+    cookieSameSite: "strict",
+    methods: ["POST", "PUT", "DELETE", "PATCH"],
+    excludedUrls: [
+      ["/api/_auth/session", "GET"],
+      ["/api/auth/logout", "POST"]
+    ],
+    https: process.env.NODE_ENV === 'production',
+    methodsToProtect: ["POST", "PUT", "DELETE", "PATCH"],
+    addCsrfTokenToEventCtx: true,
+    secret: process.env.CSRF_SECRET || process.env.JWT_SECRET
+  },
 
   runtimeConfig: {
     public: {
