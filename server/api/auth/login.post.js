@@ -1,5 +1,6 @@
 import { AuthService } from '../../services/auth-service.js';
-import { validateUserLogin, checkRateLimit, ValidationError } from '../../utils/input-validation.js';
+import { validateUserLogin, checkRateLimit } from '../../utils/input-validation.js';
+import { ValidationError } from '../../utils/error-handler.js';
 
 export default defineEventHandler(async (event) => {
   const clientIP = getClientIP(event);

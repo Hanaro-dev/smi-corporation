@@ -1,5 +1,10 @@
 // Input validation and sanitization utilities
 
+/**
+ * Import ValidationError from error-handler
+ */
+import { ValidationError } from './error-handler.js';
+
 // Simple HTML sanitization without external dependencies
 function createSimplePurify() {
   return {
@@ -47,17 +52,6 @@ const USERNAME_REGEX = /^[a-zA-Z0-9_]{3,50}$/;
  * Slug validation regex (lowercase letters, numbers, and hyphens)
  */
 const SLUG_REGEX = /^[a-z0-9-]+$/;
-
-/**
- * Validation error class
- */
-class ValidationError extends Error {
-  constructor(message, field = null) {
-    super(message);
-    this.name = 'ValidationError';
-    this.field = field;
-  }
-}
 
 /**
  * Sanitizes HTML content
@@ -294,7 +288,6 @@ function checkRateLimit(ip, maxRequests = 5, windowMs = 60000) {
 }
 
 export {
-  ValidationError,
   sanitizeHtml,
   sanitizeText,
   isValidEmail,

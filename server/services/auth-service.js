@@ -2,7 +2,7 @@
 import jwt from 'jsonwebtoken';
 import { userDb, sessionDb, roleDb, auditDb } from '../utils/mock-db.js';
 import { config } from '../utils/env-validation.js';
-import { ValidationError } from '../utils/input-validation.js';
+import { ValidationError } from '../utils/error-handler.js';
 
 export class AuthService {
   /**

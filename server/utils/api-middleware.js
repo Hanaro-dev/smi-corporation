@@ -1,7 +1,8 @@
 // Common API middleware for improved code quality and consistency
 import jwt from 'jsonwebtoken';
 import { config } from './env-validation.js';
-import { checkRateLimit, ValidationError } from './input-validation.js';
+import { checkRateLimit } from './input-validation.js';
+import { ValidationError } from './error-handler.js';
 import { userCache, cacheKeys } from './cache.js';
 import { userDb } from './mock-db.js';
 

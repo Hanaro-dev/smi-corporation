@@ -1,93 +1,9 @@
 // Performance utilities and caching strategies
 
 /**
- * Simple in-memory cache with TTL support
+ * Import MemoryCache from cache.js
  */
-class MemoryCache {
-  constructor(defaultTTL = 300000) { // 5 minutes default
-    this.cache = new Map();
-    this.defaultTTL = defaultTTL;
-    this.timers = new Map();
-    
-    // Cleanup expired entries periodically
-    this.cleanupInterval = setInterval(() => {
-      this.cleanup();
-    }, 60000); // Cleanup every minute
-  }
-
-  set(key, value, ttl = this.defaultTTL) {
-    // Clear existing timer if any
-    if (this.timers.has(key)) {
-      clearTimeout(this.timers.get(key));
-    }
-
-    // Set the value
-    this.cache.set(key, {
-      value,
-      createdAt: Date.now(),
-      ttl
-    });
-
-    // Set expiration timer
-    const timer = setTimeout(() => {
-      this.delete(key);
-    }, ttl);
-    
-    this.timers.set(key, timer);
-  }
-
-  get(key) {
-    const item = this.cache.get(key);
-    if (!item) return null;
-
-    // Check if expired
-    if (Date.now() - item.createdAt > item.ttl) {
-      this.delete(key);
-      return null;
-    }
-
-    return item.value;
-  }
-
-  has(key) {
-    return this.get(key) !== null;
-  }
-
-  delete(key) {
-    if (this.timers.has(key)) {
-      clearTimeout(this.timers.get(key));
-      this.timers.delete(key);
-    }
-    return this.cache.delete(key);
-  }
-
-  clear() {
-    // Clear all timers
-    for (const timer of this.timers.values()) {
-      clearTimeout(timer);
-    }
-    this.timers.clear();
-    this.cache.clear();
-  }
-
-  cleanup() {
-    const now = Date.now();
-    for (const [key, item] of this.cache.entries()) {
-      if (now - item.createdAt > item.ttl) {
-        this.delete(key);
-      }
-    }
-  }
-
-  size() {
-    return this.cache.size;
-  }
-
-  destroy() {
-    clearInterval(this.cleanupInterval);
-    this.clear();
-  }
-}
+import { MemoryCache } from './cache.js';
 
 /**
  * Debounce function to limit function calls
@@ -238,7 +154,6 @@ const globalCache = new MemoryCache();
 const performanceMonitor = new PerformanceMonitor();
 
 export {
-  MemoryCache,
   debounce,
   throttle,
   memoize,
