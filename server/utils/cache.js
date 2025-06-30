@@ -8,7 +8,7 @@ class MemoryCache {
     this.timers = new Map();
     
     // Clean up expired entries every 5 minutes
-    setInterval(() => this.cleanup(), 300000);
+    this.cleanupInterval = setInterval(() => this.cleanup(), 300000);
   }
 
   /**
@@ -42,7 +42,7 @@ class MemoryCache {
    */
   set(key, value, ttl = null) {
     const now = Date.now();
-    const timeToLive = ttl || this.defaultTTL;
+    const timeToLive = ttl !== null ? ttl : this.defaultTTL;
     
     // Clear existing timer if any
     if (this.timers.has(key)) {
@@ -53,13 +53,13 @@ class MemoryCache {
       value,
       created: now,
       lastAccessed: now,
-      expires: timeToLive ? now + timeToLive : null
+      expires: timeToLive > 0 ? now + timeToLive : null
     };
     
     this.cache.set(key, entry);
     
     // Set expiration timer
-    if (timeToLive) {
+    if (timeToLive > 0) {
       const timer = setTimeout(() => {
         this.delete(key);
       }, timeToLive);
@@ -113,6 +113,20 @@ class MemoryCache {
     
     this.cache.clear();
     this.timers.clear();
+  }
+
+  /**
+   * Destroy cache and cleanup all resources
+   */
+  destroy() {
+    // Clear all timers
+    this.clear();
+    
+    // Clear cleanup interval
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
   }
 
   /**
@@ -229,6 +243,20 @@ function invalidateRoleCache(roleId) {
   // Role changes affect all users with that role
   userCache.clear(); // Simple approach - clear all user cache
 }
+
+// Cleanup on process exit to prevent memory leaks
+function cleanupCaches() {
+  console.log('Cleaning up caches...');
+  defaultCache.destroy();
+  userCache.destroy();
+  pageCache.destroy();
+  roleCache.destroy();
+}
+
+// Register cleanup handlers
+process.on('SIGINT', cleanupCaches);
+process.on('SIGTERM', cleanupCaches);
+process.on('exit', cleanupCaches);
 
 export {
   MemoryCache,

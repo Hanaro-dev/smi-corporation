@@ -86,6 +86,7 @@ export default defineNuxtConfig({
 
   // CSRF protection configuration
   csurf: {
+    enabled: true,
     cookieKey: "XSRF-TOKEN",
     cookieHttpOnly: true,
     cookieSameSite: "strict",

@@ -1,8 +1,9 @@
 // Authentication service layer
 import jwt from 'jsonwebtoken';
 import { userDb, sessionDb, roleDb, auditDb } from '../utils/mock-db.js';
-import { config } from '../utils/env-validation.js';
-import { ValidationError } from '../utils/error-handler.js';
+import { authConfig, appSettings } from '../config/index.js';
+import { ValidationError, AuthenticationError, NotFoundError } from '../utils/error-handler.js';
+import { userRepository } from '../repositories/index.js';
 
 export class AuthService {
   /**
@@ -15,12 +16,12 @@ export class AuthService {
    */
   static async authenticate(email, password, clientIP, userAgent) {
     try {
-      // Find user by email
-      const user = userDb.findByEmail(email);
+      // Find user by email using repository
+      const user = await userRepository.findByEmail(email);
       
       if (!user) {
         await this.logFailedAttempt(email, 'user_not_found', clientIP, userAgent);
-        throw new ValidationError('Identifiants invalides');
+        throw new AuthenticationError('Identifiants invalides');
       }
 
       // Verify password
@@ -41,7 +42,7 @@ export class AuthService {
       const token = this.generateToken(user, role);
       
       // Create session
-      sessionDb.create(user.id, token, config.security.sessionMaxAge);
+      sessionDb.create(user.id, token, authConfig.sessionMaxAge);
       
       // Log successful login
       await this.logSuccessfulLogin(user, role, clientIP, userAgent);

@@ -10,6 +10,16 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:run": "vitest run",
+    "migrate": "node server/scripts/migrate-database.js",
+    "migrate:indexes": "node server/scripts/migrate-database.js add-indexes",
+    "migrate:analyze": "node server/scripts/migrate-database.js analyze",
+    "migrate:stats": "node server/scripts/migrate-database.js stats",
+    "config:validate": "node server/scripts/validate-config.js",
     "docs": "echo 'Documentation disponible dans le dossier docs/ - Consultez docs/README.md'"
   },
   "dependencies": {
@@ -61,6 +71,10 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@iconify-json/lucide": "^1.2.49",
-    "commitizen": "^4.3.1"
+    "@vitest/ui": "^3.2.4",
+    "commitizen": "^4.3.1",
+    "happy-dom": "^18.0.1",
+    "supertest": "^7.1.1",
+    "vitest": "^3.2.4"
   }
 }
