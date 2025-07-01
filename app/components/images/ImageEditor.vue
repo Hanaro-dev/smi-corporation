@@ -154,7 +154,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { useToast } from '~/composables/useAppToast';
+import { toast } from '~/composables/useToast';
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';

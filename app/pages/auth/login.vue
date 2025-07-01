@@ -84,16 +84,17 @@
 
 <script setup>
 import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { useAppToast } from "~/composables/useAppToast";
-import { loginApi, handleApiError } from "~/utils/api";
+import { useRouter, useRoute } from "vue-router";
+import { useApi } from "~/composables/useApi";
+import { toast } from "~/composables/useToast";
 
 const email = ref("");
 const password = ref("");
 const loading = ref(false);
 const error = ref("");
 const router = useRouter();
-const { showToast } = useAppToast();
+const api = useApi();
+const { success, error: showError } = toast;
 
 // Récupérer l'URL de redirection depuis la query string ou utiliser la page d'accueil par défaut
 const route = useRoute();
@@ -104,7 +105,7 @@ const handleLogin = async () => {
   loading.value = true;
   
   try {
-    const response = await loginApi({
+    const response = await api.post('/api/auth/login', {
       email: email.value,
       password: password.value,
       redirect: redirectTo.value
@@ -114,19 +115,18 @@ const handleLogin = async () => {
     const destination = response.redirect || "/";
     
     // Afficher un toast de succès
-    showToast({
-      message: `Bienvenue, ${response.user.name}!`,
-      type: "success",
-      timeout: 3000
-    });
+    success(`Bienvenue, ${response.user.name}!`);
+    
+    // Vider les champs
+    email.value = "";
+    password.value = "";
     
     // Rediriger l'utilisateur
     router.push(destination);
   } catch (e) {
-    // Use centralized error handling
-    handleApiError(e, (message) => {
-      error.value = message;
-    });
+    console.error("Erreur login:", e);
+    error.value = e.data?.message || "Erreur lors de la connexion.";
+    showError(error.value);
   } finally {
     loading.value = false;
   }

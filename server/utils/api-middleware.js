@@ -324,7 +324,7 @@ export function compose(...middlewares) {
 }
 
 // Helper to get client IP
-function getClientIP(event) {
+export function getClientIP(event) {
   return getHeader(event, 'x-forwarded-for') || 
          getHeader(event, 'x-real-ip') || 
          event.node.req.socket.remoteAddress || 

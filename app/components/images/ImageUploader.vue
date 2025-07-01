@@ -43,7 +43,7 @@
 
 <script setup>
 import { ref, onMounted, defineEmits } from 'vue';
-import { useToast } from '~/composables/useAppToast';
+import { toast } from '~/composables/useToast';
 
 // Import FilePond and plugins
 import vueFilePond from 'vue-filepond';

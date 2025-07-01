@@ -100,12 +100,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '~/stores/auth';
-import { useAppToast } from '~/composables/useAppToast';
+import { toast } from '~/composables/useToast';
 
 // Store et composables
 const auth = useAuthStore();
 const { user } = storeToRefs(auth);
-const { addToast } = useAppToast();
+const { success, error: showError } = toast;
 
 // États
 const isSubmitting = ref(false);

@@ -48,7 +48,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useToast } from '~/composables/useAppToast';
+import { toast } from '~/composables/useToast';
 
 definePageMeta({
   layout: 'admin',

@@ -87,6 +87,8 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useApi } from "~/composables/useApi";
+import { toast } from "~/composables/useToast";
 
 const username = ref("");
 const email = ref("");
@@ -94,22 +96,35 @@ const password = ref("");
 const loading = ref(false);
 const error = ref("");
 const router = useRouter();
+const api = useApi();
+const { success, error: showError } = toast;
 
 const handleRegister = async () => {
   error.value = "";
   loading.value = true;
   try {
-    await $fetch("/api/auth/register", {
-      method: "POST",
-      body: {
-        username: username.value,
-        email: email.value,
-        password: password.value,
-      },
+    const response = await api.post("/api/auth/register", {
+      username: username.value,
+      email: email.value,
+      password: password.value,
     });
-    router.push("/auth/login");
+    
+    success("Inscription réussie ! Vous pouvez maintenant vous connecter.");
+    
+    // Vider les champs
+    username.value = "";
+    email.value = "";
+    password.value = "";
+    
+    // Rediriger vers la page de connexion après un délai
+    setTimeout(() => {
+      router.push("/auth/login");
+    }, 1500);
+    
   } catch (e) {
+    console.error("Erreur inscription:", e);
     error.value = e.data?.message || "Erreur lors de l'inscription.";
+    showError(error.value);
   } finally {
     loading.value = false;
   }

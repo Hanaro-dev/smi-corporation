@@ -2,6 +2,7 @@ import { AuthService } from '../../services/auth-service.js';
 import { validateUserLogin, checkRateLimit } from '../../utils/input-validation.js';
 import { ValidationError } from '../../utils/error-handler.js';
 import { userDb, roleDb, sessionDb, auditDb } from '../../utils/mock-db.js';
+import { getClientIP } from '../../utils/api-middleware.js';
 import jwt from 'jsonwebtoken';
 import config from '../../config/index.js';
 

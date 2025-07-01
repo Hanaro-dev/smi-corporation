@@ -23,9 +23,9 @@
 </template>
 
 <script setup>
-import { useAppToast } from "~/composables/useAppToast";
+import { toast } from "~/composables/useToast";
 
-const { toasts } = useAppToast();
+const { toasts } = toast;
 </script>
 
 <style scoped>

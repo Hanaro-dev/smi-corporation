@@ -1,74 +1,176 @@
 <template>
-  <div class="max-w-4xl mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Gestion des Pages</h1>
-    
-    <div class="flex mb-4 space-x-4">
-      <button
-        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        @click="showCreateForm = true">
-        Créer une nouvelle page
-      </button>
-      <button
-        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-        @click="viewMode = viewMode === 'list' ? 'tree' : 'list'">
-        {{ viewMode === 'list' ? 'Vue arborescente' : 'Vue liste' }}
-      </button>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestion des Pages</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">Créez et gérez le contenu de votre site</p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button
+          @click="viewMode = viewMode === 'list' ? 'tree' : 'list'"
+          class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        >
+          <Icon :name="viewMode === 'list' ? 'heroicons:squares-2x2' : 'heroicons:list-bullet'" class="w-4 h-4 mr-2" />
+          {{ viewMode === 'list' ? 'Vue arborescente' : 'Vue liste' }}
+        </button>
+        <button
+          @click="showCreateForm = true"
+          class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+        >
+          <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
+          Nouvelle page
+        </button>
+      </div>
+    </div>
+
+    <!-- Search and filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+      <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex-1">
+          <div class="relative">
+            <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Rechercher une page..."
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+        </div>
+        <div class="flex items-center space-x-3">
+          <select
+            v-model="statusFilter"
+            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value="published">Publié</option>
+            <option value="draft">Brouillon</option>
+          </select>
+          <button
+            @click="clearFilters"
+            class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+          >
+            Effacer
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+            <Icon name="heroicons:document-text" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total pages</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ pages.length }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+            <Icon name="heroicons:eye" class="w-5 h-5 text-green-600 dark:text-green-400" />
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Publiées</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ publishedPages }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
+            <Icon name="heroicons:pencil-square" class="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Brouillons</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ draftPages }}</p>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- Vue liste -->
-    <div v-if="viewMode === 'list'">
-      <ul class="space-y-4">
-        <li v-for="page in pages" :key="page.id" class="border rounded p-3 bg-white dark:bg-gray-800">
-          <div v-if="editId !== page.id" class="space-y-2">
-            <div class="flex items-center">
-              <span 
-                class="text-lg font-semibold"
-                :class="{'opacity-70': page.status === 'draft'}"
-              >
-                {{ page.title }}
-              </span>
+    <div v-if="viewMode === 'list'" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Liste des pages</h3>
+      </div>
+      <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <div v-if="filteredPages.length === 0" class="p-8 text-center">
+          <Icon name="heroicons:document-text" class="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p class="text-gray-500 dark:text-gray-400">Aucune page ne correspond à vos critères</p>
+        </div>
+        <div v-for="page in filteredPages" :key="page.id" class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+          <div v-if="editId !== page.id" class="flex items-start justify-between">
+            <div class="flex-1">
+              <div class="flex items-center space-x-3 mb-2">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white" :class="{'opacity-70': page.status === 'draft'}">
+                  {{ page.title }}
+                </h4>
+                <span 
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  :class="page.status === 'published' 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
+                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'"
+                >
+                  <Icon :name="page.status === 'published' ? 'heroicons:eye' : 'heroicons:pencil-square'" class="w-3 h-3 mr-1" />
+                  {{ page.status === 'published' ? 'Publié' : 'Brouillon' }}
+                </span>
+                <span v-if="page.parentId" class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                  <Icon name="heroicons:arrow-up-right" class="w-3 h-3 mr-1" />
+                  {{ getParentTitle(page.parentId) }}
+                </span>
+              </div>
               
-              <span 
-                class="ml-2 px-2 py-0.5 text-xs rounded-full"
-                :class="page.status === 'published' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
-              >
-                {{ page.status === 'published' ? 'Publié' : 'Brouillon' }}
-              </span>
+              <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-2">
+                <span class="flex items-center">
+                  <Icon name="heroicons:link" class="w-4 h-4 mr-1" />
+                  /{{ page.slug }}
+                </span>
+                <span class="flex items-center">
+                  <Icon name="heroicons:calendar" class="w-4 h-4 mr-1" />
+                  {{ formatDate(page.updatedAt || page.createdAt) }}
+                </span>
+              </div>
               
-              <span v-if="page.parentId" class="ml-2 text-xs text-gray-500">
-                Parent: {{ getParentTitle(page.parentId) }}
-              </span>
+              <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                {{ truncateContent(sanitizedContent(page.content)) }}
+              </p>
             </div>
             
-            <div class="text-sm text-gray-600 dark:text-gray-400">
-              URL: /{{ page.slug }}
-            </div>
-            
-            <div class="text-sm text-gray-600 dark:text-gray-400">
-              {{ truncateContent(sanitizedContent(page.content)) }}
-            </div>
-            
-            <div class="flex space-x-2 mt-2">
+            <div class="flex items-center space-x-2 ml-4">
               <button
-                class="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                @click="startEdit(page)">
+                @click="startEdit(page)"
+                class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                <Icon name="heroicons:pencil" class="w-4 h-4 mr-1" />
                 Modifier
               </button>
               <button
                 v-if="page.status === 'draft'"
-                class="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                @click="updateStatus(page.id, 'published')">
+                @click="updateStatus(page.id, 'published')"
+                class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors"
+              >
+                <Icon name="heroicons:eye" class="w-4 h-4 mr-1" />
                 Publier
               </button>
               <button
                 v-else
-                class="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
-                @click="updateStatus(page.id, 'draft')">
+                @click="updateStatus(page.id, 'draft')"
+                class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
+              >
+                <Icon name="heroicons:eye-slash" class="w-4 h-4 mr-1" />
                 Dépublier
               </button>
               <button
-                class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                @click="confirmDelete(page)">
+                @click="confirmDelete(page)"
+                class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
+              >
+                <Icon name="heroicons:trash" class="w-4 h-4 mr-1" />
                 Supprimer
               </button>
             </div>
@@ -146,25 +248,31 @@
               </button>
             </div>
           </form>
-        </li>
-      </ul>
+        </div>
+      </div>
     </div>
     
     <!-- Vue arborescente -->
-    <div v-else-if="viewMode === 'tree'" class="border rounded p-4 bg-white dark:bg-gray-800">
-      <div v-if="treePages.length === 0" class="text-gray-500">
-        Aucune page trouvée. Créez votre première page.
+    <div v-else-if="viewMode === 'tree'" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Arborescence des pages</h3>
       </div>
-      <ul class="space-y-2">
-        <PageTreeItem 
-          v-for="page in treePages" 
-          :key="page.id" 
-          :page="page"
-          @edit="startEdit"
-          @delete="confirmDelete"
-          @update-status="updateStatus"
-        />
-      </ul>
+      <div class="p-4">
+        <div v-if="treePages.length === 0" class="text-center py-8">
+          <Icon name="heroicons:folder-open" class="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p class="text-gray-500 dark:text-gray-400">Aucune page trouvée. Créez votre première page.</p>
+        </div>
+        <ul v-else class="space-y-2">
+          <PageTreeItem 
+            v-for="page in treePages" 
+            :key="page.id" 
+            :page="page"
+            @edit="startEdit"
+            @delete="confirmDelete"
+            @update-status="updateStatus"
+          />
+        </ul>
+      </div>
     </div>
     
     <!-- Formulaire de création de page -->
@@ -276,7 +384,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import DOMPurify from "dompurify";
-import { useAppToast } from "~/composables/useAppToast";
+import { toast } from "~/composables/useToast";
 import html2bbcode from "html2bbcode";
 import bbcode2html from "bbcode-to-html";
 import TipTapEditor from "~/components/TipTapEditor.vue";
@@ -354,6 +462,10 @@ const showCreateForm = ref(false);
 const showDeleteConfirm = ref(false);
 const pageToDelete = ref(null);
 
+// Filtres et recherche
+const searchQuery = ref('');
+const statusFilter = ref('all');
+
 // Formulaire de création
 const newTitle = ref("");
 const newContent = ref("");
@@ -371,7 +483,7 @@ const editStatus = ref("draft");
 
 const errorMessage = ref("");
 
-const { addToast } = useAppToast();
+const { success, error: showError, warning, info } = toast;
 
 // Récupération des pages
 onMounted(async () => {
@@ -385,7 +497,7 @@ const fetchPages = async () => {
     pages.value = res.pages;
   } catch (error) {
     console.error(error);
-    addToast("Erreur lors du chargement des pages.", "error", 4000);
+    showError("Erreur lors du chargement des pages.");
   }
 };
 
@@ -395,7 +507,7 @@ const fetchPagesTree = async () => {
     treePages.value = res.tree;
   } catch (error) {
     console.error(error);
-    addToast("Erreur lors du chargement de l'arborescence.", "error", 4000);
+    showError("Erreur lors du chargement de l'arborescence.");
   }
 };
 
@@ -445,10 +557,52 @@ const hasChildren = (pageId) => {
   return pages.value.some(p => p.parentId === pageId);
 };
 
+// Computed properties
+const filteredPages = computed(() => {
+  let filtered = pages.value;
+  
+  // Filtrer par recherche
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(page => 
+      page.title.toLowerCase().includes(query) ||
+      page.slug.toLowerCase().includes(query) ||
+      (page.content && page.content.toLowerCase().includes(query))
+    );
+  }
+  
+  // Filtrer par statut
+  if (statusFilter.value !== 'all') {
+    filtered = filtered.filter(page => page.status === statusFilter.value);
+  }
+  
+  return filtered;
+});
+
+const publishedPages = computed(() => pages.value.filter(p => p.status === 'published').length);
+const draftPages = computed(() => pages.value.filter(p => p.status === 'draft').length);
+
+// Utility functions
+const formatDate = (dateString) => {
+  if (!dateString) return 'Non défini';
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(dateString));
+};
+
+const clearFilters = () => {
+  searchQuery.value = '';
+  statusFilter.value = 'all';
+};
+
 // Actions CRUD
 const createPage = async () => {
   if (!newTitle.value.trim()) {
-    addToast("Le titre est requis.", "error", 4000);
+    showError("Le titre est requis.");
     return;
   }
   
@@ -470,7 +624,7 @@ const createPage = async () => {
     await fetchPages();
     await fetchPagesTree();
     
-    addToast("Page créée avec succès.", "success", 4000);
+    success("Page créée avec succès.");
     newTitle.value = "";
     newContent.value = "";
     newSlug.value = "";
@@ -482,7 +636,7 @@ const createPage = async () => {
     if (error.data && error.data.message) {
       errorMessage.value = JSON.stringify(error.data.message);
     } else {
-      addToast("Erreur lors de la création.", "error", 4000);
+      showError("Erreur lors de la création.");
     }
   }
 };
@@ -498,7 +652,7 @@ const startEdit = (page) => {
 
 const updatePage = async (id) => {
   if (!editTitle.value.trim()) {
-    addToast("Le titre est requis.", "error", 4000);
+    showError("Le titre est requis.");
     return;
   }
   
@@ -520,14 +674,14 @@ const updatePage = async (id) => {
     await fetchPages();
     await fetchPagesTree();
     
-    addToast("Page modifiée avec succès.", "success", 4000);
+    success("Page modifiée avec succès.");
     cancelEdit();
   } catch (error) {
     console.error(error);
     if (error.data && error.data.message) {
       errorMessage.value = JSON.stringify(error.data.message);
     } else {
-      addToast("Erreur lors de la modification.", "error", 4000);
+      showError("Erreur lors de la modification.");
     }
   }
 };
@@ -543,14 +697,10 @@ const updateStatus = async (id, status) => {
     await fetchPages();
     await fetchPagesTree();
     
-    addToast(
-      status === 'published' ? "Page publiée." : "Page mise en brouillon.", 
-      "success", 
-      4000
-    );
+    success(status === 'published' ? "Page publiée." : "Page mise en brouillon.");
   } catch (error) {
     console.error(error);
-    addToast("Erreur lors de la mise à jour du statut.", "error", 4000);
+    showError("Erreur lors de la mise à jour du statut.");
   }
 };
 
@@ -581,14 +731,14 @@ const deletePage = async (id) => {
     await fetchPages();
     await fetchPagesTree();
     
-    addToast("Page supprimée.", "warning", 4000);
+    warning("Page supprimée.");
     showDeleteConfirm.value = false;
   } catch (error) {
     console.error(error);
     if (error.data && error.data.message) {
-      addToast(error.data.message, "error", 4000);
+      showError(error.data.message);
     } else {
-      addToast("Erreur lors de la suppression.", "error", 4000);
+      showError("Erreur lors de la suppression.");
     }
   }
 };

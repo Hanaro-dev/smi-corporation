@@ -162,7 +162,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { useAppToast } from '@/composables/useAppToast';
+import { toast } from '~/composables/useToast';
 
 // État de l'application
 const roles = ref([]);
@@ -172,7 +172,7 @@ const newPermissionName = ref("");
 const editingRole = ref(null);
 const editingPermission = ref(null);
 const rolePermissions = ref({});
-const { showToast } = useAppToast();
+const { success, error: showError } = toast;
 
 // Gestion des notifications et confirmations
 const notification = ref({ show: false, message: "", type: "info" });
@@ -406,7 +406,8 @@ const showNotification = (message, type = "info") => {
   }, 3000);
   
   // Utiliser aussi le toast du système
-  showToast(message, type);
+  if (type === 'success') success(message);
+  else showError(message);
 };
 </script>
 

@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devServer: {
-    host: "0.0.0.0", // Accessible depuis l'extérieur du conteneur
+    host: "localhost", // Accessible depuis l'extérieur du conteneur
     port: 3000,
   },
   app: {
@@ -91,19 +91,21 @@ export default defineNuxtConfig({
 
   // CSRF protection configuration
   csurf: {
-    enabled: true,
+    enabled: false, // Temporairement désactivé pour debug
     cookieKey: "XSRF-TOKEN",
-    cookieHttpOnly: true,
-    cookieSameSite: "strict",
+    cookieHttpOnly: false, // Permettre l'accès depuis JS pour lire le token
+    cookieSameSite: "lax", // Moins strict pour le développement
+    cookieSecure: false, // Désactiver en développement
     methods: ["POST", "PUT", "DELETE", "PATCH"],
     excludedUrls: [
       ["/api/_auth/session", "GET"],
       ["/api/auth/logout", "POST"],
+      ["/api/csrf-token", "GET"], // Exclure notre endpoint d'initialisation
     ],
     https: process.env.NODE_ENV === "production",
     methodsToProtect: ["POST", "PUT", "DELETE", "PATCH"],
     addCsrfTokenToEventCtx: true,
-    secret: process.env.CSRF_SECRET || process.env.JWT_SECRET,
+    secret: process.env.CSRF_SECRET || process.env.JWT_SECRET || "default-csrf-secret-for-dev",
   },
 
   runtimeConfig: {

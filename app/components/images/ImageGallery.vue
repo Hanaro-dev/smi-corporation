@@ -196,7 +196,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useToast } from '~/composables/useAppToast';
+import { toast } from '~/composables/useToast';
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 
 const props = defineProps({
