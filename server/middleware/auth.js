@@ -72,7 +72,10 @@ export default defineEventHandler(async (event) => {
     // Vérifier la validité du token JWT
     let decodedToken;
     try {
-      decodedToken = jwt.verify(token, process.env.JWT_SECRET || "YOUR_FALLBACK_JWT_SECRET");
+      if (!process.env.JWT_SECRET) {
+        throw new Error("JWT_SECRET is not configured");
+      }
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
       // Token JWT invalide ou expiré, supprimer la session
       sessionDb.delete(token);

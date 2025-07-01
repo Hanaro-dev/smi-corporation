@@ -4,36 +4,28 @@ export default defineNuxtPlugin(async () => {
   const authStore = useAuthStore();
   const router = useRouter();
   
-  // 1. Charger les données d'authentification depuis localStorage (côté client uniquement)
+  // Initialize auth state from server session only
   if (import.meta.client) {
-    authStore.loadAuth();
-  }
-  
-  // 2. Ensuite, vérifier la session serveur pour valider
-  try {
-    const { data } = await useFetch('/api/_auth/session');
-    
-    if (data.value && data.value.user) {
-      // Mise à jour du store avec les données serveur (plus complètes et à jour)
-      authStore.login({
-        user: data.value.user,
-        token: authStore.token, // Conserver le token actuel
-        expiresIn: authStore.tokenExpiry ? 
-          Math.floor((new Date(authStore.tokenExpiry) - new Date()) / 1000) : 
-          3600 // 1h par défaut
-      });
+    try {
+      const { data } = await useFetch('/api/_auth/session');
       
-      console.log('Session utilisateur validée :', data.value.user.name);
-    } else {
-      // Si pas de session serveur mais authentifié côté client, déconnecter
-      if (authStore.isAuthenticated) {
-        console.log('Session expirée ou invalide, déconnexion');
+      if (data.value && data.value.user) {
+        // Set auth state from server session
+        authStore.isAuthenticated = true;
+        authStore.user = data.value.user;
+        authStore.role = data.value.user.Role?.name || null;
+        authStore.permissions = data.value.user.Role?.Permissions?.map(p => p.name) || [];
+        authStore.error = null;
+        
+        console.log('Session utilisateur validée :', data.value.user.name);
+      } else {
+        // No valid server session
         authStore.logout();
       }
+    } catch (error) {
+      console.error('Erreur lors de la récupération de la session :', error);
+      authStore.logout();
     }
-  } catch (error) {
-    console.error('Erreur lors de la récupération de la session :', error);
-    // En cas d'erreur, on garde l'état d'authentification local
   }
   
   // Middleware global pour la gestion des routes protégées

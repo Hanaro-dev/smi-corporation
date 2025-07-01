@@ -201,12 +201,19 @@ class PageQueries {
  * Connection pool configuration for better performance
  */
 const poolConfig = {
-  max: 5,          // Maximum connections in pool
-  min: 0,          // Minimum connections in pool
-  acquire: 30000,  // Maximum time to wait for connection (30 seconds)
-  idle: 10000,     // Maximum idle time before releasing connection (10 seconds)
-  evict: 1000,     // Check for idle connections every second
-  handleDisconnects: true
+  max: parseInt(process.env.DB_POOL_MAX) || 10,          // Maximum connections in pool
+  min: parseInt(process.env.DB_POOL_MIN) || 2,           // Minimum connections in pool
+  acquire: parseInt(process.env.DB_POOL_ACQUIRE) || 30000,  // Maximum time to wait for connection (30 seconds)
+  idle: parseInt(process.env.DB_POOL_IDLE) || 10000,     // Maximum idle time before releasing connection (10 seconds)
+  evict: parseInt(process.env.DB_POOL_EVICT) || 1000,    // Check for idle connections every second
+  handleDisconnects: true,
+  validate: (connection) => {
+    // Validate connection health
+    return connection && !connection.destroyed;
+  },
+  retry: {
+    max: 3
+  }
 };
 
 /**

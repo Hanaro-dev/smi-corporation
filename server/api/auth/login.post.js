@@ -1,6 +1,9 @@
 import { AuthService } from '../../services/auth-service.js';
 import { validateUserLogin, checkRateLimit } from '../../utils/input-validation.js';
 import { ValidationError } from '../../utils/error-handler.js';
+import { userDb, roleDb, sessionDb, auditDb } from '../../utils/mock-db.js';
+import jwt from 'jsonwebtoken';
+import config from '../../config/index.js';
 
 export default defineEventHandler(async (event) => {
   const clientIP = getClientIP(event);
@@ -54,12 +57,12 @@ export default defineEventHandler(async (event) => {
         role_id: user.role_id,
         role: role.name
       },
-      config.jwt.secret,
-      { expiresIn: config.jwt.expiresIn }
+      config.auth.jwtSecret,
+      { expiresIn: config.auth.jwtExpiresIn }
     );
     
     // Enregistrer la session avec durée de vie configurable
-    sessionDb.create(user.id, token, config.security.sessionMaxAge);
+    sessionDb.create(user.id, token, config.auth.sessionMaxAge);
     
     // Préparer la réponse utilisateur sans le mot de passe
     const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
@@ -83,7 +86,7 @@ export default defineEventHandler(async (event) => {
     setCookie(event, "auth_token", token, {
       httpOnly: true,
       path: "/",
-      maxAge: config.security.cookieMaxAge,
+      maxAge: config.auth.cookieMaxAge,
       sameSite: "strict",
       secure: process.env.NODE_ENV === 'production',
     });
@@ -100,7 +103,7 @@ export default defineEventHandler(async (event) => {
       success: true,
       user: userWithoutPassword,
       token,
-      expiresIn: config.security.cookieMaxAge,
+      expiresIn: config.auth.cookieMaxAge,
       redirect: redirectTo
     };
   }

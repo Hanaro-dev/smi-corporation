@@ -18,3 +18,6 @@ export const useAppToast = () => {
     addToast,
   };
 };
+
+// Also export as useToast for compatibility
+export const useToast = useAppToast;

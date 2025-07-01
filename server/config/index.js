@@ -375,6 +375,9 @@ export const {
   features: featureFlags
 } = appConfig
 
+// Default export
+export default appConfig
+
 // Validate configuration on module load
 if (process.env.NODE_ENV !== 'test') {
   validateConfig()

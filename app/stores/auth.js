@@ -60,8 +60,7 @@ export const useAuthStore = defineStore("auth", {
           this.tokenExpiry = expiryDate.toISOString();
         }
         
-        // Persister les données dans le localStorage
-        this.persistAuth();
+        // Note: Token is stored securely in httpOnly cookie, no localStorage needed
         
         return true;
       } catch (error) {
@@ -82,77 +81,35 @@ export const useAuthStore = defineStore("auth", {
       this.loading = false;
       this.error = null;
       
-      // Supprimer les données du localStorage (côté client uniquement)
-      if (import.meta.client && window.localStorage) {
-        localStorage.removeItem('auth');
-      }
+      // Note: Token is removed via API call to logout endpoint
     },
     
     // Mettre à jour les données utilisateur
     updateUser(userData) {
       this.user = { ...this.user, ...userData };
-      this.persistAuth();
     },
     
-    // Persister les données d'authentification dans le localStorage
-    persistAuth() {
-      const authData = {
-        isAuthenticated: this.isAuthenticated,
-        user: this.user,
-        token: this.token,
-        role: this.role,
-        permissions: this.permissions,
-        tokenExpiry: this.tokenExpiry
-      };
-      
-      // Sauvegarder dans localStorage (côté client uniquement)
-      if (import.meta.client && window.localStorage) {
-        localStorage.setItem('auth', JSON.stringify(authData));
-      }
-    },
-    
-    // Charger les données d'authentification avec validation
-    loadAuth() {
-      // Vérifier si on est côté client (où localStorage est disponible)
-      if (import.meta.client && window.localStorage) {
-        try {
-          const authData = localStorage.getItem('auth');
-          if (!authData) return false;
-          
-          const parsedData = JSON.parse(authData);
-          
-          // Validation des données
-          if (!parsedData.user || !parsedData.token) {
-            localStorage.removeItem('auth');
-            return false;
-          }
-          
-          // Vérifier si le token est expiré
-          if (parsedData.tokenExpiry) {
-            const expiryDate = new Date(parsedData.tokenExpiry);
-            if (expiryDate <= new Date()) {
-              // Token expiré, supprimer les données
-              localStorage.removeItem('auth');
-              return false;
-            }
-          }
-          
-          // Charger les données
-          this.isAuthenticated = parsedData.isAuthenticated;
-          this.user = parsedData.user;
-          this.token = parsedData.token;
-          this.role = parsedData.role;
-          this.permissions = parsedData.permissions || [];
-          this.tokenExpiry = parsedData.tokenExpiry;
-          
+    // Initialize auth state from server session
+    async initializeFromSession() {
+      try {
+        const { data } = await $fetch('/api/_auth/session');
+        
+        if (data && data.user) {
+          this.isAuthenticated = true;
+          this.user = data.user;
+          this.role = data.user.Role?.name || null;
+          this.permissions = data.user.Role?.Permissions?.map(p => p.name) || [];
+          this.error = null;
           return true;
-        } catch (error) {
-          console.error('Error loading auth data:', error);
-          localStorage.removeItem('auth');
+        } else {
+          this.logout();
           return false;
         }
+      } catch (error) {
+        console.error('Error initializing session:', error);
+        this.logout();
+        return false;
       }
-      return false;
     },
     
     // Vérifier si l'utilisateur peut accéder à une ressource
