@@ -231,7 +231,45 @@
             
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contenu</label>
-              <TipTapEditor v-model="editContent" />
+              <!-- Sélecteur de mode d'édition -->
+              <div class="mb-3 flex items-center space-x-4">
+                <label class="flex items-center">
+                  <input 
+                    v-model="useBBCodeMode" 
+                    type="checkbox" 
+                    class="mr-2"
+                  />
+                  <span class="text-sm text-gray-600 dark:text-gray-400">Utiliser l'éditeur BBCode avancé</span>
+                </label>
+                <span v-if="useBBCodeMode" class="text-xs text-blue-600 dark:text-blue-400">
+                  Mode BBCode activé - Tags personnalisés disponibles
+                </span>
+              </div>
+              
+              <!-- Éditeur BBCode ou TipTap selon le mode sélectionné -->
+              <BBCodeEditor 
+                v-if="useBBCodeMode"
+                v-model="editContent"
+                :page-type="'admin'"
+                :show-preview-by-default="true"
+                @validation="handleBBCodeValidation"
+                class="min-h-64"
+              />
+              <TipTapEditor 
+                v-else
+                v-model="editContent" 
+              />
+              
+              <!-- Affichage des erreurs de validation BBCode -->
+              <div v-if="useBBCodeMode && !bbcodeValidation.isValid" class="mt-2">
+                <div 
+                  v-for="error in bbcodeValidation.errors" 
+                  :key="error"
+                  class="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-2 mb-1"
+                >
+                  {{ error }}
+                </div>
+              </div>
             </div>
             
             <div class="flex space-x-2">
@@ -331,7 +369,45 @@
           
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contenu</label>
-            <TipTapEditor v-model="newContent" />
+            <!-- Sélecteur de mode d'édition pour la création -->
+            <div class="mb-3 flex items-center space-x-4">
+              <label class="flex items-center">
+                <input 
+                  v-model="useBBCodeMode" 
+                  type="checkbox" 
+                  class="mr-2"
+                />
+                <span class="text-sm text-gray-600 dark:text-gray-400">Utiliser l'éditeur BBCode avancé</span>
+              </label>
+              <span v-if="useBBCodeMode" class="text-xs text-blue-600 dark:text-blue-400">
+                Mode BBCode activé - Tags personnalisés disponibles
+              </span>
+            </div>
+            
+            <!-- Éditeur BBCode ou TipTap selon le mode sélectionné -->
+            <BBCodeEditor 
+              v-if="useBBCodeMode"
+              v-model="newContent"
+              :page-type="'admin'"
+              :show-preview-by-default="true"
+              @validation="handleBBCodeValidation"
+              class="min-h-64"
+            />
+            <TipTapEditor 
+              v-else
+              v-model="newContent" 
+            />
+            
+            <!-- Affichage des erreurs de validation BBCode -->
+            <div v-if="useBBCodeMode && !bbcodeValidation.isValid" class="mt-2">
+              <div 
+                v-for="error in bbcodeValidation.errors" 
+                :key="error"
+                class="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-2 mb-1"
+              >
+                {{ error }}
+              </div>
+            </div>
           </div>
           
           <p v-if="errorMessage" class="text-red-600">{{ errorMessage }}</p>
@@ -388,6 +464,16 @@ import { toast } from "~/composables/useToast";
 import html2bbcode from "html2bbcode";
 import bbcode2html from "bbcode-to-html";
 import TipTapEditor from "~/components/TipTapEditor.vue";
+// Importation du système BBCode personnalisé pour l'édition avancée
+import BBCodeEditor from "~/components/BBCodeEditor.vue";
+import { useBBCode } from "~/composables/useBBCode";
+
+// Hook BBCode pour la validation et la gestion des tags personnalisés
+const { getAvailableBBCodes, validateBBCode } = useBBCode();
+
+// État pour la gestion du BBCode dans les formulaires
+const useBBCodeMode = ref(false);
+const bbcodeValidation = ref({ isValid: true, errors: [] });
 
 // Composant pour l'affichage arborescent
 const PageTreeItem = defineComponent({
@@ -514,9 +600,29 @@ const fetchPagesTree = async () => {
 // Fonctions utilitaires
 const sanitizeHtml = (html) => DOMPurify.sanitize(html);
 
+/**
+ * Convertit et nettoie le contenu BBCode pour l'affichage
+ * Gère à la fois les BBCodes standards et personnalisés
+ */
 const sanitizedContent = (bbcodeContent) => {
   if (!bbcodeContent) return "";
-  return sanitizeHtml(bbcode2html(bbcodeContent));
+  
+  try {
+    // Utiliser le système BBCode personnalisé si des tags custom sont détectés
+    const customBBCodePattern = /\[(orgchart|columns|callout|gallery|userinfo|breadcrumb)([^\]]*)?\]/i;
+    
+    if (customBBCodePattern.test(bbcodeContent)) {
+      // Utiliser le parseur BBCode personnalisé pour préserver les éléments custom
+      const { parseCustomBBCode } = useBBCode();
+      return sanitizeHtml(parseCustomBBCode(bbcodeContent, getAvailableBBCodes('admin')));
+    } else {
+      // Utiliser le parseur BBCode standard pour les contenus simples
+      return sanitizeHtml(bbcode2html(bbcodeContent));
+    }
+  } catch (error) {
+    console.warn('Erreur lors du parsing BBCode:', error);
+    return sanitizeHtml(bbcodeContent); // Fallback vers le contenu brut
+  }
 };
 
 const truncateContent = (html) => {
@@ -600,23 +706,48 @@ const clearFilters = () => {
 };
 
 // Actions CRUD
+// Gestion de la validation BBCode
+const handleBBCodeValidation = (validation) => {
+  bbcodeValidation.value = validation;
+};
+
+/**
+ * Crée une nouvelle page avec gestion intelligente du contenu
+ * Supporte à la fois le mode BBCode avancé et l'éditeur TipTap classique
+ */
 const createPage = async () => {
   if (!newTitle.value.trim()) {
     showError("Le titre est requis.");
     return;
   }
   
+  // Vérifier la validation BBCode si le mode est activé
+  if (useBBCodeMode.value && !bbcodeValidation.value.isValid) {
+    showError("Veuillez corriger les erreurs BBCode avant de sauvegarder.");
+    return;
+  }
+  
   try {
-    // Convertir le HTML de l'éditeur en BBCode avant envoi à l'API
-    const bbcode = html2bbcode(newContent.value);
+    // Gestion intelligente du contenu selon le mode d'édition
+    let contentToSave;
+    if (useBBCodeMode.value) {
+      // En mode BBCode, le contenu est déjà au format BBCode
+      contentToSave = newContent.value;
+    } else {
+      // En mode TipTap, convertir le HTML en BBCode
+      contentToSave = html2bbcode(newContent.value);
+    }
+    // Envoi de la requête avec le contenu préparé
     const res = await $fetch("/api/pages", {
       method: "POST",
       body: {
         title: newTitle.value,
-        content: bbcode,
+        content: contentToSave,
         slug: newSlug.value,
         parentId: newParentId.value,
-        status: newStatus.value
+        status: newStatus.value,
+        // Métadonnées pour identifier le type de contenu
+        contentType: useBBCodeMode.value ? 'bbcode' : 'html'
       },
     });
     
@@ -625,11 +756,14 @@ const createPage = async () => {
     await fetchPagesTree();
     
     success("Page créée avec succès.");
+    // Réinitialisation complète du formulaire
     newTitle.value = "";
     newContent.value = "";
     newSlug.value = "";
     newParentId.value = null;
     newStatus.value = "draft";
+    useBBCodeMode.value = false; // Réinitialiser le mode d'édition
+    bbcodeValidation.value = { isValid: true, errors: [] }; // Réinitialiser la validation
     showCreateForm.value = false;
   } catch (error) {
     console.error(error);
@@ -641,32 +775,76 @@ const createPage = async () => {
   }
 };
 
+/**
+ * Initialise le formulaire d'édition d'une page
+ * Détecte automatiquement le format du contenu et configure l'éditeur approprié
+ */
 const startEdit = (page) => {
   editId.value = page.id;
   editTitle.value = page.title;
-  editContent.value = bbcode2html(page.content || "");
   editSlug.value = page.slug;
   editParentId.value = page.parentId;
   editStatus.value = page.status;
+  
+  // Détection intelligente du format de contenu
+  const pageContent = page.content || "";
+  
+  // Vérifier si le contenu contient des BBCodes personnalisés
+  const customBBCodePattern = /\[(orgchart|columns|callout|gallery|userinfo|breadcrumb)([^\]]*)?\]/i;
+  const hasCustomBBCodes = customBBCodePattern.test(pageContent);
+  
+  if (hasCustomBBCodes) {
+    // Mode BBCode : garder le contenu en BBCode
+    useBBCodeMode.value = true;
+    editContent.value = pageContent;
+    info("Mode BBCode activé - Cette page contient des éléments BBCode personnalisés.");
+  } else {
+    // Mode classique : convertir BBCode vers HTML pour TipTap
+    useBBCodeMode.value = false;
+    editContent.value = bbcode2html(pageContent);
+  }
+  
+  // Réinitialiser la validation
+  bbcodeValidation.value = { isValid: true, errors: [] };
 };
 
+/**
+ * Met à jour une page existante avec gestion intelligente du contenu
+ * Détecte automatiquement le format et applique les bonnes conversions
+ */
 const updatePage = async (id) => {
   if (!editTitle.value.trim()) {
     showError("Le titre est requis.");
     return;
   }
   
+  // Vérifier la validation BBCode si le mode est activé
+  if (useBBCodeMode.value && !bbcodeValidation.value.isValid) {
+    showError("Veuillez corriger les erreurs BBCode avant de sauvegarder.");
+    return;
+  }
+  
   try {
-    // Convertir le HTML de l'éditeur en BBCode avant envoi à l'API
-    const bbcode = html2bbcode(editContent.value);
+    // Gestion intelligente du contenu selon le mode d'édition
+    let contentToSave;
+    if (useBBCodeMode.value) {
+      // En mode BBCode, le contenu est déjà au format BBCode
+      contentToSave = editContent.value;
+    } else {
+      // En mode TipTap, convertir le HTML en BBCode
+      contentToSave = html2bbcode(editContent.value);
+    }
+    // Envoi de la requête avec le contenu préparé
     const res = await $fetch(`/api/pages/${id}`, {
       method: "PUT",
       body: {
         title: editTitle.value,
-        content: bbcode,
+        content: contentToSave,
         slug: editSlug.value,
         parentId: editParentId.value,
-        status: editStatus.value
+        status: editStatus.value,
+        // Métadonnées pour identifier le type de contenu
+        contentType: useBBCodeMode.value ? 'bbcode' : 'html'
       },
     });
     
@@ -704,6 +882,9 @@ const updateStatus = async (id, status) => {
   }
 };
 
+/**
+ * Annule l'édition et réinitialise tous les champs du formulaire
+ */
 const cancelEdit = () => {
   editId.value = null;
   editTitle.value = "";
@@ -711,6 +892,8 @@ const cancelEdit = () => {
   editSlug.value = "";
   editParentId.value = null;
   editStatus.value = "draft";
+  useBBCodeMode.value = false; // Réinitialiser le mode d'édition
+  bbcodeValidation.value = { isValid: true, errors: [] }; // Réinitialiser la validation
   errorMessage.value = "";
 };
 
