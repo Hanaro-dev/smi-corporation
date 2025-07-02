@@ -1,70 +1,100 @@
-# 📚 Documentation SMI Corporation CMS
+# 📚 SMI Corporation CMS - Documentation
 
-Bienvenue dans la documentation du système de gestion de contenu SMI Corporation.
+Complete documentation for the SMI Corporation Content Management System.
 
-## 📖 Table des Matières
+## 📖 Documentation Overview
 
-### 🏗️ Architecture & Fonctionnement
-- [**Architecture et Fonctionnement**](./architecture-et-fonctionnement.md) - Vue d'ensemble de l'architecture système
-- [**CSRF Implementation**](./CSRF_IMPLEMENTATION.md) - Implémentation de la protection CSRF
+### 🚀 Getting Started
+- **[User Guide](USER_GUIDE.md)** - Complete guide for end-users, content creators, and administrators
+- **[Developer Guide](DEVELOPER_GUIDE.md)** - Development setup, coding standards, and contribution guidelines
 
-### 📄 Gestion des Pages
-- [**Pages README**](./PAGES-README.md) - Documentation du système de pages
-- [**Plan Gestion Pages**](./plan-gestion-pages.md) - Planification de la gestion des pages
+### 🏗️ Technical Documentation  
+- **[API Reference](API_REFERENCE.md)** - Complete REST API documentation with endpoints and examples
+- **[System Architecture](ARCHITECTURE.md)** - Technical architecture, technology stack, and system design
+- **[BBCode System](BBCODE_SYSTEM.md)** - Advanced BBCode editor and custom tag documentation
 
-### 👥 Gestion des Utilisateurs
-- [**Analyse Gestion Utilisateurs**](./analyse-gestion-utilisateurs.md) - Analyse du système de gestion utilisateurs
-- [**Plan Gestion Organigramme**](./plan-gestion-organigramme.md) - Planification de l'organigramme
+## 🎯 Quick Navigation
 
-### 🖼️ Gestion des Médias
-- [**Analyse Gestion Médias**](./analyse-gestion-medias.md) - Analyse du système de gestion des médias
+### For End Users
+- [Getting Started](USER_GUIDE.md#getting-started) - First login and basic navigation
+- [Creating Content](USER_GUIDE.md#content-management) - Page creation and editing
+- [BBCode Editor](USER_GUIDE.md#bbcode-editor) - Rich text formatting and custom tags
+- [Media Management](USER_GUIDE.md#media-management) - Image uploads and galleries
+- [Troubleshooting](USER_GUIDE.md#troubleshooting) - Common issues and solutions
 
-## 🚀 Démarrage Rapide
+### For Developers
+- [Development Setup](DEVELOPER_GUIDE.md#development-setup) - Local environment configuration
+- [API Endpoints](API_REFERENCE.md) - REST API reference and usage examples
+- [Frontend Development](DEVELOPER_GUIDE.md#frontend-development) - Vue.js and Nuxt.js patterns
+- [Backend Development](DEVELOPER_GUIDE.md#backend-development) - Server-side API development
+- [Testing](DEVELOPER_GUIDE.md#testing) - Testing strategies and examples
 
-Pour commencer avec le projet :
+### For Administrators
+- [User Management](USER_GUIDE.md#user-management) - Account and role administration
+- [System Configuration](USER_GUIDE.md#administration) - System settings and security
+- [Architecture Overview](ARCHITECTURE.md) - System design and technology choices
+- [Security Features](API_REFERENCE.md#authentication--security) - Authentication and security systems
 
-1. **Installation** : `npm install`
-2. **Développement** : `npm run dev`
-3. **Build** : `npm run build`
-4. **Lint** : `npm run lint`
+## 🛠️ System Overview
 
-## 🛡️ Sécurité
+**SMI Corporation CMS** is a modern, full-stack content management system built with:
 
-Le projet implémente plusieurs mesures de sécurité :
-- Protection CSRF
-- Authentification JWT
-- Validation des entrées
-- Gestion des permissions RBAC
-- Rate limiting
+- **Frontend**: Nuxt.js 3 with Vue.js 3, Tailwind CSS, and advanced BBCode editor
+- **Backend**: Nitro server with Sequelize ORM and MySQL/SQLite database
+- **Security**: JWT authentication, RBAC, CSRF protection, and input sanitization
+- **Features**: Hierarchical content, media management, user administration, and audit logging
 
-## 📁 Structure du Projet
+## 📋 Feature Highlights
 
-```
-docs/
-├── README.md                           # Ce fichier
-├── CSRF_IMPLEMENTATION.md              # Protection CSRF
-├── architecture-et-fonctionnement.md   # Architecture
-├── PAGES-README.md                     # Système de pages
-├── analyse-gestion-utilisateurs.md     # Gestion utilisateurs
-├── analyse-gestion-medias.md           # Gestion médias
-├── plan-gestion-pages.md               # Planification pages
-└── plan-gestion-organigramme.md        # Planification organigramme
-```
+### ✨ Content Management
+- Hierarchical page structure with up to 3 levels
+- Advanced BBCode editor with live preview
+- Custom components (organizational charts, galleries, user info)
+- Draft/publish workflow with content versioning
 
-## 🔧 Technologies Utilisées
+### 🔐 Security & Authentication
+- Role-based access control (RBAC) with granular permissions
+- JWT-based authentication with secure cookie storage
+- CSRF protection and rate limiting
+- Input validation and XSS prevention
 
-- **Frontend** : Nuxt.js 3, Vue.js 3, Tailwind CSS
-- **Backend** : Nuxt Server API (Nitro), Sequelize ORM
-- **Base de données** : MySQL/SQLite avec support mock
-- **Sécurité** : nuxt-csurf, JWT, bcrypt
-- **Outils** : ESLint, Commitizen, TypeScript
+### 📱 Media Management
+- Multi-format image support (JPEG, PNG, GIF, WebP, SVG)
+- Automatic image variants and optimization
+- Advanced image cropping and editing tools
+- Organized storage with search and filtering
 
-## 📞 Support
+### 👥 User Administration
+- Complete user lifecycle management
+- Flexible role and permission system
+- Activity monitoring and audit trails
+- Bulk operations and user analytics
 
-Pour toute question ou problème, consultez :
-1. Cette documentation
-2. Les fichiers d'analyse spécifiques
-3. Le fichier `CLAUDE.md` pour les instructions projet
+## 🚀 Quick Start
+
+### For Users
+1. Navigate to your organization's CMS URL
+2. Log in with your credentials
+3. Refer to the [User Guide](USER_GUIDE.md) for detailed instructions
+
+### For Developers
+1. Clone the repository
+2. Follow the [Development Setup](DEVELOPER_GUIDE.md#development-setup) guide
+3. Review the [API Reference](API_REFERENCE.md) for integration details
+
+### For System Administrators
+1. Review the [Architecture Documentation](ARCHITECTURE.md)
+2. Configure system settings per the [Administration Guide](USER_GUIDE.md#administration)
+3. Set up user roles using the [User Management](USER_GUIDE.md#user-management) documentation
+
+## 📞 Support & Contribution
+
+- **Issues**: Report bugs and feature requests via your organization's support channels
+- **Development**: Follow the [Developer Guide](DEVELOPER_GUIDE.md) for contribution guidelines
+- **Documentation**: This documentation is maintained alongside the codebase
 
 ---
-*Dernière mise à jour : $(date '+%Y-%m-%d')*
+
+**Latest Update**: January 2025  
+**Documentation Version**: 2.0  
+**CMS Version**: Compatible with SMI Corporation CMS v1.x
