@@ -6,15 +6,15 @@ import { config } from './env-validation.js';
 // Vérifier si on doit utiliser la base de données simulée
 const useMockDb = config.database.useMock;
 
-// Fonction pour hacher un mot de passe
-const hashPassword = (plainPassword) => {
-  const salt = bcrypt.genSaltSync(config.security.bcryptRounds);
-  return bcrypt.hashSync(plainPassword, salt);
+// Fonction pour hacher un mot de passe (async pour de meilleures performances)
+const hashPassword = async (plainPassword) => {
+  const salt = await bcrypt.genSalt(config.security.bcryptRounds);
+  return await bcrypt.hash(plainPassword, salt);
 };
 
-// Fonction pour vérifier un mot de passe
-const comparePassword = (plainPassword, hashedPassword) => {
-  return bcrypt.compareSync(plainPassword, hashedPassword);
+// Fonction pour vérifier un mot de passe (async)
+const comparePassword = async (plainPassword, hashedPassword) => {
+  return await bcrypt.compare(plainPassword, hashedPassword);
 };
 
 // Structure de données pour stocker les rôles

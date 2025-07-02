@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMI Corporation CMS - Documentation API</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui.css" />
+    <link rel="icon" type="image/png" href="/favicon.ico" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+        
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+        
+        body {
+            margin: 0;
+            background: #fafafa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        .swagger-ui .topbar {
+            background-color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .swagger-ui .topbar .download-url-wrapper {
+            display: none;
+        }
+        
+        .topbar-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 40px;
+        }
+        
+        .topbar-wrapper .link {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .topbar-wrapper .link:hover {
+            color: #3498db;
+        }
+        
+        .api-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .api-info h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        
+        .api-info p {
+            margin: 0;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .quick-links {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .quick-links h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+        }
+        
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .link-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.3s ease;
+        }
+        
+        .link-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .link-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        
+        .auth-demo {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 40px;
+        }
+        
+        .auth-demo h4 {
+            margin: 0 0 15px 0;
+            color: #856404;
+        }
+        
+        .auth-demo code {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            display: block;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .environment-selector {
+            margin: 20px 40px;
+            text-align: center;
+        }
+        
+        .env-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .env-button:hover {
+            background: #2980b9;
+        }
+        
+        .env-button.active {
+            background: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="api-info">
+        <h1>🚀 SMI Corporation CMS</h1>
+        <p>Documentation API Interactive - Version 1.0.0</p>
+    </div>
+
+    <div class="environment-selector">
+        <button class="env-button active" onclick="switchEnvironment('development')">
+            🧪 Développement
+        </button>
+        <button class="env-button" onclick="switchEnvironment('production')">
+            🌐 Production
+        </button>
+    </div>
+
+    <div class="quick-links">
+        <h3>📋 Liens Rapides</h3>
+        <div class="links-grid">
+            <a href="#/Authentication" class="link-item">
+                <span class="link-icon">🔐</span>
+                <div>
+                    <strong>Authentification</strong><br>
+                    <small>Login, logout, session</small>
+                </div>
+            </a>
+            <a href="#/Users" class="link-item">
+                <span class="link-icon">👥</span>
+                <div>
+                    <strong>Utilisateurs</strong><br>
+                    <small>Gestion des comptes</small>
+                </div>
+            </a>
+            <a href="#/Pages" class="link-item">
+                <span class="link-icon">📄</span>
+                <div>
+                    <strong>Pages</strong><br>
+                    <small>Contenu et hiérarchie</small>
+                </div>
+            </a>
+            <a href="#/Images" class="link-item">
+                <span class="link-icon">🖼️</span>
+                <div>
+                    <strong>Images</strong><br>
+                    <small>Upload et gestion média</small>
+                </div>
+            </a>
+            <a href="#/Roles" class="link-item">
+                <span class="link-icon">👑</span>
+                <div>
+                    <strong>Rôles</strong><br>
+                    <small>Administration des rôles</small>
+                </div>
+            </a>
+            <a href="#/Audit" class="link-item">
+                <span class="link-icon">📊</span>
+                <div>
+                    <strong>Audit</strong><br>
+                    <small>Logs et traçabilité</small>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="auth-demo">
+        <h4>🔑 Test d'Authentification Rapide</h4>
+        <p>Utilisez ces identifiants pour tester l'API :</p>
+        <code>
+Email: admin@smi-corporation.com<br>
+Password: AdminSecure123!
+        </code>
+        <p><strong>Conseil :</strong> Cliquez sur "Authorize" 🔒 en haut à droite pour configurer l'authentification automatique.</p>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@4.15.5/swagger-ui-standalone-preset.js"></script>
+    <script>
+        // Configuration des environnements
+        const environments = {
+            development: {
+                url: 'http://localhost:3000/api/docs',
+                title: 'Développement (localhost:3000)'
+            },
+            production: {
+                url: 'https://smi-corporation.com/api/docs',
+                title: 'Production (smi-corporation.com)'
+            }
+        };
+
+        let currentEnv = 'development';
+        let swaggerUI;
+
+        // Initialisation de Swagger UI
+        function initSwaggerUI(environment) {
+            const config = environments[environment];
+            
+            swaggerUI = SwaggerUIBundle({
+                url: config.url,
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset.slice(1) // Exclude the top bar
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                defaultModelsExpandDepth: 2,
+                defaultModelExpandDepth: 2,
+                docExpansion: "list",
+                filter: false,
+                showExtensions: true,
+                showCommonExtensions: true,
+                tryItOutEnabled: true,
+                requestInterceptor: (request) => {
+                    // Ajouter des headers par défaut
+                    request.headers['Accept'] = 'application/json';
+                    if (request.method !== 'GET') {
+                        request.headers['Content-Type'] = 'application/json';
+                    }
+                    return request;
+                },
+                responseInterceptor: (response) => {
+                    // Log des réponses pour le debug
+                    if (window.console && window.console.log) {
+                        console.log('API Response:', response);
+                    }
+                    return response;
+                },
+                onComplete: () => {
+                    console.log('🎉 Documentation API chargée pour:', config.title);
+                    
+                    // Ajouter des styles personnalisés
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .swagger-ui .topbar { display: none; }
+                        .swagger-ui .info .title { font-size: 2rem; color: #2c3e50; }
+                        .swagger-ui .info .description { font-size: 1.1rem; line-height: 1.6; }
+                        .swagger-ui .scheme-container { background: #f8f9fa; border-radius: 4px; padding: 20px; margin: 20px 0; }
+                        .swagger-ui .opblock.opblock-post { border-color: #27ae60; }
+                        .swagger-ui .opblock.opblock-get { border-color: #3498db; }
+                        .swagger-ui .opblock.opblock-put { border-color: #f39c12; }
+                        .swagger-ui .opblock.opblock-delete { border-color: #e74c3c; }
+                        .swagger-ui .opblock.opblock-patch { border-color: #9b59b6; }
+                    `;
+                    document.head.appendChild(style);
+                },
+                onFailure: (error) => {
+                    console.error('❌ Erreur lors du chargement de la documentation:', error);
+                    
+                    // Afficher un message d'erreur personnalisé
+                    const container = document.getElementById('swagger-ui');
+                    container.innerHTML = `
+                        <div style="
+                            background: #f8d7da; 
+                            color: #721c24; 
+                            padding: 20px; 
+                            border-radius: 8px; 
+                            margin: 20px;
+                            text-align: center;
+                        ">
+                            <h3>❌ Impossible de charger la documentation</h3>
+                            <p>Vérifiez que le serveur API est en cours d'exécution.</p>
+                            <p><strong>URL tentée :</strong> ${config.url}</p>
+                            <button onclick="location.reload()" style="
+                                background: #dc3545; 
+                                color: white; 
+                                border: none; 
+                                padding: 10px 20px; 
+                                border-radius: 4px; 
+                                cursor: pointer;
+                                margin-top: 10px;
+                            ">
+                                🔄 Réessayer
+                            </button>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // Fonction pour changer d'environnement
+        function switchEnvironment(environment) {
+            if (environment === currentEnv) return;
+            
+            currentEnv = environment;
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('.env-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Réinitialiser Swagger UI
+            document.getElementById('swagger-ui').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <h3>🔄 Chargement de l'environnement ${environments[environment].title}...</h3>
+                    <div style="
+                        width: 40px; 
+                        height: 40px; 
+                        border: 4px solid #f3f3f3; 
+                        border-top: 4px solid #3498db; 
+                        border-radius: 50%; 
+                        animation: spin 1s linear infinite;
+                        margin: 20px auto;
+                    "></div>
+                </div>
+                <style>
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                </style>
+            `;
+            
+            setTimeout(() => {
+                initSwaggerUI(environment);
+            }, 500);
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            initSwaggerUI(currentEnv);
+        });
+
+        // Raccourcis clavier
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case '1':
+                        e.preventDefault();
+                        switchEnvironment('development');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        switchEnvironment('production');
+                        break;
+                    case 'r':
+                        if (e.shiftKey) {
+                            e.preventDefault();
+                            location.reload();
+                        }
+                        break;
+                }
+            }
+        });
+
+        // Afficher les raccourcis dans la console
+        console.log(`
+🚀 SMI Corporation CMS - Documentation API
+        
+Raccourcis clavier :
+• Ctrl/Cmd + 1 : Environnement de développement
+• Ctrl/Cmd + 2 : Environnement de production  
+• Ctrl/Cmd + Shift + R : Recharger la page
+
+Liens utiles :
+• Documentation : /docs/api/README.md
+• Spécification OpenAPI : /api/docs
+• Code source : https://github.com/smi-corporation/cms
+        `);
+    </script>
+</body>
+</html>

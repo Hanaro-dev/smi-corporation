@@ -14,13 +14,22 @@
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
+    "test:integration": "vitest run tests/integration",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "test:run": "vitest run",
     "migrate": "node server/scripts/migrate-database.js",
     "migrate:indexes": "node server/scripts/migrate-database.js add-indexes",
     "migrate:analyze": "node server/scripts/migrate-database.js analyze",
     "migrate:stats": "node server/scripts/migrate-database.js stats",
     "config:validate": "node server/scripts/validate-config.js",
-    "docs": "echo 'Documentation disponible dans le dossier docs/ - Consultez docs/README.md'"
+    "docs": "echo 'Documentation disponible dans le dossier docs/ - Consultez docs/README.md'",
+    "docs:generate": "node scripts/generate-api-client.js",
+    "docs:serve": "npx http-server docs/api -p 3001 -o swagger-ui.html",
+    "docs:validate": "npx swagger-parser validate docs/api/openapi.yaml",
+    "monitoring:dashboard": "npx http-server docs/monitoring -p 3002 -o dashboard.html",
+    "monitoring:test": "curl -s http://localhost:3000/api/monitoring/health | jq '.'",
+    "monitoring:metrics": "curl -s http://localhost:3000/api/monitoring/metrics | jq '.data.application.counters'"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
@@ -71,9 +80,12 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@iconify-json/lucide": "^1.2.49",
+    "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "commitizen": "^4.3.1",
     "happy-dom": "^18.0.1",
+    "ofetch": "^1.4.1",
+    "playwright": "^1.53.2",
     "supertest": "^7.1.1",
     "vitest": "^3.2.4"
   }

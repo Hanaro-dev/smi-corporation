@@ -1,0 +1,1539 @@
+openapi: 3.0.3
+info:
+  title: SMI Corporation CMS API
+  description: |
+    API complète pour le système de gestion de contenu SMI Corporation.
+    
+    ## Authentification
+    L'API utilise une authentification basée sur JWT avec des cookies httpOnly.
+    
+    ## Taux de limite
+    - Authentification: 5 tentatives/minute
+    - API générale: 100 requêtes/minute
+    
+    ## Codes d'erreur
+    - 400: Données invalides
+    - 401: Non authentifié
+    - 403: Permissions insuffisantes  
+    - 404: Ressource non trouvée
+    - 409: Conflit (ex: email déjà utilisé)
+    - 429: Trop de requêtes
+    - 500: Erreur serveur
+    
+  version: 1.0.0
+  contact:
+    name: SMI Corporation Dev Team
+    email: dev@smi-corporation.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Serveur de développement
+  - url: https://smi-corporation.com/api
+    description: Serveur de production
+
+tags:
+  - name: Authentication
+    description: Gestion de l'authentification
+  - name: Users
+    description: Gestion des utilisateurs
+  - name: Pages
+    description: Gestion des pages de contenu
+  - name: Images
+    description: Gestion des médias et images
+  - name: Roles
+    description: Gestion des rôles
+  - name: Permissions
+    description: Gestion des permissions
+  - name: Audit
+    description: Journalisation et audit
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: auth_token
+      description: Token JWT stocké dans un cookie httpOnly
+
+  schemas:
+    # Modèles de base
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Jean Dupont"
+        username:
+          type: string
+          example: "jdupont"
+        email:
+          type: string
+          format: email
+          example: "jean.dupont@example.com"
+        role_id:
+          type: integer
+          example: 2
+        Role:
+          $ref: '#/components/schemas/Role'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "admin"
+        Permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+
+    Permission:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "manage_users"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+
+    Page:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "À propos de nous"
+        content:
+          type: string
+          example: "<p>Contenu de la page...</p>"
+        slug:
+          type: string
+          example: "a-propos"
+        status:
+          type: string
+          enum: [draft, published]
+          example: "published"
+        parentId:
+          type: integer
+          nullable: true
+          example: null
+        order:
+          type: integer
+          example: 0
+        level:
+          type: integer
+          example: 0
+        parent:
+          $ref: '#/components/schemas/Page'
+          nullable: true
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Page'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - slug
+        - status
+
+    Image:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        filename:
+          type: string
+          example: "image_123456.jpg"
+        originalFilename:
+          type: string
+          example: "photo-vacances.jpg"
+        path:
+          type: string
+          example: "/uploads/images/image_123456.jpg"
+        size:
+          type: integer
+          example: 1024576
+        width:
+          type: integer
+          example: 1920
+        height:
+          type: integer
+          example: 1080
+        format:
+          type: string
+          example: "jpeg"
+        mimeType:
+          type: string
+          example: "image/jpeg"
+        title:
+          type: string
+          example: "Photo de vacances"
+        description:
+          type: string
+          example: "Coucher de soleil sur la plage"
+        altText:
+          type: string
+          example: "Coucher de soleil orange sur une plage"
+        hash:
+          type: string
+          example: "abc123def456"
+        userId:
+          type: integer
+          example: 1
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageVariant'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - filename
+        - originalFilename
+        - path
+        - size
+        - width
+        - height
+        - format
+        - mimeType
+        - hash
+        - userId
+
+    ImageVariant:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        filename:
+          type: string
+          example: "image_123456_thumb.jpg"
+        path:
+          type: string
+          example: "/uploads/images/thumbnails/image_123456_thumb.jpg"
+        size:
+          type: integer
+          example: 50240
+        width:
+          type: integer
+          example: 300
+        height:
+          type: integer
+          example: 200
+        format:
+          type: string
+          example: "jpeg"
+        type:
+          type: string
+          enum: [thumbnail, small, medium, large, webp]
+          example: "thumbnail"
+        imageId:
+          type: integer
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # Modèles de requête
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "admin@smi-corporation.com"
+        password:
+          type: string
+          format: password
+          example: "MotDePasseSecurise123!"
+        redirect:
+          type: string
+          example: "/admin"
+      required:
+        - email
+        - password
+
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Jean Dupont"
+        username:
+          type: string
+          example: "jdupont"
+        email:
+          type: string
+          format: email
+          example: "jean.dupont@example.com"
+        password:
+          type: string
+          format: password
+          example: "MotDePasseSecurise123!"
+      required:
+        - name
+        - email
+        - password
+
+    CreatePageRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Nouvelle page"
+        content:
+          type: string
+          example: "<p>Contenu de la nouvelle page</p>"
+        slug:
+          type: string
+          example: "nouvelle-page"
+        status:
+          type: string
+          enum: [draft, published]
+          example: "draft"
+        parentId:
+          type: integer
+          nullable: true
+          example: null
+        order:
+          type: integer
+          example: 0
+      required:
+        - title
+
+    UpdatePageRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Page mise à jour"
+        content:
+          type: string
+          example: "<p>Contenu mis à jour</p>"
+        slug:
+          type: string
+          example: "page-mise-a-jour"
+        status:
+          type: string
+          enum: [draft, published]
+          example: "published"
+        parentId:
+          type: integer
+          nullable: true
+          example: 1
+        order:
+          type: integer
+          example: 1
+
+    # Modèles de réponse
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expiresIn:
+          type: integer
+          example: 86400
+        redirect:
+          type: string
+          example: "/admin"
+
+    SessionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+
+    PaginatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items: {}
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            limit:
+              type: integer
+              example: 20
+            total:
+              type: integer
+              example: 100
+            pages:
+              type: integer
+              example: 5
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        statusCode:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Données invalides"
+        details:
+          type: object
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+
+security:
+  - cookieAuth: []
+
+paths:
+  # Authentication
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Connexion utilisateur
+      description: Authentifie un utilisateur avec email et mot de passe
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              admin:
+                summary: Connexion administrateur
+                value:
+                  email: "admin@smi-corporation.com"
+                  password: "AdminPassword123!"
+              user:
+                summary: Connexion utilisateur standard
+                value:
+                  email: "user@example.com"
+                  password: "UserPassword123!"
+      responses:
+        '200':
+          description: Connexion réussie
+          headers:
+            Set-Cookie:
+              description: Cookie d'authentification JWT
+              schema:
+                type: string
+                example: "auth_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; HttpOnly; Secure; SameSite=Strict"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Identifiants invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Trop de tentatives de connexion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Inscription utilisateur
+      description: Crée un nouveau compte utilisateur
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Utilisateur créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Email déjà utilisé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Déconnexion utilisateur
+      description: Déconnecte l'utilisateur et supprime le cookie d'authentification
+      responses:
+        '200':
+          description: Déconnexion réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Déconnexion réussie"
+
+  /_auth/session:
+    get:
+      tags:
+        - Authentication
+      summary: Vérification de session
+      description: Vérifie la validité de la session utilisateur
+      responses:
+        '200':
+          description: Session valide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+        '401':
+          description: Session invalide ou expirée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Users
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Liste des utilisateurs
+      description: Récupère la liste paginée des utilisateurs
+      parameters:
+        - name: page
+          in: query
+          description: Numéro de page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: search
+          in: query
+          description: Recherche par nom ou email
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Liste des utilisateurs
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+        '403':
+          description: Permissions insuffisantes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Détails d'un utilisateur
+      description: Récupère les informations détaillées d'un utilisateur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de l'utilisateur
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails de l'utilisateur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: Utilisateur non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Users
+      summary: Modifier un utilisateur
+      description: Met à jour les informations d'un utilisateur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de l'utilisateur
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Jean Dupont"
+                username:
+                  type: string
+                  example: "jdupont"
+                email:
+                  type: string
+                  format: email
+                  example: "jean.dupont@example.com"
+                role_id:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Utilisateur mis à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Utilisateur non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Users
+      summary: Supprimer un utilisateur
+      description: Supprime un utilisateur du système
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de l'utilisateur
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur supprimé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Utilisateur supprimé avec succès"
+        '404':
+          description: Utilisateur non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Impossible de supprimer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Pages
+  /pages:
+    get:
+      tags:
+        - Pages
+      summary: Liste des pages
+      description: Récupère la liste des pages avec filtrage et pagination
+      parameters:
+        - name: page
+          in: query
+          description: Numéro de page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          description: Filtrer par statut
+          schema:
+            type: string
+            enum: [draft, published]
+        - name: parentId
+          in: query
+          description: Filtrer par page parent
+          schema:
+            type: integer
+        - name: level
+          in: query
+          description: Filtrer par niveau
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 2
+        - name: search
+          in: query
+          description: Recherche dans titre et contenu
+          schema:
+            type: string
+        - name: includeHierarchy
+          in: query
+          description: Inclure la hiérarchie parent-enfant
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Liste des pages
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Page'
+
+    post:
+      tags:
+        - Pages
+      summary: Créer une page
+      description: Crée une nouvelle page de contenu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePageRequest'
+      responses:
+        '201':
+          description: Page créée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Page'
+        '400':
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Slug déjà utilisé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /pages/{id}:
+    get:
+      tags:
+        - Pages
+      summary: Détails d'une page
+      description: Récupère les informations détaillées d'une page
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la page
+          schema:
+            type: integer
+        - name: includeChildren
+          in: query
+          description: Inclure les pages enfants
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Détails de la page
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Page'
+        '404':
+          description: Page non trouvée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Pages
+      summary: Modifier une page
+      description: Met à jour le contenu d'une page
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la page
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePageRequest'
+      responses:
+        '200':
+          description: Page mise à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Page'
+        '400':
+          description: Données invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Page non trouvée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Pages
+      summary: Supprimer une page
+      description: Supprime une page et gère les pages enfants
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la page
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Page supprimée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Page supprimée avec succès"
+        '404':
+          description: Page non trouvée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Page avec enfants - impossible de supprimer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # Images
+  /images:
+    get:
+      tags:
+        - Images
+      summary: Liste des images
+      description: Récupère la liste des images avec pagination
+      parameters:
+        - name: page
+          in: query
+          description: Numéro de page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: userId
+          in: query
+          description: Filtrer par utilisateur
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Liste des images
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Image'
+
+    post:
+      tags:
+        - Images
+      summary: Upload d'image
+      description: Upload et traitement d'une nouvelle image
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Fichier image (JPEG, PNG, WebP)
+                title:
+                  type: string
+                  description: Titre de l'image
+                description:
+                  type: string
+                  description: Description de l'image
+                altText:
+                  type: string
+                  description: Texte alternatif pour l'accessibilité
+              required:
+                - image
+      responses:
+        '201':
+          description: Image uploadée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Image'
+        '400':
+          description: Fichier invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '413':
+          description: Fichier trop volumineux
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Images
+      summary: Suppression multiple d'images
+      description: Supprime plusieurs images en une fois
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                imageIds:
+                  type: array
+                  items:
+                    type: integer
+                  example: [1, 2, 3]
+              required:
+                - imageIds
+      responses:
+        '200':
+          description: Images supprimées
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  deleted:
+                    type: integer
+                    example: 3
+                  message:
+                    type: string
+                    example: "3 images supprimées avec succès"
+
+  /images/{id}:
+    get:
+      tags:
+        - Images
+      summary: Détails d'une image
+      description: Récupère les informations détaillées d'une image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de l'image
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails de l'image
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Image'
+        '404':
+          description: Image non trouvée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      tags:
+        - Images
+      summary: Modifier les métadonnées d'une image
+      description: Met à jour les informations d'une image (titre, description, etc.)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de l'image
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "Nouveau titre"
+                description:
+                  type: string
+                  example: "Nouvelle description"
+                altText:
+                  type: string
+                  example: "Nouveau texte alternatif"
+      responses:
+        '200':
+          description: Image mise à jour
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Image'
+        '404':
+          description: Image non trouvée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /images/{id}/crop:
+    post:
+      tags:
+        - Images
+      summary: Recadrer une image
+      description: Crée une nouvelle version recadrée de l'image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de l'image
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                x:
+                  type: integer
+                  example: 100
+                y:
+                  type: integer
+                  example: 50
+                width:
+                  type: integer
+                  example: 800
+                height:
+                  type: integer
+                  example: 600
+              required:
+                - x
+                - y
+                - width
+                - height
+      responses:
+        '201':
+          description: Image recadrée créée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Image'
+
+  /images/stats:
+    get:
+      tags:
+        - Images
+      summary: Statistiques des images
+      description: Récupère les statistiques d'utilisation des images
+      responses:
+        '200':
+          description: Statistiques des images
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      totalImages:
+                        type: integer
+                        example: 150
+                      totalSize:
+                        type: integer
+                        example: 52428800
+                      averageSize:
+                        type: integer
+                        example: 349525
+                      byFormat:
+                        type: object
+                        properties:
+                          jpeg:
+                            type: integer
+                            example: 100
+                          png:
+                            type: integer
+                            example: 30
+                          webp:
+                            type: integer
+                            example: 20
+
+  # Roles
+  /roles:
+    get:
+      tags:
+        - Roles
+      summary: Liste des rôles
+      description: Récupère la liste des rôles disponibles
+      responses:
+        '200':
+          description: Liste des rôles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Role'
+
+  /roles/{id}:
+    get:
+      tags:
+        - Roles
+      summary: Détails d'un rôle
+      description: Récupère les informations détaillées d'un rôle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du rôle
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails du rôle
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Role'
+
+  /roles/{id}/permissions:
+    get:
+      tags:
+        - Roles
+      summary: Permissions d'un rôle
+      description: Récupère les permissions associées à un rôle
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du rôle
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Permissions du rôle
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Permission'
+
+  /roles/assign-permission:
+    post:
+      tags:
+        - Roles
+      summary: Assigner une permission à un rôle
+      description: Associe une permission à un rôle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roleId:
+                  type: integer
+                  example: 2
+                permissionId:
+                  type: integer
+                  example: 3
+              required:
+                - roleId
+                - permissionId
+      responses:
+        '200':
+          description: Permission assignée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Permission assignée avec succès"
+
+  # Permissions
+  /permissions:
+    get:
+      tags:
+        - Permissions
+      summary: Liste des permissions
+      description: Récupère la liste des permissions disponibles
+      responses:
+        '200':
+          description: Liste des permissions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Permission'
+
+  /permissions/{id}:
+    get:
+      tags:
+        - Permissions
+      summary: Détails d'une permission
+      description: Récupère les informations détaillées d'une permission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la permission
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Détails de la permission
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Permission'
+
+  # Audit
+  /audit/logs:
+    get:
+      tags:
+        - Audit
+      summary: Journaux d'audit
+      description: Récupère les logs d'audit du système
+      parameters:
+        - name: page
+          in: query
+          description: Numéro de page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Nombre d'éléments par page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: action
+          in: query
+          description: Filtrer par type d'action
+          schema:
+            type: string
+            enum: [login, logout, create, update, delete]
+        - name: userId
+          in: query
+          description: Filtrer par utilisateur
+          schema:
+            type: integer
+        - name: startDate
+          in: query
+          description: Date de début (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          description: Date de fin (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Journaux d'audit
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            action:
+                              type: string
+                            resource:
+                              type: string
+                            resourceId:
+                              type: integer
+                            userId:
+                              type: integer
+                            details:
+                              type: object
+                            createdAt:
+                              type: string
+                              format: date-time

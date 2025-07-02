@@ -89,23 +89,28 @@ export default defineNuxtConfig({
       process.env.NODE_ENV === "production" ? ["vue-toastification"] : [],
   },
 
-  // CSRF protection configuration
+  // CSRF protection configuration - Enhanced security
   csurf: {
-    enabled: false, // Temporairement désactivé pour debug
+    enabled: true, // ✅ CSRF protection enabled
     cookieKey: "XSRF-TOKEN",
-    cookieHttpOnly: false, // Permettre l'accès depuis JS pour lire le token
-    cookieSameSite: "lax", // Moins strict pour le développement
-    cookieSecure: false, // Désactiver en développement
+    cookieHttpOnly: false, // Allow JS access for SPA compatibility
+    cookieSameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+    cookieSecure: process.env.NODE_ENV === "production",
     methods: ["POST", "PUT", "DELETE", "PATCH"],
     excludedUrls: [
       ["/api/_auth/session", "GET"],
-      ["/api/auth/logout", "POST"],
-      ["/api/csrf-token", "GET"], // Exclure notre endpoint d'initialisation
+      ["/api/csrf-token", "GET"],
     ],
     https: process.env.NODE_ENV === "production",
     methodsToProtect: ["POST", "PUT", "DELETE", "PATCH"],
     addCsrfTokenToEventCtx: true,
-    secret: process.env.CSRF_SECRET || process.env.JWT_SECRET || "default-csrf-secret-for-dev",
+    secret: process.env.CSRF_SECRET || (() => {
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("CSRF_SECRET environment variable is required in production");
+      }
+      console.warn("⚠️  Using default CSRF secret for development only");
+      return "dev-csrf-secret-change-in-production";
+    })(),
   },
 
   runtimeConfig: {
