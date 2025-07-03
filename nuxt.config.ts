@@ -77,6 +77,12 @@ export default defineNuxtConfig({
     "nuxt-csurf",
   ],
 
+  // Configuration Nuxt UI avec Tailwind Typography
+  ui: {
+    global: true,
+    icons: ['heroicons', 'lucide']
+  },
+
   // Performance optimizations
   experimental: {
     payloadExtraction: false,

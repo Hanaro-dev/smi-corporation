@@ -17,7 +17,10 @@ export default defineEventHandler(async (event) => {
     "/api/auth/register",
     "/api/auth/logout",
     "/api/_auth/session", // Route pour vérifier la session
+    "/api/csrf-token", // Route pour obtenir le token CSRF
     "/favicon.ico", // Ressources statiques
+    "/_nuxt/", // Vite development files
+    "/__nuxt_devtools__/", // DevTools
     // Ajoutez d'autres routes publiques si nécessaire
   ];
 
@@ -35,7 +38,15 @@ export default defineEventHandler(async (event) => {
   }
 
   // Vérifier si la route est publique
-  if (publicRoutes.some(route => requestUrl === route || requestUrl.startsWith(route + '?'))) {
+  const isPublicRoute = publicRoutes.some(route => {
+    if (route.endsWith('/')) {
+      return requestUrl.startsWith(route);
+    }
+    return requestUrl === route || requestUrl.startsWith(route + '?');
+  });
+  console.log(`[Auth Middleware] Checking URL: ${requestUrl}, isPublic: ${isPublicRoute}`);
+  
+  if (isPublicRoute) {
     console.log(`[Auth Middleware] Public route: ${requestUrl}`);
     return; // Ne pas vérifier l'authentification pour les routes publiques
   }

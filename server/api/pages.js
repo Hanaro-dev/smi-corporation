@@ -1,10 +1,9 @@
 import { defineEventHandler, createError, getQuery, readBody } from "h3";
 import DOMPurify from "dompurify";
 import { validatePageInput } from "../utils/validators";
-import auth from "../middleware/auth.js";
 import { Page, sequelize } from "../models.js";
 import dotenv from "dotenv";
-import { pageDb } from '../utils/mock-db.js';
+import { pageDb, userDb, sessionDb } from '../utils/mock-db.js';
 import { Op as SequelizeOp } from "sequelize";
 
 // Charger les variables d'environnement
@@ -56,11 +55,23 @@ const handleDbConnectionError = (error) => {
 
 export default defineEventHandler(async (event) => {
   try {
-    await auth(event);
-
-    const user = event.context.user;
+    // Authentification comme dans session.get.js
+    const token = getCookie(event, "auth_token");
+    
+    if (!token) {
+      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
+    }
+    
+    // Rechercher la session
+    const session = sessionDb.findByToken(token);
+    if (!session) {
+      throw createError({ statusCode: 401, message: "Session invalide." });
+    }
+    
+    // Rechercher l'utilisateur
+    const user = await userDb.findById(session.userId);
     if (!user) {
-      throw createError({ statusCode: 401, message: "Non autorisé." });
+      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
     }
 
   const method = event.node.req.method;

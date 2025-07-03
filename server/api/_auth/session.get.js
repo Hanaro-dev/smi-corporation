@@ -1,4 +1,4 @@
-import { userDb, sessionDb } from '../../utils/mock-db.js';
+import { userDb, sessionDb, roleDb } from '../../utils/mock-db.js';
 
 export default defineEventHandler(async (event) => {
   // Récupérer le token depuis le cookie
@@ -15,14 +15,25 @@ export default defineEventHandler(async (event) => {
   }
   
   // Rechercher l'utilisateur
-  const user = userDb.findById(session.userId);
+  const user = await userDb.findById(session.userId);
   if (!user) {
     return { user: null };
   }
   
+  // Récupérer le rôle et les permissions
+  const role = roleDb.findByPk(user.role_id);
+  
   // Retourner les informations de l'utilisateur sans mot de passe
   const userWithoutPassword = { ...user };
   delete userWithoutPassword.password;
+  
+  // Ajouter le rôle avec ses permissions
+  if (role) {
+    userWithoutPassword.Role = {
+      ...role,
+      Permissions: role.getPermissions()
+    };
+  }
   
   // Mettre à jour le contexte de l'événement
   event.context.user = userWithoutPassword;

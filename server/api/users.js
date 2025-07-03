@@ -1,5 +1,4 @@
 import { ERROR_MESSAGES } from "../constants/messages";
-import auth from "../middleware/auth.js";
 import { requirePermission } from "../middleware/check-permission.js";
 import { validateUser, validateLoginInput } from "../utils/validators";
 import jwt from 'jsonwebtoken';
@@ -72,8 +71,28 @@ export default defineEventHandler(async (event) => {
 
   // GET /api/users (Liste des utilisateurs - Protégé)
   if (method === "GET") {
-    await auth(event); // Protéger cette route
-    await requirePermission("manage_users")(event); // Vérifier les permissions
+    // Authentification comme dans pages.js
+    const token = getCookie(event, "auth_token");
+    
+    if (!token) {
+      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
+    }
+    
+    const session = sessionDb.findByToken(token);
+    if (!session) {
+      throw createError({ statusCode: 401, message: "Session invalide." });
+    }
+    
+    const authUser = await userDb.findById(session.userId);
+    if (!authUser) {
+      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
+    }
+    
+    // Vérifier les permissions
+    const userRole = roleDb.findByPk(authUser.role_id);
+    if (!userRole || !userRole.hasPermission('manage_users')) {
+      throw createError({ statusCode: 403, message: "Permission insuffisante." });
+    }
     
     const { page = 1, limit = 10, role_id } = getQuery(event);
     const offset = (page - 1) * limit;

@@ -345,6 +345,13 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useApi } from "~/composables/useApi";
 
+// Configuration de la page
+definePageMeta({
+  layout: 'admin',
+  middleware: 'auth',
+  permission: 'manage_users'
+});
+
 const users = ref([]);
 const totalUsers = ref(0);
 const currentPage = ref(1);

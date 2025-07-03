@@ -92,7 +92,7 @@ export const useAuthStore = defineStore("auth", {
     // Initialize auth state from server session
     async initializeFromSession() {
       try {
-        const { data } = await $fetch('/api/_auth/session');
+        const data = await $fetch('/api/_auth/session');
         
         if (data && data.user) {
           this.isAuthenticated = true;

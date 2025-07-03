@@ -437,11 +437,113 @@ const renderCustomBreadcrumb = () => {
 /* === STYLES DU RENDU BBCODE === */
 
 /**
- * Configuration Prose pour le contenu BBCode
+ * Configuration pour le contenu BBCode
  * Optimisé pour la lisibilité et l'accessibilité
  */
 .bbcode-content {
-  @apply prose prose-sm max-w-none dark:prose-invert;
+  max-width: none;
+  color: #111827;
+  line-height: 1.75;
+}
+
+.dark .bbcode-content {
+  color: #f9fafb;
+}
+
+.bbcode-content h1 { 
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #111827;
+}
+
+.dark .bbcode-content h1 { color: #ffffff; }
+
+.bbcode-content h2 { 
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #111827;
+}
+
+.dark .bbcode-content h2 { color: #ffffff; }
+
+.bbcode-content h3 { 
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.dark .bbcode-content h3 { color: #ffffff; }
+
+.bbcode-content p { 
+  margin-bottom: 1rem;
+  line-height: 1.625;
+}
+
+.bbcode-content ul { 
+  list-style-type: disc;
+  list-style-position: inside;
+  margin-bottom: 1rem;
+}
+
+.bbcode-content ol { 
+  list-style-type: decimal;
+  list-style-position: inside;
+  margin-bottom: 1rem;
+}
+
+.bbcode-content li { 
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.bbcode-content strong { 
+  font-weight: 600;
+}
+
+.bbcode-content em { 
+  font-style: italic;
+}
+
+.bbcode-content code { 
+  background-color: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: 'Courier New', monospace;
+}
+
+.dark .bbcode-content code {
+  background-color: #1f2937;
+}
+
+.bbcode-content pre { 
+  background-color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.dark .bbcode-content pre {
+  background-color: #1f2937;
+}
+
+.bbcode-content blockquote { 
+  border-left: 4px solid #3b82f6;
+  padding-left: 1rem;
+  font-style: italic;
+  color: #374151;
+  margin-bottom: 1rem;
+}
+
+.dark .bbcode-content blockquote {
+  color: #d1d5db;
 }
 
 /**

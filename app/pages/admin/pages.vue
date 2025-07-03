@@ -471,7 +471,8 @@ import { useBBCode } from "~/composables/useBBCode";
 // Configuration de la page
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth'
+  middleware: 'auth',
+  permission: 'edit' // Permission requise pour gérer les pages
 });
 
 // Hook BBCode pour la validation et la gestion des tags personnalisés
@@ -579,6 +580,10 @@ const { success, error: showError, warning, info } = toast;
 
 // Récupération des pages
 onMounted(async () => {
+  console.log("Admin pages mounted, checking auth state...");
+  console.log("Current user:", useState('user').value);
+  console.log("Is authenticated:", useState('user').value?.id);
+  
   await fetchPages();
   await fetchPagesTree();
 });

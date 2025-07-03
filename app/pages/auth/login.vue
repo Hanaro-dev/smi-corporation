@@ -87,6 +87,7 @@ import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useApi } from "~/composables/useApi";
 import { toast } from "~/composables/useToast";
+import { useAuthStore } from "~/stores/auth";
 
 const email = ref("");
 const password = ref("");
@@ -95,6 +96,7 @@ const error = ref("");
 const router = useRouter();
 const api = useApi();
 const { success, error: showError } = toast;
+const authStore = useAuthStore();
 
 // Récupérer l'URL de redirection depuis la query string ou utiliser la page d'accueil par défaut
 const route = useRoute();
@@ -110,6 +112,16 @@ const handleLogin = async () => {
       password: password.value,
       redirect: redirectTo.value
     });
+
+    // Mettre à jour le store auth avec les données utilisateur
+    authStore.login(response);
+    
+    // Initialiser aussi desde la session pour charger les permissions
+    await authStore.initializeFromSession();
+    
+    // Mettre à jour l'état global
+    const userState = useState('user');
+    userState.value = authStore.user;
 
     // Utiliser la redirection fournie par l'API ou la redirection par défaut
     const destination = response.redirect || "/";

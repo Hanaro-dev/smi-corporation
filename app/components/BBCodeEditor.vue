@@ -1,7 +1,7 @@
 <template>
   <div class="bbcode-editor">
     <!-- Toolbar avec BBCodes disponibles -->
-    <div class="toolbar bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-t-lg p-3">
+    <div class="toolbar bg-gray-50 dark:bg-gray-800 rounded-t-lg p-3" style="border: 1px solid #d1d5db; border-bottom: none;">
       <!-- Boutons BBCode organisés par catégorie -->
       <div class="flex flex-wrap gap-2 mb-3">
         <button
@@ -52,7 +52,7 @@
           v-model="localContent"
           @input="handleInput"
           @keydown="handleKeydown"
-          class="w-full h-64 p-4 border-0 border-l border-r border-gray-200 dark:border-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:text-white"
+          class="w-full h-64 p-4 border-0 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
           :class="showPreview ? 'border-r-0' : 'rounded-b-lg border-b'"
           placeholder="Saisissez votre contenu avec des BBCodes..."
         ></textarea>
@@ -61,7 +61,8 @@
       <!-- Aperçu -->
       <div 
         v-if="showPreview" 
-        class="preview-panel border-r border-b border-gray-200 dark:border-gray-700 rounded-br-lg"
+        class="preview-panel rounded-br-lg"
+        style="border-right: 1px solid #d1d5db; border-bottom: 1px solid #d1d5db;"
       >
         <div class="h-64 p-4 overflow-y-auto bg-white dark:bg-gray-800">
           <BBCodeRenderer 
@@ -76,7 +77,8 @@
     <!-- Aide contextuelle -->
     <div 
       v-if="showHelp" 
-      class="help-panel bg-gray-50 dark:bg-gray-800 border-l border-r border-b border-gray-200 dark:border-gray-700 rounded-b-lg p-4"
+      class="help-panel bg-gray-50 dark:bg-gray-800 rounded-b-lg p-4"
+      style="border-left: 1px solid #d1d5db; border-right: 1px solid #d1d5db; border-bottom: 1px solid #d1d5db;"
     >
       <h4 class="font-medium text-gray-900 dark:text-white mb-3">BBCodes disponibles :</h4>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -233,7 +235,13 @@ validateContent()
 
 <style scoped>
 .bbcode-editor {
-  @apply border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.dark .bbcode-editor {
+  border-color: #4b5563;
 }
 
 .editor-container {
@@ -245,6 +253,6 @@ validateContent()
 }
 
 .help-item:hover {
-  @apply shadow-md;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 </style>

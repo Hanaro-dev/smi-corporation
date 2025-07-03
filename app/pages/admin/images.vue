@@ -187,7 +187,8 @@ import { toast } from '~/composables/useToast';
 
 definePageMeta({
   layout: 'admin',
-  middleware: ['auth']
+  middleware: 'auth',
+  permission: 'edit' // Permission pour gérer les images
 });
 
 const { error: showError } = toast;
