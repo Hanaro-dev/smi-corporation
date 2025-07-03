@@ -4,12 +4,23 @@
  */
 import { databaseService } from './services/database-service.js';
 
-// Initialize database service
-await databaseService.initialize();
+// Initialize database service and export models
+let User, Role, Permission, Page, Image, ImageVariant, sequelize;
 
-// Clean interface for accessing models
-const { User, Role, Permission, Page, Image, ImageVariant } = databaseService.models;
-const sequelize = databaseService.sequelize;
+const initializeModels = async () => {
+  await databaseService.initialize();
+  const models = databaseService.models;
+  User = models.User;
+  Role = models.Role;
+  Permission = models.Permission;
+  Page = models.Page;
+  Image = models.Image;
+  ImageVariant = models.ImageVariant;
+  sequelize = databaseService.sequelize;
+};
+
+// Auto-initialize on import
+initializeModels().catch(console.error);
 
 // Enhanced database synchronization with fallback
 const syncDatabase = async () => {

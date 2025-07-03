@@ -145,57 +145,67 @@ roles.forEach(role => {
   };
 });
 
-// Créer un utilisateur admin avec mot de passe haché
-const adminHashedPassword = hashPassword('admin123');
+// Structure de données pour stocker les utilisateurs (sera initialisée de manière asynchrone)
+let users = [];
 
-// Structure de données pour stocker les utilisateurs
-let users = [
-  {
-    id: 1,
-    email: "admin@exemple.fr",
-    name: "Administrateur",
-    username: "admin",
-    password: adminHashedPassword,
-    role_id: 1, // Admin role
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    toJSON: function() {
-      const { password, ...userWithoutPassword } = this;
-      const role = roles.find(r => r.id === this.role_id);
-      return { ...userWithoutPassword, Role: role };
+// Fonction d'initialisation asynchrone pour les utilisateurs
+const initializeUsers = async () => {
+  if (users.length > 0) return; // Déjà initialisé
+  
+  const adminHashedPassword = await hashPassword('admin123');
+  const editorHashedPassword = await hashPassword('editeur123');
+  const userHashedPassword = await hashPassword('user123');
+  
+  users = [
+    {
+      id: 1,
+      email: "admin@exemple.fr",
+      name: "Administrateur",
+      username: "admin",
+      password: adminHashedPassword,
+      role_id: 1, // Admin role
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      toJSON: function() {
+        const { password, ...userWithoutPassword } = this;
+        const role = roles.find(r => r.id === this.role_id);
+        return { ...userWithoutPassword, Role: role };
+      }
+    },
+    {
+      id: 2,
+      email: "editeur@exemple.fr",
+      name: "Éditeur",
+      username: "editeur",
+      password: editorHashedPassword,
+      role_id: 2, // Editor role
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      toJSON: function() {
+        const { password, ...userWithoutPassword } = this;
+        const role = roles.find(r => r.id === this.role_id);
+        return { ...userWithoutPassword, Role: role };
+      }
+    },
+    {
+      id: 3,
+      email: "utilisateur@exemple.fr",
+      name: "Utilisateur",
+      username: "user",
+      password: userHashedPassword,
+      role_id: 3, // User role
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      toJSON: function() {
+        const { password, ...userWithoutPassword } = this;
+        const role = roles.find(r => r.id === this.role_id);
+        return { ...userWithoutPassword, Role: role };
+      }
     }
-  },
-  {
-    id: 2,
-    email: "editeur@exemple.fr",
-    name: "Éditeur",
-    username: "editeur",
-    password: hashPassword('editeur123'),
-    role_id: 2, // Editor role
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    toJSON: function() {
-      const { password, ...userWithoutPassword } = this;
-      const role = roles.find(r => r.id === this.role_id);
-      return { ...userWithoutPassword, Role: role };
-    }
-  },
-  {
-    id: 3,
-    email: "utilisateur@exemple.fr",
-    name: "Utilisateur",
-    username: "user",
-    password: hashPassword('user123'),
-    role_id: 3, // User role
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    toJSON: function() {
-      const { password, ...userWithoutPassword } = this;
-      const role = roles.find(r => r.id === this.role_id);
-      return { ...userWithoutPassword, Role: role };
-    }
-  }
-];
+  ];
+  
+  console.log("Mock users initialized with hashed passwords");
+};
 
 // Structure pour stocker les pages
 let pages = [
@@ -251,11 +261,13 @@ console.log("Mock DB initialisé en mode", useMockDb ? "simulation" : "compatibi
 
 // Fonctions pour manipuler les utilisateurs
 export const userDb = {
-  findByEmail: (email) => {
+  findByEmail: async (email) => {
+    await initializeUsers();
     return users.find(user => user.email === email);
   },
   
-  findById: (id) => {
+  findById: async (id) => {
+    await initializeUsers();
     return users.find(user => user.id === parseInt(id));
   },
   
@@ -344,8 +356,8 @@ export const userDb = {
   },
   
   // Fonction de vérification de mot de passe
-  verifyPassword: (plainPassword, hashedPassword) => {
-    return comparePassword(plainPassword, hashedPassword);
+  verifyPassword: async (plainPassword, hashedPassword) => {
+    return await comparePassword(plainPassword, hashedPassword);
   }
 };
 

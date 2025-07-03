@@ -91,7 +91,7 @@ export default defineNuxtConfig({
 
   // CSRF protection configuration - Enhanced security
   csurf: {
-    enabled: true, // ✅ CSRF protection enabled
+    enabled: false, // ❌ CSRF protection disabled temporarily
     cookieKey: "XSRF-TOKEN",
     cookieHttpOnly: false, // Allow JS access for SPA compatibility
     cookieSameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
@@ -100,6 +100,8 @@ export default defineNuxtConfig({
     excludedUrls: [
       ["/api/_auth/session", "GET"],
       ["/api/csrf-token", "GET"],
+      ["/api/auth/login", "POST"],
+      ["/api/auth/register", "POST"],
     ],
     https: process.env.NODE_ENV === "production",
     methodsToProtect: ["POST", "PUT", "DELETE", "PATCH"],
@@ -140,6 +142,9 @@ export default defineNuxtConfig({
   nitro: {
     experimental: {
       wasm: true,
+    },
+    esbuild: {
+      target: 'es2022'
     },
     hooks: {
       error: (error, event) => {

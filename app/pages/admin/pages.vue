@@ -468,6 +468,12 @@ import TipTapEditor from "~/components/TipTapEditor.vue";
 import BBCodeEditor from "~/components/BBCodeEditor.vue";
 import { useBBCode } from "~/composables/useBBCode";
 
+// Configuration de la page
+definePageMeta({
+  layout: 'admin',
+  middleware: 'auth'
+});
+
 // Hook BBCode pour la validation et la gestion des tags personnalisés
 const { getAvailableBBCodes, validateBBCode } = useBBCode();
 
@@ -579,11 +585,13 @@ onMounted(async () => {
 
 const fetchPages = async () => {
   try {
+    console.log("Fetching pages from API...");
     const res = await $fetch("/api/pages");
+    console.log("Pages fetched successfully:", res);
     pages.value = res.pages;
   } catch (error) {
-    console.error(error);
-    showError("Erreur lors du chargement des pages.");
+    console.error("Error fetching pages:", error);
+    showError(`Erreur lors du chargement des pages: ${error.message || error}`);
   }
 };
 

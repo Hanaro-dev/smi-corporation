@@ -37,10 +37,10 @@ export default defineEventHandler(async (event) => {
   const { email, password } = validatedData;
 
   // Recherche de l'utilisateur par email
-  const user = userDb.findByEmail(email);
+  const user = await userDb.findByEmail(email);
 
   // Vérification des identifiants avec le mot de passe haché
-  if (user && userDb.verifyPassword(password, user.password)) {
+  if (user && await userDb.verifyPassword(password, user.password)) {
     // Récupérer le rôle et ses permissions
     const role = roleDb.findByPk(user.role_id);
     if (!role) {

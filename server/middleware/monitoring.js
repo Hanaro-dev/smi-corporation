@@ -31,7 +31,7 @@ export default defineEventHandler(async (event) => {
     if (chunk) {
       responseSize += chunk.length;
     }
-    return originalEnd.call(this, chunk, encoding);
+    return originalWrite.call(this, chunk, encoding);
   };
 
   // Override end to capture metrics

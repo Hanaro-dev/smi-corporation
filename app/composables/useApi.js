@@ -42,8 +42,25 @@ export const useApi = () => {
     const methodsNeedingCsrf = ['POST', 'PUT', 'DELETE', 'PATCH'];
     const method = options.method?.toUpperCase() || 'GET';
     
-    if (methodsNeedingCsrf.includes(method) && csrfToken) {
-      defaultOptions.headers['X-XSRF-TOKEN'] = csrfToken;
+    if (methodsNeedingCsrf.includes(method)) {
+      if (!csrfToken) {
+        console.warn('CSRF token not found, attempting to initialize...');
+        try {
+          await $fetch('/api/csrf-token', { method: 'GET', credentials: 'include' });
+          await new Promise(resolve => setTimeout(resolve, 100)); // Wait a bit
+          const newToken = getCsrfToken();
+          if (newToken) {
+            defaultOptions.headers['X-XSRF-TOKEN'] = newToken;
+            console.log('CSRF token initialized successfully');
+          } else {
+            console.error('Failed to get CSRF token after initialization');
+          }
+        } catch (error) {
+          console.error('Failed to initialize CSRF token:', error);
+        }
+      } else {
+        defaultOptions.headers['X-XSRF-TOKEN'] = csrfToken;
+      }
     }
 
     // Merger les options

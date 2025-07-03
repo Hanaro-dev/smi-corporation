@@ -73,6 +73,32 @@ export default defineEventHandler(async (event) => {
     const { page = 1, limit = 10, search = '' } = getQuery(event);
     const offset = (page - 1) * limit;
     
+    if (useMockDb) {
+      console.log("Mode base de données simulée: utilisation des données simulées pour /api/pages");
+      let allPages = pageDb.findAll();
+      
+      // Filtrer par recherche si nécessaire
+      if (search) {
+        const searchLower = search.toLowerCase();
+        allPages = allPages.filter(page => 
+          page.title.toLowerCase().includes(searchLower) ||
+          (page.content && page.content.toLowerCase().includes(searchLower))
+        );
+      }
+      
+      const total = allPages.length;
+      const startIndex = parseInt(offset);
+      const endIndex = startIndex + parseInt(limit);
+      const pages = allPages.slice(startIndex, endIndex);
+      
+      return { 
+        pages,
+        total,
+        page: parseInt(page),
+        totalPages: Math.ceil(total / parseInt(limit))
+      };
+    }
+    
     const where = {};
     if (search) {
       where.title = { [Op.like]: `%${search}%` };
