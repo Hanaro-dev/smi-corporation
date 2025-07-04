@@ -1,6 +1,7 @@
 /**
  * Security Middleware - Enhanced security headers and validation
  */
+import { defineEventHandler, setHeader } from '../utils/http-utils.js';
 
 export default defineEventHandler(async (event) => {
   // Only apply to API routes
@@ -9,13 +10,11 @@ export default defineEventHandler(async (event) => {
   }
 
   // Security headers
-  setHeaders(event, {
-    'X-Content-Type-Options': 'nosniff',
-    'X-Frame-Options': 'DENY',
-    'X-XSS-Protection': '1; mode=block',
-    'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-  });
+  setHeader(event, 'X-Content-Type-Options', 'nosniff');
+  setHeader(event, 'X-Frame-Options', 'DENY');
+  setHeader(event, 'X-XSS-Protection', '1; mode=block');
+  setHeader(event, 'Referrer-Policy', 'strict-origin-when-cross-origin');
+  setHeader(event, 'Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
 
   // Content Security Policy for API responses
   if (process.env.NODE_ENV === 'production') {

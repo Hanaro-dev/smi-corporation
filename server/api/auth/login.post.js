@@ -3,7 +3,8 @@ import { validateUserLogin } from '../../utils/input-validation.js';
 import { checkRateLimit } from '../../utils/rate-limiter.js';
 import { ValidationError } from '../../utils/error-handler.js';
 import { userDb, roleDb, sessionDb, auditDb } from '../../utils/mock-db.js';
-import { getClientIP } from '../../utils/api-middleware.js';
+import { getClientIP } from '../../utils/ip-utils.js';
+import { defineEventHandler, createError, readBody } from '../../utils/http-utils.js';
 import jwt from 'jsonwebtoken';
 import config from '../../config/index.js';
 

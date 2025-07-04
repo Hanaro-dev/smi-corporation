@@ -1,4 +1,5 @@
 import { roleDb, permissionDb, auditDb } from '../utils/mock-db.js';
+import { defineEventHandler, createError } from '../utils/http-utils.js';
 
 /**
  * Middleware pour vérifier si l'utilisateur a une permission spécifique

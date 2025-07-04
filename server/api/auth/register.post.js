@@ -2,7 +2,8 @@ import { userDb, auditDb } from '../../utils/mock-db.js';
 import { validateUserRegistration, sanitizeInput } from '../../utils/input-validation.js';
 import { checkRateLimit } from '../../utils/rate-limiter.js';
 import { ValidationError } from '../../utils/error-handler.js';
-import { getClientIP } from '../../utils/api-middleware.js';
+import { getClientIP } from '../../utils/ip-utils.js';
+import { defineEventHandler, createError, readBody } from '../../utils/http-utils.js';
 import bcrypt from 'bcryptjs';
 
 export default defineEventHandler(async (event) => {
