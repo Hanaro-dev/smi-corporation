@@ -1,194 +1,233 @@
-# CLAUDE.md - SMI Corporation Project
+# CLAUDE.md - Projet SMI Corporation
 
-## Project Overview
+## Vue d'ensemble du projet
 
-SMI Corporation is a comprehensive Content Management System (CMS) built with Nuxt.js, featuring user authentication, role-based access control, dynamic page management, and media handling. The application is designed with a mock database system for development and can be migrated to a real database for production.
+SMI Corporation est un système de gestion de contenu (CMS) complet construit avec Nuxt.js, offrant l'authentification utilisateur, le contrôle d'accès basé sur les rôles, la gestion dynamique des pages, la gestion des médias et la gestion des organigrammes. L'application est conçue avec un système de base de données simulée pour le développement et peut être migrée vers une vraie base de données pour la production.
 
-## Technology Stack
+## Pile technologique
 
 ### Frontend
-- **Framework**: Nuxt.js 3.17.4 (Vue.js 3.5.16)
-- **CSS**: Tailwind CSS via @nuxt/ui 3.1.3
-- **State Management**: Pinia 3.0.2
-- **Router**: Vue Router 4.5.1
-- **Rich Text Editor**: TipTap 2.14.0
-- **File Upload**: FilePond 4.32.8 with Vue integration
-- **Image Processing**: Vue Advanced Cropper 2.8.9
-- **Icons**: @nuxt/icon 1.13.0 + FontAwesome 6.7.2
-- **Validation**: Vee-Validate 4.15.1 + Yup 1.6.1 + Zod 3.25.67
+- **Framework** : Nuxt.js 3.17.4 (Vue.js 3.5.16)
+- **CSS** : Tailwind CSS via @nuxt/ui 3.1.3
+- **Gestion d'état** : Pinia 3.0.2
+- **Routeur** : Vue Router 4.5.1
+- **Éditeur de texte riche** : TipTap 2.14.0
+- **Téléchargement de fichiers** : FilePond 4.32.8 avec intégration Vue
+- **Traitement d'images** : Vue Advanced Cropper 2.8.9
+- **Icônes** : @nuxt/icon 1.13.0 + FontAwesome 6.7.2
+- **Validation** : Vee-Validate 4.15.1 + Yup 1.6.1 + Zod 3.25.67
 
 ### Backend
-- **Runtime**: Nuxt.js Server API (Nitro)
-- **Database ORM**: Sequelize 6.37.7
-- **Database**: MySQL2 3.14.1 (with SQLite3 5.1.7 for development)
-- **Authentication**: Custom JWT-based system with nuxt-auth-utils 0.5.20
-- **Security**: bcryptjs 3.0.2, CSRF protection (nuxt-csurf), DOMPurify 3.2.6
-- **Image Processing**: Sharp 0.34.2
+- **Runtime** : API Serveur Nuxt.js (Nitro)
+- **ORM Base de données** : Sequelize 6.37.7
+- **Base de données** : MySQL2 3.14.1 (avec SQLite3 5.1.7 pour le développement)
+- **Authentification** : Système JWT personnalisé avec nuxt-auth-utils 0.5.20
+- **Sécurité** : bcryptjs 3.0.2, protection CSRF (nuxt-csurf), DOMPurify 3.2.6
+- **Traitement d'images** : Sharp 0.34.2
 
-### Development Tools
-- **TypeScript**: 5.8.3
-- **ESLint**: 9.29.0 with @nuxt/eslint 1.4.1
-- **Commitizen**: cz-customizable 7.4.0
-- **Commitlint**: @commitlint/config-conventional
-- **Husky**: 9.1.7 (pre-commit hooks)
+### Outils de développement
+- **TypeScript** : 5.8.3
+- **ESLint** : 9.29.0 avec @nuxt/eslint 1.4.1
+- **Commitizen** : cz-customizable 7.4.0
+- **Commitlint** : @commitlint/config-conventional
+- **Husky** : 9.1.7 (hooks pre-commit)
 
-## Project Structure
+## Structure du projet
 
 ```
 /mnt/Seagate2T/Projets Web/Code/smi-corporation/
-├── app/                          # Nuxt application code
-│   ├── assets/                   # Static assets (CSS, images, logos)
-│   ├── components/               # Vue components
-│   │   ├── images/               # Image management components
-│   │   └── pages/                # Page rendering components
-│   ├── composables/              # Vue composables
-│   ├── layouts/                  # Application layouts (default, admin)
-│   ├── middleware/               # Route middleware (auth, pages routing)
-│   ├── pages/                    # Application pages
-│   │   ├── admin/                # Admin interface pages
-│   │   └── auth/                 # Authentication pages
-│   ├── plugins/                  # Nuxt plugins
-│   └── stores/                   # Pinia stores
-├── server/                       # Server-side code
-│   ├── api/                      # API endpoints
-│   │   ├── auth/                 # Authentication endpoints
-│   │   ├── images/               # Image management API
-│   │   ├── permissions/          # Permission management API
-│   │   ├── roles/                # Role management API
-│   │   └── users/                # User management API
-│   ├── middleware/               # Server middleware
-│   ├── models.js                 # Database models (Sequelize)
-│   ├── database.js               # Database configuration
-│   ├── services/                 # Business logic services
-│   └── utils/                    # Server utilities
-├── public/                       # Public static files
-├── content.config.ts             # Nuxt Content configuration
-├── nuxt.config.ts                # Nuxt configuration
-└── package.json                  # Dependencies and scripts
+├── app/                          # Code de l'application Nuxt
+│   ├── assets/                   # Ressources statiques (CSS, images, logos)
+│   ├── components/               # Composants Vue
+│   │   ├── images/               # Composants de gestion des images
+│   │   └── pages/                # Composants de rendu des pages
+│   ├── composables/              # Composables Vue
+│   ├── layouts/                  # Layouts d'application (default, admin)
+│   ├── middleware/               # Middleware de routes (auth, routing pages)
+│   ├── pages/                    # Pages de l'application
+│   │   ├── admin/                # Pages de l'interface d'administration
+│   │   └── auth/                 # Pages d'authentification
+│   ├── plugins/                  # Plugins Nuxt
+│   └── stores/                   # Stores Pinia
+├── server/                       # Code côté serveur
+│   ├── api/                      # Points d'accès API
+│   │   ├── auth/                 # Points d'accès d'authentification
+│   │   ├── images/               # API de gestion des images
+│   │   ├── organigrammes/        # API des organigrammes
+│   │   ├── permissions/          # API de gestion des permissions
+│   │   ├── roles/                # API de gestion des rôles
+│   │   └── users/                # API de gestion des utilisateurs
+│   ├── middleware/               # Middleware serveur
+│   ├── models.js                 # Modèles de base de données (Sequelize)
+│   ├── database.js               # Configuration de la base de données
+│   ├── services/                 # Services de logique métier
+│   └── utils/                    # Utilitaires serveur
+├── public/                       # Fichiers statiques publics
+├── content.config.ts             # Configuration Nuxt Content
+├── nuxt.config.ts                # Configuration Nuxt
+└── package.json                  # Dépendances et scripts
 ```
 
-## Key Features
+## Fonctionnalités principales
 
-### Authentication & Authorization
-- User registration and login system
-- JWT-based session management
-- Role-based access control (RBAC)
-- Permission system with granular control
-- Protected routes and API endpoints
+### Authentification et autorisation
+- Système d'inscription et de connexion des utilisateurs
+- Gestion de session basée sur JWT
+- Contrôle d'accès basé sur les rôles (RBAC)
+- Système de permissions avec contrôle granulaire
+- Routes et points d'accès API protégés
 
-### Content Management
-- Dynamic page creation and management
-- Hierarchical page structure (parent/child relationships)
-- Rich text editor with BBCode support
-- Draft/Published status system
-- SEO-friendly slug generation
+### Gestion de contenu
+- Création et gestion dynamique des pages
+- Structure de pages hiérarchique (relations parent/enfant)
+- Éditeur de texte riche avec support BBCode
+- Système de statut Brouillon/Publié
+- Génération de slugs SEO-friendly
 
-### Media Management
-- Image upload and storage
-- Image cropping and editing capabilities
-- File validation and processing
-- Gallery management interface
+### Gestion des médias
+- Téléchargement et stockage d'images
+- Capacités de recadrage et d'édition d'images
+- Validation et traitement des fichiers
+- Interface de gestion de galerie
+
+### Gestion des organigrammes
+- Créer et gérer les organigrammes
+- Structure d'employés hiérarchique (jusqu'à 10 niveaux)
+- Intégration BBCode pour intégrer les organigrammes dans les pages
+- Système de statut Brouillon/Publié
+- Gestion des employés avec poste et coordonnées
 
 ### Administration
-- Complete admin interface at `/admin`
-- User management (CRUD operations)
-- Role and permission management
-- Page content management
-- Image gallery management
-- Audit logging system
+- Interface d'administration complète sur `/admin`
+- Gestion des utilisateurs (opérations CRUD)
+- Gestion des rôles et permissions
+- Gestion du contenu des pages
+- Gestion de la galerie d'images
+- Gestion des organigrammes
+- Système de journalisation d'audit
 
-## Development Configuration
+## Configuration de développement
 
-### Environment Setup
-The project uses a mock database system for development:
-- Set `USE_MOCK_DB=true` in environment variables
-- Mock data is defined in `/server/utils/mock-db.js`
-- Real database configuration in `/server/database.js`
+### Configuration de l'environnement
+Le projet utilise un système de base de données simulée pour le développement :
+- Définir `USE_MOCK_DB=true` dans les variables d'environnement
+- Les données simulées sont définies dans `/server/utils/mock-db.js`
+- Configuration de vraie base de données dans `/server/database.js`
 
 ### Scripts
 ```json
 {
-  "dev": "nuxt dev",           # Development server
-  "build": "nuxt build",       # Production build
-  "preview": "nuxt preview",   # Preview production build
-  "lint": "eslint .",          # Code linting
-  "lint:fix": "eslint . --fix", # Auto-fix linting issues
-  "commit": "cz"               # Commitizen commit helper
+  "dev": "nuxt dev",           # Serveur de développement
+  "build": "nuxt build",       # Build de production
+  "preview": "nuxt preview",   # Aperçu du build de production
+  "lint": "eslint .",          # Linting du code
+  "lint:fix": "eslint . --fix", # Correction automatique des erreurs de linting
+  "commit": "cz"               # Assistant de commit Commitizen
 }
 ```
 
-### Code Quality
-- ESLint configuration with Nuxt standards
-- Commitlint for conventional commit messages
-- Husky pre-commit hooks (currently in bak.husky/)
-- TypeScript support throughout the project
+### Qualité du code
+- Configuration ESLint avec les standards Nuxt
+- Commitlint pour les messages de commit conventionnels
+- Hooks pre-commit Husky (actuellement dans bak.husky/)
+- Support TypeScript dans tout le projet
 
-## Database Schema
+## Schéma de base de données
 
-### Core Models
-- **User**: Authentication and user data
-- **Role**: Role definitions
-- **Permission**: Permission definitions
-- **RolePermission**: Many-to-many relationship
-- **Page**: Dynamic page content
-- **Image**: Media file management
-- **AuditLog**: System activity tracking
+### Modèles principaux
+- **User** : Authentification et données utilisateur
+- **Role** : Définitions des rôles
+- **Permission** : Définitions des permissions
+- **RolePermission** : Relation plusieurs-à-plusieurs
+- **Page** : Contenu de page dynamique
+- **Image** : Gestion des fichiers médias
+- **Organigramme** : Définitions des organigrammes
+- **Employee** : Données des employés avec relations hiérarchiques
+- **AuditLog** : Suivi des activités système
 
-## API Endpoints
+## Points d'accès API
 
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `POST /api/auth/register` - User registration
-- `GET /api/_auth/session` - Session validation
+### Authentification
+- `POST /api/auth/login` - Connexion utilisateur
+- `POST /api/auth/logout` - Déconnexion utilisateur
+- `POST /api/auth/register` - Inscription utilisateur
+- `GET /api/_auth/session` - Validation de session
 
 ### Pages
-- `GET /api/pages` - List all pages
-- `POST /api/pages` - Create new page
-- `GET /api/pages/:id` - Get specific page
-- `PUT /api/pages/:id` - Update page
-- `DELETE /api/pages/:id` - Delete page
+- `GET /api/pages` - Lister toutes les pages
+- `POST /api/pages` - Créer une nouvelle page
+- `GET /api/pages/:id` - Obtenir une page spécifique
+- `PUT /api/pages/:id` - Mettre à jour une page
+- `DELETE /api/pages/:id` - Supprimer une page
 
-### Users & Roles
-- `GET /api/users` - List users
-- `GET /api/roles` - List roles
-- `GET /api/permissions` - List permissions
+### Utilisateurs et rôles
+- `GET /api/users` - Lister les utilisateurs
+- `GET /api/roles` - Lister les rôles
+- `GET /api/permissions` - Lister les permissions
 
 ### Images
-- `POST /api/images` - Upload image
-- `GET /api/images` - List images
-- `PATCH /api/images/:id` - Update image
-- `DELETE /api/images` - Delete image
+- `POST /api/images` - Télécharger une image
+- `GET /api/images` - Lister les images
+- `PATCH /api/images/:id` - Mettre à jour une image
+- `DELETE /api/images` - Supprimer une image
 
-## Security Features
-- CSRF protection (configurable)
-- Input validation and sanitization
-- Password hashing with bcrypt
-- JWT token management
-- XSS protection with DOMPurify
-- File upload validation
+### Organigrammes
+- `GET /api/organigrammes` - Lister les organigrammes
+- `POST /api/organigrammes` - Créer un nouvel organigramme
+- `GET /api/organigrammes/:id` - Obtenir un organigramme spécifique
+- `PUT /api/organigrammes/:id` - Mettre à jour un organigramme
+- `DELETE /api/organigrammes/:id` - Supprimer un organigramme
+- `GET /api/organigrammes/:slug` - Obtenir un organigramme par slug (BBCode)
+- `GET /api/organigrammes/:id/employees` - Lister les employés d'un organigramme
+- `POST /api/organigrammes/:id/employees` - Ajouter un employé à un organigramme
 
-## Deployment Notes
-- Nuxt.js static generation support
-- Environment-based configuration
-- Database migration utilities available
-- Production-ready build system
+## Fonctionnalités de sécurité
+- Protection CSRF (configurable)
+- Validation et assainissement des entrées
+- Hachage des mots de passe avec bcrypt
+- Gestion des tokens JWT
+- Protection XSS avec DOMPurify
+- Validation des téléchargements de fichiers
+- Limitation de débit sur les points d'accès API
+- Système de permissions hiérarchique (manage_organigrammes)
+- Journalisation d'audit pour les opérations d'organigrammes
 
-## Development Workflow
-1. Use mock database for development (`USE_MOCK_DB=true`)
-2. Follow conventional commit standards
-3. Run linting before commits
-4. Test in both mock and real database modes
-5. Use the admin interface for content management
+## Notes de déploiement
+- Support de génération statique Nuxt.js
+- Configuration basée sur l'environnement
+- Utilitaires de migration de base de données disponibles
+- Système de build prêt pour la production
 
-## Important Files to Understand
-- `/nuxt.config.ts` - Main Nuxt configuration
-- `/server/models.js` - Database models and mock system
-- `/server/database.js` - Database connection setup
-- `/app/stores/auth.js` - Authentication state management
-- `/server/api/` - All API endpoints
-- `/app/middleware/auth.js` - Route protection
-- `/app/middleware/pages.global.js` - Dynamic routing
+## Support BBCode
 
-## Migration Path
-The project includes utilities for migrating from mock database to real MySQL/SQLite database. See `/server/utils/db-setup.js` and related documentation files for migration procedures.
+L'application supporte BBCode pour l'intégration de contenu riche :
+
+### Organigrammes
+- `[orgchart id="slug"]` - Intégrer un organigramme par slug
+- Exemple : `[orgchart id="direction-generale"]`
+
+### Utilisation
+- BBCode est traité côté serveur pour la sécurité
+- Les organigrammes sont rendus comme des structures hiérarchiques interactives
+- Seuls les organigrammes publiés sont accessibles via BBCode
+
+## Flux de travail de développement
+1. Utiliser la base de données simulée pour le développement (`USE_MOCK_DB=true`)
+2. Suivre les standards de commit conventionnels
+3. Exécuter le linting avant les commits
+4. Tester en modes base de données simulée et réelle
+5. Utiliser l'interface d'administration pour la gestion de contenu
+
+## Fichiers importants à comprendre
+- `/nuxt.config.ts` - Configuration principale Nuxt
+- `/server/models.js` - Modèles de base de données et système simulé
+- `/server/database.js` - Configuration de connexion à la base de données
+- `/app/stores/auth.js` - Gestion d'état d'authentification
+- `/server/api/` - Tous les points d'accès API
+- `/server/api/organigrammes/` - Points d'accès des organigrammes
+- `/app/middleware/auth.js` - Protection des routes
+- `/app/middleware/pages.global.js` - Routage dynamique
+- `/app/composables/useBBCode.js` - Logique de traitement BBCode
+
+## Chemin de migration
+Le projet inclut des utilitaires pour migrer de la base de données simulée vers une vraie base de données MySQL/SQLite. Voir `/server/utils/db-setup.js` et les fichiers de documentation associés pour les procédures de migration.
