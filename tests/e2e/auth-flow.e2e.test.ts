@@ -2,7 +2,8 @@
  * Tests E2E pour le flux d'authentification
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { chromium, Browser, Page } from 'playwright'
+import type { Browser, Page } from 'playwright';
+import { chromium } from 'playwright'
 
 describe('Authentication Flow E2E', () => {
   let browser: Browser

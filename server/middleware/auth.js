@@ -127,10 +127,18 @@ export default defineEventHandler(async (event) => {
 
     console.log(`[Auth Middleware] Protected route: ${requestUrl}. User authenticated: ${user.name} (Role: ${role.name})`);
   } catch (error) {
-    // En cas d'erreur non gérée, renvoyer une erreur 401 ou l'erreur spécifiée
+    // Log l'erreur pour les administrateurs sans exposer les détails
+    console.error("Auth middleware error:", {
+      url: requestUrl,
+      method: requestMethod,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+
+    // En cas d'erreur non gérée, renvoyer une erreur générique
     throw createError({ 
       statusCode: error.statusCode || 401, 
-      message: error.message || "Erreur d'authentification." 
+      message: error.statusCode ? error.message : "Authentification requise" 
     });
   }
 });

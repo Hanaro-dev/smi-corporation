@@ -287,9 +287,26 @@ function checkRateLimit(ip, maxRequests = 5, windowMs = 60000) {
   return count < maxRequests;
 }
 
+/**
+ * Generic input sanitization function
+ * @param {string} input - Input to sanitize
+ * @param {number} maxLength - Maximum allowed length
+ * @returns {string} Sanitized input
+ */
+function sanitizeInput(input, maxLength = 255) {
+  if (!input || typeof input !== 'string') return '';
+  
+  return input
+    .trim()
+    .replace(/[<>"'&]/g, '') // Remove potential HTML and quote chars
+    .replace(/\s+/g, ' ') // Normalize whitespace
+    .substring(0, maxLength);
+}
+
 export {
   sanitizeHtml,
   sanitizeText,
+  sanitizeInput,
   isValidEmail,
   isValidPassword,
   isValidUsername,

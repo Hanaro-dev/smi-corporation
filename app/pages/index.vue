@@ -31,7 +31,7 @@
               src="~/assets/images/smi-headerfull.png"
               alt="SMI Corporation"
               class="max-w-full h-auto"
-            />
+            >
           </div>
         </div>
       </UContainer>

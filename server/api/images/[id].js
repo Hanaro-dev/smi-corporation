@@ -1,7 +1,37 @@
 import { Image, ImageVariant, User } from '../../models.js'
+import { getCookie } from 'h3'
+import { sessionDb, userDb, roleDb } from '../../utils/mock-db.js'
+import { checkPermission } from '../../utils/permission-utils.js'
 
 export default defineEventHandler(async (event) => {
   try {
+    // 1. Authentification (lecture seule pour les images publiques, mais on vérifie quand même)
+    const token = getCookie(event, "auth_token");
+    
+    // Pour la lecture, on peut permettre l'accès sans authentification pour les images publiques
+    // Mais dans un contexte sécurisé, on pourrait exiger l'authentification
+    if (token) {
+      // Rechercher la session
+      const session = sessionDb.findByToken(token);
+      if (session) {
+        // Rechercher l'utilisateur
+        const user = await userDb.findById(session.userId);
+        if (user) {
+          // Récupérer le rôle de l'utilisateur avec ses permissions
+          const role = roleDb.findByPk(user.role_id);
+          if (role) {
+            // Mettre l'utilisateur dans le contexte
+            const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
+            delete userWithoutPassword.password;
+            
+            event.context.user = userWithoutPassword;
+            event.context.userRole = role;
+            event.context.permissions = role.getPermissions();
+          }
+        }
+      }
+    }
+    
     const id = event.context.params.id
     
     // Récupérer l'image avec ses variantes et l'utilisateur associé

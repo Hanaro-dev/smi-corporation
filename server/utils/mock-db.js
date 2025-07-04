@@ -85,19 +85,67 @@ let permissions = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     toJSON: function() { return {...this}; }
+  },
+  {
+    id: 7,
+    name: "manage_user_roles",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 8,
+    name: "view_audit_logs",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 9,
+    name: "manage_content",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 10,
+    name: "manage_media",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 11,
+    name: "manage_organigrammes",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
   }
 ];
 
 // Table de jointure pour les rôles et permissions
 let rolePermissions = [
+  // Admin - toutes les permissions
   { roleId: 1, permissionId: 1 },  // admin a la permission admin
   { roleId: 1, permissionId: 2 },  // admin a la permission edit
   { roleId: 1, permissionId: 3 },  // admin a la permission view
   { roleId: 1, permissionId: 4 },  // admin a la permission manage_users
   { roleId: 1, permissionId: 5 },  // admin a la permission manage_roles
   { roleId: 1, permissionId: 6 },  // admin a la permission manage_permissions
+  { roleId: 1, permissionId: 7 },  // admin a la permission manage_user_roles
+  { roleId: 1, permissionId: 8 },  // admin a la permission view_audit_logs
+  { roleId: 1, permissionId: 9 },  // admin a la permission manage_content
+  { roleId: 1, permissionId: 10 }, // admin a la permission manage_media
+  { roleId: 1, permissionId: 11 }, // admin a la permission manage_organigrammes
+  
+  // Editor - permissions d'édition et gestion de contenu
   { roleId: 2, permissionId: 2 },  // editor a la permission edit
   { roleId: 2, permissionId: 3 },  // editor a la permission view
+  { roleId: 2, permissionId: 9 },  // editor a la permission manage_content
+  { roleId: 2, permissionId: 10 }, // editor a la permission manage_media
+  { roleId: 2, permissionId: 11 }, // editor a la permission manage_organigrammes
+  
+  // User - permission de lecture seulement
   { roleId: 3, permissionId: 3 },  // user a la permission view
 ];
 
@@ -758,5 +806,393 @@ export const pageDb = {
     }
     
     return maxValue;
+  }
+};
+
+// === ORGANIGRAMMES ===
+let organigrammes = [
+  {
+    id: 1,
+    title: "Direction Générale",
+    description: "Structure organisationnelle de la direction générale de SMI Corporation",
+    slug: "direction-generale",
+    status: "published",
+    userId: 1, // Admin user
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 2,
+    title: "Département IT",
+    description: "Organigramme du département informatique",
+    slug: "departement-it",
+    status: "published",
+    userId: 1,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 3,
+    title: "Équipe Marketing",
+    description: "Structure de l'équipe marketing et communication",
+    slug: "equipe-marketing",
+    status: "draft",
+    userId: 2, // Editor user
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  }
+];
+
+export const organigrammeDb = {
+  findAll: (options = {}) => {
+    let result = [...organigrammes];
+    
+    if (options.where) {
+      Object.keys(options.where).forEach(key => {
+        result = result.filter(org => org[key] === options.where[key]);
+      });
+    }
+    
+    if (options.order) {
+      // Simple ordering support
+      result.sort((a, b) => {
+        for (let [field, direction] of options.order) {
+          if (a[field] < b[field]) return direction === 'ASC' ? -1 : 1;
+          if (a[field] > b[field]) return direction === 'ASC' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    
+    if (options.limit) {
+      const offset = options.offset || 0;
+      result = result.slice(offset, offset + options.limit);
+    }
+    
+    return result;
+  },
+  
+  findOne: (options = {}) => {
+    if (options.where) {
+      return organigrammes.find(org => {
+        return Object.keys(options.where).every(key => 
+          org[key] === options.where[key]
+        );
+      }) || null;
+    }
+    return organigrammes[0] || null;
+  },
+  
+  findByPk: (id) => {
+    return organigrammes.find(org => org.id === parseInt(id)) || null;
+  },
+  
+  create: (data) => {
+    const newId = organigrammes.length > 0 ? Math.max(...organigrammes.map(o => o.id)) + 1 : 1;
+    
+    const newOrganigramme = {
+      id: newId,
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      toJSON: function() { return {...this}; }
+    };
+    organigrammes.push(newOrganigramme);
+    return newOrganigramme;
+  },
+  
+  update: (id, data) => {
+    const index = organigrammes.findIndex(org => org.id === parseInt(id));
+    if (index !== -1) {
+      organigrammes[index] = {
+        ...organigrammes[index],
+        ...data,
+        updatedAt: new Date().toISOString()
+      };
+      return organigrammes[index];
+    }
+    return null;
+  },
+  
+  destroy: (id) => {
+    const index = organigrammes.findIndex(org => org.id === parseInt(id));
+    if (index !== -1) {
+      organigrammes.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+};
+
+// === EMPLOYÉS ===
+let employees = [
+  // Direction Générale (organigramme 1)
+  {
+    id: 1,
+    name: "Marie Dubois",
+    position: "Directrice Générale",
+    email: "marie.dubois@smi-corp.fr",
+    phone: "01 23 45 67 89",
+    parentId: null,
+    organigrammeId: 1,
+    level: 0,
+    orderIndex: 0,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 2,
+    name: "Pierre Martin",
+    position: "Directeur des Opérations",
+    email: "pierre.martin@smi-corp.fr",
+    phone: "01 23 45 67 90",
+    parentId: 1,
+    organigrammeId: 1,
+    level: 1,
+    orderIndex: 0,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 3,
+    name: "Sophie Laurent",
+    position: "Directrice des Ressources Humaines",
+    email: "sophie.laurent@smi-corp.fr",
+    phone: "01 23 45 67 91",
+    parentId: 1,
+    organigrammeId: 1,
+    level: 1,
+    orderIndex: 1,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 4,
+    name: "Thomas Leroy",
+    position: "Responsable Production",
+    email: "thomas.leroy@smi-corp.fr",
+    phone: "01 23 45 67 92",
+    parentId: 2,
+    organigrammeId: 1,
+    level: 2,
+    orderIndex: 0,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 5,
+    name: "Julie Moreau",
+    position: "Responsable Qualité",
+    email: "julie.moreau@smi-corp.fr",
+    phone: "01 23 45 67 93",
+    parentId: 2,
+    organigrammeId: 1,
+    level: 2,
+    orderIndex: 1,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+
+  // Département IT (organigramme 2)
+  {
+    id: 6,
+    name: "Alexandre Rousseau",
+    position: "Directeur Technique",
+    email: "alexandre.rousseau@smi-corp.fr",
+    phone: "01 23 45 67 94",
+    parentId: null,
+    organigrammeId: 2,
+    level: 0,
+    orderIndex: 0,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 7,
+    name: "Sarah Dupond",
+    position: "Lead Developer Frontend",
+    email: "sarah.dupond@smi-corp.fr",
+    phone: "01 23 45 67 95",
+    parentId: 6,
+    organigrammeId: 2,
+    level: 1,
+    orderIndex: 0,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 8,
+    name: "Kevin Bernard",
+    position: "Lead Developer Backend",
+    email: "kevin.bernard@smi-corp.fr",
+    phone: "01 23 45 67 96",
+    parentId: 6,
+    organigrammeId: 2,
+    level: 1,
+    orderIndex: 1,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 9,
+    name: "Emma Garcia",
+    position: "DevOps Engineer",
+    email: "emma.garcia@smi-corp.fr",
+    phone: "01 23 45 67 97",
+    parentId: 6,
+    organigrammeId: 2,
+    level: 1,
+    orderIndex: 2,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+
+  // Équipe Marketing (organigramme 3)
+  {
+    id: 10,
+    name: "Nathalie Lefebvre",
+    position: "Directrice Marketing",
+    email: "nathalie.lefebvre@smi-corp.fr",
+    phone: "01 23 45 67 98",
+    parentId: null,
+    organigrammeId: 3,
+    level: 0,
+    orderIndex: 0,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 11,
+    name: "David Roux",
+    position: "Responsable Communication",
+    email: "david.roux@smi-corp.fr",
+    phone: "01 23 45 67 99",
+    parentId: 10,
+    organigrammeId: 3,
+    level: 1,
+    orderIndex: 0,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 12,
+    name: "Lisa Petit",
+    position: "Responsable Digital",
+    email: "lisa.petit@smi-corp.fr",
+    phone: "01 23 45 68 00",
+    parentId: 10,
+    organigrammeId: 3,
+    level: 1,
+    orderIndex: 1,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  }
+];
+
+export const employeeDb = {
+  findAll: (options = {}) => {
+    let result = [...employees];
+    
+    if (options.where) {
+      Object.keys(options.where).forEach(key => {
+        result = result.filter(emp => emp[key] === options.where[key]);
+      });
+    }
+    
+    if (options.order) {
+      // Simple ordering support
+      result.sort((a, b) => {
+        for (let [field, direction] of options.order) {
+          if (a[field] < b[field]) return direction === 'ASC' ? -1 : 1;
+          if (a[field] > b[field]) return direction === 'ASC' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    
+    if (options.limit) {
+      const offset = options.offset || 0;
+      result = result.slice(offset, offset + options.limit);
+    }
+    
+    return result;
+  },
+  
+  findOne: (options = {}) => {
+    if (options.where) {
+      return employees.find(emp => {
+        return Object.keys(options.where).every(key => 
+          emp[key] === options.where[key]
+        );
+      }) || null;
+    }
+    return employees[0] || null;
+  },
+  
+  findByPk: (id) => {
+    return employees.find(emp => emp.id === parseInt(id)) || null;
+  },
+  
+  create: (data) => {
+    const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+    
+    const newEmployee = {
+      id: newId,
+      ...data,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      toJSON: function() { return {...this}; }
+    };
+    employees.push(newEmployee);
+    return newEmployee;
+  },
+  
+  update: (id, data) => {
+    const index = employees.findIndex(emp => emp.id === parseInt(id));
+    if (index !== -1) {
+      employees[index] = {
+        ...employees[index],
+        ...data,
+        updatedAt: new Date().toISOString()
+      };
+      return employees[index];
+    }
+    return null;
+  },
+  
+  destroy: (id) => {
+    const index = employees.findIndex(emp => emp.id === parseInt(id));
+    if (index !== -1) {
+      employees.splice(index, 1);
+      return true;
+    }
+    return false;
   }
 };

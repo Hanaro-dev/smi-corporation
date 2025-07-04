@@ -75,10 +75,17 @@ export const checkPermission = async (event, permissionName) => {
     } catch (error) {
       if (error.statusCode) throw error; // Renvoyer nos erreurs personnalisées
       
-      console.error("Erreur lors de la vérification des permissions :", error);
+      // Log l'erreur pour les administrateurs sans exposer les détails
+      console.error("Permission check error:", {
+        userId: user.id,
+        permission: permissionName,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+      
       throw createError({
         statusCode: 500,
-        message: "Erreur serveur lors de la vérification des permissions"
+        message: "Erreur interne du serveur"
       });
     }
   }
@@ -138,10 +145,17 @@ export const hasRole = async (event, roleName) => {
     } catch (error) {
       if (error.statusCode) throw error; // Renvoyer nos erreurs personnalisées
       
-      console.error("Erreur lors de la vérification du rôle :", error);
+      // Log l'erreur pour les administrateurs sans exposer les détails
+      console.error("Role check error:", {
+        userId: user.id,
+        role: roleName,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+      
       throw createError({
         statusCode: 500,
-        message: "Erreur serveur lors de la vérification du rôle"
+        message: "Erreur interne du serveur"
       });
     }
   }

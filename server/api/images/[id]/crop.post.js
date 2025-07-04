@@ -4,6 +4,9 @@ import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import sizeOf from "image-size";
 import { Image, ImageVariant } from "../../../models.js";
+import { getCookie, getClientIP, getHeader } from "h3";
+import { sessionDb, userDb, roleDb, auditDb } from '../../../utils/mock-db.js';
+import { checkPermission } from "../../../utils/permission-utils.js";
 
 // Dimensions des variantes
 const VARIANTS = {
@@ -15,6 +18,45 @@ const VARIANTS = {
 
 export default defineEventHandler(async (event) => {
   try {
+    // 1. Authentification et vérification des permissions
+    const token = getCookie(event, "auth_token");
+    
+    if (!token) {
+      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
+    }
+    
+    // Rechercher la session
+    const session = sessionDb.findByToken(token);
+    if (!session) {
+      throw createError({ statusCode: 401, message: "Session invalide." });
+    }
+    
+    // Rechercher l'utilisateur
+    const user = await userDb.findById(session.userId);
+    if (!user) {
+      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
+    }
+
+    // Récupérer le rôle de l'utilisateur avec ses permissions
+    const role = roleDb.findByPk(user.role_id);
+    if (!role) {
+      throw createError({
+        statusCode: 500,
+        message: "Rôle utilisateur non trouvé."
+      });
+    }
+
+    // Mettre l'utilisateur dans le contexte
+    const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
+    delete userWithoutPassword.password;
+    
+    event.context.user = userWithoutPassword;
+    event.context.userRole = role;
+    event.context.permissions = role.getPermissions();
+
+    // Vérifier les permissions
+    await checkPermission(event, "manage_media");
+    
     const id = event.context.params.id;
     const body = await readBody(event);
     
@@ -177,6 +219,15 @@ export default defineEventHandler(async (event) => {
     } catch (error) {
       console.error(`Erreur lors de la suppression de l'image originale:`, error);
     }
+    
+    // Enregistrer l'activité dans les logs d'audit
+    await auditDb.create({
+      userId: event.context.user.id,
+      action: 'image_crop',
+      details: `Image recadrée: ${updatedImage.originalFilename || updatedImage.filename} (ID: ${id})`,
+      ipAddress: getClientIP(event) || 'unknown',
+      userAgent: getHeader(event, 'user-agent') || 'unknown'
+    });
     
     // Formater la réponse
     const jsonImage = updatedImage.toJSON();

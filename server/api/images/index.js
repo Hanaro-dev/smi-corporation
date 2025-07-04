@@ -1,8 +1,50 @@
 import { Image, ImageVariant, User, sequelize } from '../../models.js'
 import { Op } from 'sequelize'
+import { getCookie } from 'h3'
+import { sessionDb, userDb, roleDb } from '../../utils/mock-db.js'
+import { checkPermission } from '../../utils/permission-utils.js'
 
 export default defineEventHandler(async (event) => {
   try {
+    // 1. Authentification et vérification des permissions
+    const token = getCookie(event, "auth_token");
+    
+    if (!token) {
+      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
+    }
+    
+    // Rechercher la session
+    const session = sessionDb.findByToken(token);
+    if (!session) {
+      throw createError({ statusCode: 401, message: "Session invalide." });
+    }
+    
+    // Rechercher l'utilisateur
+    const user = await userDb.findById(session.userId);
+    if (!user) {
+      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
+    }
+
+    // Récupérer le rôle de l'utilisateur avec ses permissions
+    const role = roleDb.findByPk(user.role_id);
+    if (!role) {
+      throw createError({
+        statusCode: 500,
+        message: "Rôle utilisateur non trouvé."
+      });
+    }
+
+    // Mettre l'utilisateur dans le contexte
+    const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
+    delete userWithoutPassword.password;
+    
+    event.context.user = userWithoutPassword;
+    event.context.userRole = role;
+    event.context.permissions = role.getPermissions();
+
+    // Vérifier les permissions (view pour la lecture)
+    await checkPermission(event, "view");
+    
     const query = getQuery(event)
     
     // Paramètres de pagination

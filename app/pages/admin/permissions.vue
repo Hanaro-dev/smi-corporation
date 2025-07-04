@@ -18,21 +18,21 @@
                 v-model="newRoleName" 
                 required 
                 placeholder="Ex: Éditeur, Gestionnaire..."
-              />
+              >
             </div>
             <button type="submit" class="btn primary">Créer</button>
           </form>
         </div>
         
         <!-- Liste des rôles existants -->
-        <div class="card" v-if="roles.length > 0">
+        <div v-if="roles.length > 0" class="card">
           <h3>Rôles existants</h3>
           <div v-for="role in roles" :key="role.id" class="role-item">
             <div class="role-header">
               <h4>{{ role.name }}</h4>
               <div class="role-actions">
-                <button @click="selectRoleForEdit(role)" class="btn small">Modifier</button>
-                <button @click="confirmDeleteRole(role)" class="btn small danger">Supprimer</button>
+                <button class="btn small" @click="selectRoleForEdit(role)">Modifier</button>
+                <button class="btn small danger" @click="confirmDeleteRole(role)">Supprimer</button>
               </div>
             </div>
             
@@ -42,7 +42,7 @@
               <div v-if="role.Permissions && role.Permissions.length > 0" class="permission-tags">
                 <span v-for="permission in role.Permissions" :key="permission.id" class="permission-tag">
                   {{ permission.name }}
-                  <button @click="removePermission(role.id, permission.id)" class="remove-permission">&times;</button>
+                  <button class="remove-permission" @click="removePermission(role.id, permission.id)">&times;</button>
                 </span>
               </div>
               <p v-else class="no-items">Aucune permission</p>
@@ -61,9 +61,9 @@
                 </option>
               </select>
               <button 
-                @click="addPermissionToRole(role.id)" 
                 class="btn small" 
-                :disabled="!rolePermissions[role.id]"
+                :disabled="!rolePermissions[role.id]" 
+                @click="addPermissionToRole(role.id)"
               >
                 Ajouter
               </button>
@@ -88,20 +88,20 @@
                 v-model="newPermissionName" 
                 required 
                 placeholder="Ex: create_user, edit_content..."
-              />
+              >
             </div>
             <button type="submit" class="btn primary">Créer</button>
           </form>
         </div>
         
         <!-- Liste des permissions existantes -->
-        <div class="card" v-if="permissions.length > 0">
+        <div v-if="permissions.length > 0" class="card">
           <h3>Permissions existantes</h3>
           <div v-for="permission in permissions" :key="permission.id" class="permission-item">
             <div class="permission-name">{{ permission.name }}</div>
             <div class="permission-actions">
-              <button @click="selectPermissionForEdit(permission)" class="btn small">Modifier</button>
-              <button @click="confirmDeletePermission(permission)" class="btn small danger">Supprimer</button>
+              <button class="btn small" @click="selectPermissionForEdit(permission)">Modifier</button>
+              <button class="btn small danger" @click="confirmDeletePermission(permission)">Supprimer</button>
             </div>
           </div>
         </div>
@@ -116,7 +116,7 @@
         <form @submit.prevent="updateRole">
           <div class="form-group">
             <label for="editRoleName">Nom du rôle</label>
-            <input id="editRoleName" v-model="editingRole.name" required />
+            <input id="editRoleName" v-model="editingRole.name" required >
           </div>
           <div class="modal-actions">
             <button type="button" class="btn" @click="cancelEditRole">Annuler</button>
@@ -132,7 +132,7 @@
         <form @submit.prevent="updatePermission">
           <div class="form-group">
             <label for="editPermissionName">Nom de la permission</label>
-            <input id="editPermissionName" v-model="editingPermission.name" required />
+            <input id="editPermissionName" v-model="editingPermission.name" required >
           </div>
           <div class="modal-actions">
             <button type="button" class="btn" @click="cancelEditPermission">Annuler</button>

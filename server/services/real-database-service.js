@@ -48,6 +48,8 @@ export class RealDatabaseService {
     this.definePageModel();
     this.defineImageModel();
     this.defineImageVariantModel();
+    this.defineOrganigrammeModel();
+    this.defineEmployeeModel();
   }
 
   defineUserModel() {
@@ -340,8 +342,153 @@ export class RealDatabaseService {
     );
   }
 
+  defineOrganigrammeModel() {
+    this.models.Organigramme = this.sequelize.define(
+      "Organigramme",
+      {
+        title: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          validate: {
+            notEmpty: { msg: "Le titre de l'organigramme ne peut pas être vide." },
+            len: { args: [3, 255], msg: "Le titre doit contenir entre 3 et 255 caractères." }
+          },
+        },
+        description: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+        },
+        slug: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          unique: { msg: "Cette URL d'organigramme est déjà utilisée." },
+          validate: {
+            is: {
+              args: /^[a-z0-9-]+$/i,
+              msg: "Le slug ne peut contenir que des lettres, des chiffres et des tirets."
+            }
+          },
+        },
+        status: {
+          type: DataTypes.ENUM('draft', 'published'),
+          defaultValue: 'draft',
+          allowNull: false,
+        },
+        userId: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: { model: 'Users', key: 'id' }
+        },
+      },
+      {
+        timestamps: true,
+        hooks: {
+          beforeValidate: async (organigramme) => {
+            // Auto-generate slug from title if not provided
+            if (!organigramme.slug && organigramme.title) {
+              organigramme.slug = organigramme.title
+                .toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+            }
+          }
+        }
+      }
+    );
+  }
+
+  defineEmployeeModel() {
+    this.models.Employee = this.sequelize.define(
+      "Employee",
+      {
+        name: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          validate: {
+            notEmpty: { msg: "Le nom de l'employé ne peut pas être vide." },
+            len: { args: [2, 100], msg: "Le nom doit contenir entre 2 et 100 caractères." }
+          },
+        },
+        position: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          validate: {
+            notEmpty: { msg: "Le poste ne peut pas être vide." },
+            len: { args: [2, 150], msg: "Le poste doit contenir entre 2 et 150 caractères." }
+          },
+        },
+        email: {
+          type: DataTypes.STRING,
+          allowNull: true,
+          validate: {
+            isEmail: { msg: "L'email doit être valide." }
+          },
+        },
+        phone: {
+          type: DataTypes.STRING,
+          allowNull: true,
+          validate: {
+            is: {
+              args: /^[\d\s\-\+\(\)\.]+$/,
+              msg: "Le numéro de téléphone contient des caractères invalides."
+            }
+          },
+        },
+        parentId: {
+          type: DataTypes.INTEGER,
+          allowNull: true,
+          references: { model: 'Employees', key: 'id' }
+        },
+        organigrammeId: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: { model: 'Organigrammes', key: 'id' }
+        },
+        level: {
+          type: DataTypes.INTEGER,
+          defaultValue: 0,
+          validate: {
+            min: { args: [0], msg: "Le niveau ne peut pas être négatif." },
+            max: { args: [10], msg: "Le niveau ne peut pas dépasser 10." }
+          },
+        },
+        orderIndex: {
+          type: DataTypes.INTEGER,
+          defaultValue: 0,
+          field: 'order_index', // Use snake_case in database
+        },
+        isActive: {
+          type: DataTypes.BOOLEAN,
+          defaultValue: true,
+          field: 'is_active',
+        },
+      },
+      {
+        timestamps: true,
+        hooks: {
+          beforeValidate: async (employee) => {
+            // Calculate level based on parent
+            if (employee.parentId) {
+              try {
+                const parent = await this.models.Employee.findByPk(employee.parentId);
+                if (parent) {
+                  employee.level = parent.level + 1;
+                }
+              } catch (error) {
+                console.error("Error checking parent employee:", error);
+              }
+            } else {
+              employee.level = 0;
+            }
+          }
+        }
+      }
+    );
+  }
+
   setupAssociations() {
-    const { User, Role, Permission, Page, Image, ImageVariant } = this.models;
+    const { User, Role, Permission, Page, Image, ImageVariant, Organigramme, Employee } = this.models;
     
     // User relations
     User.belongsTo(Role, { foreignKey: "role_id" });
@@ -360,6 +507,16 @@ export class RealDatabaseService {
     ImageVariant.belongsTo(Image, { foreignKey: 'imageId' });
     User.hasMany(Image, { foreignKey: 'userId' });
     Image.belongsTo(User, { foreignKey: 'userId' });
+
+    // Organigramme relations
+    User.hasMany(Organigramme, { foreignKey: 'userId' });
+    Organigramme.belongsTo(User, { foreignKey: 'userId' });
+    Organigramme.hasMany(Employee, { foreignKey: 'organigrammeId', as: 'employees' });
+    Employee.belongsTo(Organigramme, { foreignKey: 'organigrammeId' });
+
+    // Employee relations (self-referencing hierarchy)
+    Employee.hasMany(Employee, { foreignKey: 'parentId', as: 'children' });
+    Employee.belongsTo(Employee, { foreignKey: 'parentId', as: 'parent' });
   }
 
   async initialize() {

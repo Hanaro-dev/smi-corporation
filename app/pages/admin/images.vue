@@ -10,15 +10,15 @@
       </div>
       <div class="flex items-center space-x-3">
         <button
-          @click="activeTab = 'upload'"
           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          @click="activeTab = 'upload'"
         >
           <Icon name="heroicons:arrow-up-tray" class="w-4 h-4 mr-2" />
           Télécharger
         </button>
         <button
-          @click="showBulkActions = !showBulkActions"
           class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          @click="showBulkActions = !showBulkActions"
         >
           <Icon name="heroicons:cog-6-tooth" class="w-4 h-4 mr-2" />
           Actions
@@ -101,7 +101,7 @@
               type="text"
               placeholder="Rechercher une image..."
               class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-            />
+            >
           </div>
         </div>
         <div class="flex items-center space-x-3">

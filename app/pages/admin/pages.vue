@@ -8,15 +8,15 @@
       </div>
       <div class="flex items-center space-x-3">
         <button
-          @click="viewMode = viewMode === 'list' ? 'tree' : 'list'"
           class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          @click="viewMode = viewMode === 'list' ? 'tree' : 'list'"
         >
           <Icon :name="viewMode === 'list' ? 'heroicons:squares-2x2' : 'heroicons:list-bullet'" class="w-4 h-4 mr-2" />
           {{ viewMode === 'list' ? 'Vue arborescente' : 'Vue liste' }}
         </button>
         <button
-          @click="showCreateForm = true"
           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          @click="showCreateForm = true"
         >
           <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
           Nouvelle page
@@ -35,7 +35,7 @@
               type="text"
               placeholder="Rechercher une page..."
               class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-            />
+            >
           </div>
         </div>
         <div class="flex items-center space-x-3">
@@ -48,8 +48,8 @@
             <option value="draft">Brouillon</option>
           </select>
           <button
-            @click="clearFilters"
             class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+            @click="clearFilters"
           >
             Effacer
           </button>
@@ -144,31 +144,31 @@
             
             <div class="flex items-center space-x-2 ml-4">
               <button
-                @click="startEdit(page)"
                 class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                @click="startEdit(page)"
               >
                 <Icon name="heroicons:pencil" class="w-4 h-4 mr-1" />
                 Modifier
               </button>
               <button
                 v-if="page.status === 'draft'"
-                @click="updateStatus(page.id, 'published')"
                 class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors"
+                @click="updateStatus(page.id, 'published')"
               >
                 <Icon name="heroicons:eye" class="w-4 h-4 mr-1" />
                 Publier
               </button>
               <button
                 v-else
-                @click="updateStatus(page.id, 'draft')"
                 class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
+                @click="updateStatus(page.id, 'draft')"
               >
                 <Icon name="heroicons:eye-slash" class="w-4 h-4 mr-1" />
                 Dépublier
               </button>
               <button
-                @click="confirmDelete(page)"
                 class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
+                @click="confirmDelete(page)"
               >
                 <Icon name="heroicons:trash" class="w-4 h-4 mr-1" />
                 Supprimer
@@ -185,7 +185,7 @@
                 placeholder="Titre de la page"
                 class="w-full px-3 py-2 border rounded-md"
                 required
-              />
+              >
             </div>
             
             <div>
@@ -197,7 +197,7 @@
                   placeholder="url-de-la-page"
                   class="flex-1 px-3 py-2 border rounded-md"
                   required
-                />
+                >
               </div>
             </div>
             
@@ -238,7 +238,7 @@
                     v-model="useBBCodeMode" 
                     type="checkbox" 
                     class="mr-2"
-                  />
+                  >
                   <span class="text-sm text-gray-600 dark:text-gray-400">Utiliser l'éditeur BBCode avancé</span>
                 </label>
                 <span v-if="useBBCodeMode" class="text-xs text-blue-600 dark:text-blue-400">
@@ -252,8 +252,8 @@
                 v-model="editContent"
                 :page-type="'admin'"
                 :show-preview-by-default="true"
-                @validation="handleBBCodeValidation"
                 class="min-h-64"
+                @validation="handleBBCodeValidation"
               />
               <TipTapEditor 
                 v-else
@@ -327,7 +327,7 @@
               class="w-full px-3 py-2 border rounded-md"
               required
               @input="generateSlug"
-            />
+            >
           </div>
           
           <div>
@@ -339,7 +339,7 @@
                 placeholder="url-de-la-page"
                 class="flex-1 px-3 py-2 border rounded-md"
                 required
-              />
+              >
             </div>
           </div>
           
@@ -376,7 +376,7 @@
                   v-model="useBBCodeMode" 
                   type="checkbox" 
                   class="mr-2"
-                />
+                >
                 <span class="text-sm text-gray-600 dark:text-gray-400">Utiliser l'éditeur BBCode avancé</span>
               </label>
               <span v-if="useBBCodeMode" class="text-xs text-blue-600 dark:text-blue-400">
@@ -390,8 +390,8 @@
               v-model="newContent"
               :page-type="'admin'"
               :show-preview-by-default="true"
-              @validation="handleBBCodeValidation"
               class="min-h-64"
+              @validation="handleBBCodeValidation"
             />
             <TipTapEditor 
               v-else

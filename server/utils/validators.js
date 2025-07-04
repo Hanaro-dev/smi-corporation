@@ -1,38 +1,50 @@
 import { ERROR_MESSAGES } from "../constants/messages";
+import { 
+  isValidEmail, 
+  isValidPassword, 
+  isValidUsername, 
+  sanitizeInput 
+} from "./input-validation.js";
 
 export const validateUser = (user, isUpdate = false) => {
   const errors = {};
 
-  // Validation du nom
+  // Validation du nom avec sanitisation
   if (!user.name || user.name.trim().length < 3) {
-    errors.name = ERROR_MESSAGES.INVALID_NAME;
-  } else if (!/^[a-zA-Z0-9\sÀ-ÿ'-]+$/.test(user.name.trim())) { // Autorise les espaces, accents, apostrophes et tirets
+    errors.name = ERROR_MESSAGES.INVALID_NAME || "Le nom doit contenir au moins 3 caractères.";
+  } else if (!/^[a-zA-Z0-9\sÀ-ÿ'-]+$/.test(user.name.trim())) {
     errors.name = "Le nom contient des caractères non autorisés.";
+  } else if (user.name.trim().length > 100) {
+    errors.name = "Le nom ne peut pas dépasser 100 caractères.";
   }
 
-  // Validation du nom d'utilisateur (optionnel à la création, mais validé si fourni)
+  // Validation du nom d'utilisateur avec fonction robuste
   if (user.username && user.username.trim().length > 0) {
-    if (user.username.trim().length < 3 || user.username.trim().length > 50) {
-      errors.username = "Le nom d'utilisateur doit contenir entre 3 et 50 caractères.";
-    } else if (!/^[a-zA-Z0-9_]+$/.test(user.username.trim())) {
-      errors.username = "Le nom d'utilisateur ne peut contenir que des lettres, des chiffres et des underscores.";
+    if (!isValidUsername(user.username.trim())) {
+      errors.username = "Le nom d'utilisateur doit contenir entre 3 et 50 caractères (lettres, chiffres et underscores uniquement).";
     }
-  } else if (!isUpdate && !user.username) { // Requis à la création si vous le souhaitez, sinon supprimez ce bloc
-    // errors.username = "Le nom d'utilisateur est requis.";
   }
 
-
-  // Validation de l'email
-  if (!user.email || !/\S+@\S+\.\S+/.test(user.email)) {
+  // Validation de l'email avec fonction robuste
+  if (!user.email) {
+    errors.email = "L'email est requis.";
+  } else if (!isValidEmail(user.email)) {
     errors.email = "Veuillez fournir une adresse email valide.";
   }
 
-  // Validation du mot de passe (uniquement à la création ou si le mot de passe est modifié)
-  if (!isUpdate && (!user.password || user.password.length < 8)) {
-    errors.password = "Le mot de passe doit contenir au moins 8 caractères.";
-  }
-  if (isUpdate && user.password && user.password.length > 0 && user.password.length < 8) {
-    errors.password = "Le nouveau mot de passe doit contenir au moins 8 caractères.";
+  // Validation robuste du mot de passe
+  if (!isUpdate) {
+    // À la création, mot de passe obligatoire et robuste
+    if (!user.password) {
+      errors.password = "Le mot de passe est requis.";
+    } else if (!isValidPassword(user.password)) {
+      errors.password = "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (@$!%*?&).";
+    }
+  } else if (user.password && user.password.trim() !== "") {
+    // À la mise à jour, si mot de passe fourni, il doit être robuste
+    if (!isValidPassword(user.password)) {
+      errors.password = "Le nouveau mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial (@$!%*?&).";
+    }
   }
 
 
@@ -54,12 +66,19 @@ export const validateUser = (user, isUpdate = false) => {
 
 export const validateLoginInput = (input) => {
   const errors = {};
-  if (!input.email || !/\S+@\S+\.\S+/.test(input.email)) {
+  
+  // Validation email avec fonction robuste
+  if (!input.email) {
+    errors.email = "L'email est requis.";
+  } else if (!isValidEmail(input.email)) {
     errors.email = "Veuillez fournir une adresse email valide.";
   }
+  
+  // Validation mot de passe pour connexion (moins stricte qu'à la création)
   if (!input.password || input.password.length === 0) {
     errors.password = "Le mot de passe est requis.";
   }
+  
   return errors;
 };
 

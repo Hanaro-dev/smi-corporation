@@ -7,9 +7,9 @@
         <button
           v-for="bbcode in availableHelp"
           :key="bbcode.tag"
-          @click="insertBBCode(bbcode)"
           class="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors transform hover:scale-105"
           :title="`${bbcode.description} - Cliquez pour insérer`"
+          @click="insertBBCode(bbcode)"
         >
           {{ bbcode.tag }}
         </button>
@@ -30,13 +30,13 @@
             v-model="showPreview" 
             type="checkbox" 
             class="mr-2"
-          />
+          >
           <span class="text-sm text-gray-600 dark:text-gray-400">Aperçu en temps réel</span>
         </label>
         
         <button
-          @click="showHelp = !showHelp"
           class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+          @click="showHelp = !showHelp"
         >
           {{ showHelp ? 'Masquer' : 'Afficher' }} l'aide
         </button>
@@ -50,12 +50,12 @@
         <textarea
           ref="textarea"
           v-model="localContent"
-          @input="handleInput"
-          @keydown="handleKeydown"
           class="w-full h-64 p-4 border-0 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
           :class="showPreview ? 'border-r-0' : 'rounded-b-lg border-b'"
           placeholder="Saisissez votre contenu avec des BBCodes..."
-        ></textarea>
+          @input="handleInput"
+          @keydown="handleKeydown"
+        />
       </div>
 
       <!-- Aperçu -->
@@ -90,8 +90,8 @@
           <div class="flex items-center justify-between mb-2">
             <code class="text-sm bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">{{ bbcode.tag }}</code>
             <button
-              @click="insertBBCode(bbcode)"
               class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+              @click="insertBBCode(bbcode)"
             >
               Insérer
             </button>

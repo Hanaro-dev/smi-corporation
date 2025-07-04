@@ -101,13 +101,15 @@ export class MockDatabaseService {
     this.models.Page = this.createMockModel("Page");
     this.models.Image = this.createMockModel("Image");
     this.models.ImageVariant = this.createMockModel("ImageVariant");
+    this.models.Organigramme = this.createMockModel("Organigramme");
+    this.models.Employee = this.createMockModel("Employee");
     
     // Setup relationships
     this.setupRelationships();
   }
 
   setupRelationships() {
-    const { User, Role, Permission, Page, Image, ImageVariant } = this.models;
+    const { User, Role, Permission, Page, Image, ImageVariant, Organigramme, Employee } = this.models;
     
     // User relations
     User.belongsTo(Role, { foreignKey: "role_id" });
@@ -126,6 +128,16 @@ export class MockDatabaseService {
     Image.belongsTo(User, { foreignKey: 'userId' });
     Image.hasMany(ImageVariant, { foreignKey: 'imageId', as: 'variants' });
     ImageVariant.belongsTo(Image, { foreignKey: 'imageId' });
+
+    // Organigramme relations
+    User.hasMany(Organigramme, { foreignKey: 'userId' });
+    Organigramme.belongsTo(User, { foreignKey: 'userId' });
+    Organigramme.hasMany(Employee, { foreignKey: 'organigrammeId', as: 'employees' });
+    Employee.belongsTo(Organigramme, { foreignKey: 'organigrammeId' });
+
+    // Employee relations (self-referencing hierarchy)
+    Employee.hasMany(Employee, { foreignKey: 'parentId', as: 'children' });
+    Employee.belongsTo(Employee, { foreignKey: 'parentId', as: 'parent' });
   }
 
   async initialize() {

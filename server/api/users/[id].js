@@ -66,8 +66,8 @@ export default defineEventHandler(async (event) => {
 
     // Si le rôle est modifié, vérifier qu'il existe et que l'utilisateur a les permissions
     if (body.role_id && body.role_id !== user.role_id) {
-      // Seul un utilisateur avec manage_users peut changer les rôles
-      await requirePermission("manage_users")(event);
+      // Seul un utilisateur avec manage_user_roles peut changer les rôles
+      await requirePermission("manage_user_roles")(event);
       
       // Vérifier si le rôle existe
       const role = roleDb.findByPk(parseInt(body.role_id));
@@ -119,9 +119,16 @@ export default defineEventHandler(async (event) => {
     const updatedUser = userDb.update(parseInt(userId), allowedUpdates);
     
     if (!updatedUser) {
+      // Log l'erreur sans exposer les détails
+      console.error("User update failed:", {
+        userId: parseInt(userId),
+        timestamp: new Date().toISOString(),
+        updatedBy: event.context.user.id
+      });
+      
       throw createError({
         statusCode: 500,
-        message: "Erreur lors de la mise à jour de l'utilisateur."
+        message: "Erreur interne du serveur"
       });
     }
 
@@ -181,9 +188,16 @@ export default defineEventHandler(async (event) => {
     const success = userDb.destroy(parseInt(userId));
     
     if (!success) {
+      // Log l'erreur sans exposer les détails
+      console.error("User deletion failed:", {
+        userId: parseInt(userId),
+        timestamp: new Date().toISOString(),
+        deletedBy: event.context.user.id
+      });
+      
       throw createError({
         statusCode: 500,
-        message: "Erreur lors de la suppression de l'utilisateur."
+        message: "Erreur interne du serveur"
       });
     }
     

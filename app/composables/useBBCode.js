@@ -273,7 +273,7 @@ export const useBBCode = () => {
     const allowedTags = pageConfigs[pageType] || pageConfigs.default;
     
     // Log pour le débogage en mode développement
-    if (process.dev) {
+    if (import.meta.dev) {
       console.log(`BBCode: Type de page '${pageType}' -> Tags autorisés:`, allowedTags);
     }
     

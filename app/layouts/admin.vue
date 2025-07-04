@@ -17,8 +17,8 @@
             <span class="font-semibold text-gray-800 dark:text-gray-200">Administration</span>
           </div>
           <button 
-            @click="toggleSidebar"
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            @click="toggleSidebar"
           >
             <Icon :name="sidebarCollapsed ? 'heroicons:chevron-right' : 'heroicons:chevron-left'" class="w-4 h-4 text-gray-600 dark:text-gray-400" />
           </button>
@@ -49,7 +49,7 @@
           <div v-if="sidebarCollapsed" class="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
             <div class="bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
               {{ item.label }}
-              <div class="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
+              <div class="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"/>
             </div>
           </div>
         </div>
@@ -70,11 +70,11 @@
           </NuxtLink>
           
           <button
-            @click="logout"
             :class="[
               'group flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors',
               'hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400'
             ]"
+            @click="logout"
           >
             <Icon name="heroicons:arrow-right-on-rectangle" :class="['w-5 h-5', sidebarCollapsed ? 'mx-auto' : 'mr-3']" />
             <span v-if="!sidebarCollapsed">Déconnexion</span>
@@ -102,7 +102,7 @@
             <!-- Notifications -->
             <button class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
               <Icon name="heroicons:bell" class="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"/>
             </button>
             
             <!-- User Avatar -->

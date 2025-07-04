@@ -6,6 +6,11 @@ import sharp from "sharp";
 import { fileTypeFromBuffer } from "file-type";
 import sizeOf from "image-size";
 import { Image, ImageVariant } from "../models.js";
+import { getCookie, getClientIP, getHeader } from "h3";
+import { sessionDb, userDb, roleDb, auditDb } from '../utils/mock-db.js';
+import { checkPermission } from "../utils/permission-utils.js";
+import DOMPurify from "dompurify";
+import { checkRateLimit, imageUploadRateLimit } from "../utils/rate-limiter.js";
 
 // Configuration
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -27,16 +32,74 @@ const VARIANTS = {
 
 export default defineEventHandler(async (event) => {
   try {
-    // 1. Récupérer et valider les données du formulaire
+    // 1. Vérification du rate limiting (avant authentification pour éviter les attaques)
+    const clientIP = getClientIP(event) || 'unknown';
+    const rateLimitResult = checkRateLimit(clientIP, imageUploadRateLimit);
+    
+    if (!rateLimitResult.allowed) {
+      const errorMessage = rateLimitResult.blocked 
+        ? `Trop de tentatives d'upload. Réessayez dans ${Math.ceil(rateLimitResult.timeUntilUnblock / 1000 / 60)} minutes.`
+        : 'Limite d\'upload atteinte. Réessayez plus tard.';
+      
+      throw createError({
+        statusCode: 429,
+        statusMessage: errorMessage
+      });
+    }
+    
+    // 2. Authentification et vérification des permissions
+    const token = getCookie(event, "auth_token");
+    
+    if (!token) {
+      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
+    }
+    
+    // Rechercher la session
+    const session = sessionDb.findByToken(token);
+    if (!session) {
+      throw createError({ statusCode: 401, message: "Session invalide." });
+    }
+    
+    // Rechercher l'utilisateur
+    const user = await userDb.findById(session.userId);
+    if (!user) {
+      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
+    }
+
+    // Récupérer le rôle de l'utilisateur avec ses permissions
+    const role = roleDb.findByPk(user.role_id);
+    if (!role) {
+      throw createError({
+        statusCode: 500,
+        message: "Rôle utilisateur non trouvé."
+      });
+    }
+
+    // Mettre l'utilisateur dans le contexte
+    const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
+    delete userWithoutPassword.password;
+    
+    event.context.user = userWithoutPassword;
+    event.context.userRole = role;
+    event.context.permissions = role.getPermissions();
+
+    // Vérifier les permissions
+    await checkPermission(event, "manage_media");
+    
+    // 2. Récupérer et valider les données du formulaire
     const form = await readMultipartFormData(event);
     const file = form.find((f) => f.name === "image");
     const title = form.find((f) => f.name === "title")?.data.toString() || null;
     const description = form.find((f) => f.name === "description")?.data.toString() || null;
     const altText = form.find((f) => f.name === "altText")?.data.toString() || null;
     
-    // L'ID de l'utilisateur connecté (à adapter selon votre système d'authentification)
-    // Pour l'instant, nous utilisons une valeur fixe, mais cela devrait être remplacé par l'ID de l'utilisateur connecté
-    const userId = 1; // Utilisateur avec l'ID 1
+    // Utiliser l'ID de l'utilisateur authentifié
+    const userId = event.context.user.id;
+    
+    // Nettoyer et sanitiser les métadonnées
+    const sanitizedTitle = title ? DOMPurify.sanitize(title.trim()) : null;
+    const sanitizedDescription = description ? DOMPurify.sanitize(description.trim()) : null;
+    const sanitizedAltText = altText ? DOMPurify.sanitize(altText.trim()) : null;
     
     // Validation de base
     if (!file || !file.filename || !file.data) {
@@ -54,13 +117,56 @@ export default defineEventHandler(async (event) => {
       });
     }
     
-    // 2. Valider le type de fichier
+    // 2. Validation stricte du type de fichier (magic number + MIME type)
     const fileType = await fileTypeFromBuffer(file.data);
     if (!fileType || !ALLOWED_MIME_TYPES.includes(fileType.mime)) {
       throw createError({
         statusCode: 400,
         statusMessage: `Type de fichier non autorisé. Types acceptés: ${ALLOWED_MIME_TYPES.join(", ")}`,
       });
+    }
+    
+    // Vérification supplémentaire : l'extension du fichier doit correspondre au type détecté
+    const detectedExt = fileType.ext;
+    const providedExt = extname(file.filename).slice(1).toLowerCase();
+    
+    const validExtensions = {
+      'jpeg': ['jpg', 'jpeg'],
+      'png': ['png'],
+      'gif': ['gif'],
+      'webp': ['webp'],
+      'svg': ['svg']
+    };
+    
+    const expectedExts = validExtensions[detectedExt] || [detectedExt];
+    if (!expectedExts.includes(providedExt)) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "L'extension du fichier ne correspond pas au contenu détecté.",
+      });
+    }
+    
+    // Vérification spéciale pour les fichiers SVG (sécurité)
+    if (fileType.mime === 'image/svg+xml') {
+      const svgContent = file.data.toString('utf8');
+      // Vérifier la présence de balises potentiellement dangereuses
+      const dangerousPatterns = [
+        /<script/i,
+        /javascript:/i,
+        /on\w+\s*=/i,
+        /<iframe/i,
+        /<object/i,
+        /<embed/i
+      ];
+      
+      for (const pattern of dangerousPatterns) {
+        if (pattern.test(svgContent)) {
+          throw createError({
+            statusCode: 400,
+            statusMessage: "Le fichier SVG contient du contenu potentiellement dangereux.",
+          });
+        }
+      }
     }
     
     // 3. Obtenir les dimensions de l'image
@@ -113,9 +219,9 @@ export default defineEventHandler(async (event) => {
       height: dimensions.height,
       format: fileType.ext,
       mimeType: fileType.mime,
-      title,
-      description,
-      altText,
+      title: sanitizedTitle,
+      description: sanitizedDescription,
+      altText: sanitizedAltText,
       hash,
       userId,
     });
@@ -176,7 +282,16 @@ export default defineEventHandler(async (event) => {
     // Attendre que toutes les variantes soient traitées
     await Promise.all(variantPromises);
     
-    // 11. Retourner les informations de l'image
+    // 11. Enregistrer l'activité dans les logs d'audit
+    await auditDb.create({
+      userId: userId,
+      action: 'image_upload',
+      details: `Image uploadée: ${sanitizedTitle || file.filename} (${fileType.ext})`,
+      ipAddress: getClientIP(event) || 'unknown',
+      userAgent: getHeader(event, 'user-agent') || 'unknown'
+    });
+    
+    // 12. Retourner les informations de l'image
     return {
       id: imageRecord.id,
       url: relativePath,

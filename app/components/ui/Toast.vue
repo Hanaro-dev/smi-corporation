@@ -42,8 +42,8 @@
           <!-- Close button -->
           <div class="ml-4 flex-shrink-0 flex">
             <button
-              @click="close"
               class="inline-flex text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md"
+              @click="close"
             >
               <Icon name="heroicons:x-mark" class="w-4 h-4" />
             </button>
@@ -58,7 +58,7 @@
               progressColorClass
             ]"
             :style="{ width: `${progress}%` }"
-          ></div>
+          />
         </div>
       </div>
     </Transition>

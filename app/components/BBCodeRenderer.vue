@@ -5,10 +5,10 @@
   -->
   <div 
     class="bbcode-content" 
-    v-html="renderedContent"
     role="article"
     aria-label="Contenu BBCode rendu"
-  ></div>
+    v-html="renderedContent"
+  />
 </template>
 
 <script setup>

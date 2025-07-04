@@ -11,7 +11,8 @@
             <h1 class="text-2xl font-bold">Bienvenue, {{ userName }}</h1>
             <p class="text-blue-100">{{ user?.email }}</p>
             <div class="mt-2 flex flex-wrap gap-2">
-              <span v-for="permission in userPermissions" :key="permission" 
+              <span
+v-for="permission in userPermissions" :key="permission" 
                    class="px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs font-medium">
                 {{ permission }}
               </span>
@@ -33,7 +34,8 @@
             <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ stat.title }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ stat.value }}</p>
             <div class="flex items-center mt-2">
-              <Icon :name="stat.trend === 'up' ? 'heroicons:arrow-trending-up' : 'heroicons:arrow-trending-down'" 
+              <Icon
+:name="stat.trend === 'up' ? 'heroicons:arrow-trending-up' : 'heroicons:arrow-trending-down'" 
                    :class="['w-4 h-4 mr-1', stat.trend === 'up' ? 'text-green-500' : 'text-red-500']" />
               <span :class="['text-sm font-medium', stat.trend === 'up' ? 'text-green-600' : 'text-red-600']">{{ stat.change }}</span>
               <span class="text-sm text-gray-500 ml-1">vs hier</span>
@@ -61,7 +63,8 @@
 
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="module in quickModules" :key="module.title" 
+      <div
+v-for="module in quickModules" :key="module.title" 
            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group">
         <div :class="['p-6', module.bgColor]">
           <div class="flex items-center justify-between">
@@ -86,7 +89,8 @@
               <Icon name="heroicons:arrow-right" class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
             </NuxtLink>
             <div v-if="module.actions" class="flex space-x-2">
-              <button v-for="action in module.actions" :key="action.name"
+              <button
+v-for="action in module.actions" :key="action.name"
                      :class="['p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors', action.class]">
                 <Icon :name="action.icon" class="w-4 h-4" />
               </button>

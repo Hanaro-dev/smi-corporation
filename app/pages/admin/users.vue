@@ -8,15 +8,15 @@
       </div>
       <div class="flex items-center space-x-3">
         <button
-          @click="exportUsers"
           class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          @click="exportUsers"
         >
           <Icon name="heroicons:arrow-down-tray" class="w-4 h-4 mr-2" />
           Exporter
         </button>
         <button
-          @click="showCreateForm = true"
           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          @click="showCreateForm = true"
         >
           <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
           Nouvel utilisateur
@@ -96,7 +96,7 @@
               type="text"
               placeholder="Rechercher un utilisateur..."
               class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-            />
+            >
           </div>
         </div>
         <div class="flex items-center space-x-3">
@@ -118,8 +118,8 @@
             <option value="inactive">Inactif</option>
           </select>
           <button
-            @click="clearFilters"
             class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+            @click="clearFilters"
           >
             Effacer
           </button>
@@ -135,7 +135,7 @@
       
       <div v-if="isLoading" class="p-8 text-center">
         <div class="inline-flex items-center">
-          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"/>
           <span class="ml-2 text-gray-600 dark:text-gray-400">Chargement...</span>
         </div>
       </div>
@@ -178,7 +178,7 @@
                       ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
                       : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'"
                   >
-                    <div :class="['w-2 h-2 rounded-full mr-1', user.status === 'active' ? 'bg-green-500' : 'bg-gray-400']"></div>
+                    <div :class="['w-2 h-2 rounded-full mr-1', user.status === 'active' ? 'bg-green-500' : 'bg-gray-400']"/>
                     {{ user.status === 'active' ? 'Actif' : 'Inactif' }}
                   </span>
                 </div>
@@ -190,15 +190,15 @@
                 Dernière connexion: {{ formatDate(user.lastLogin) }}
               </span>
               <button
-                @click="editUser(user)"
                 class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                @click="editUser(user)"
               >
                 <Icon name="heroicons:pencil" class="w-4 h-4 mr-1" />
                 Modifier
               </button>
               <button
-                @click="confirmDeleteUser(user)"
                 class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
+                @click="confirmDeleteUser(user)"
               >
                 <Icon name="heroicons:trash" class="w-4 h-4 mr-1" />
                 Supprimer
@@ -217,16 +217,16 @@
           <div class="flex items-center space-x-2">
             <button
               :disabled="currentPage === 1"
-              @click="currentPage--"
               class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              @click="currentPage--"
             >
               <Icon name="heroicons:chevron-left" class="w-4 h-4" />
             </button>
             <span class="text-sm text-gray-700 dark:text-gray-300">{{ currentPage }} / {{ totalPages }}</span>
             <button
               :disabled="currentPage >= totalPages"
-              @click="currentPage++"
               class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              @click="currentPage++"
             >
               <Icon name="heroicons:chevron-right" class="w-4 h-4" />
             </button>
@@ -242,7 +242,7 @@
           {{ selectedUser ? 'Modifier l\'utilisateur' : 'Créer un utilisateur' }}
         </h3>
         
-        <form @submit.prevent="selectedUser ? updateUser() : validateAndCreateUser()" class="space-y-4">
+        <form class="space-y-4" @submit.prevent="selectedUser ? updateUser() : validateAndCreateUser()">
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom</label>
             <input
@@ -251,7 +251,7 @@
               required
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               :class="{ 'border-red-500': errors.name }"
-            />
+            >
             <span v-if="errors.name" class="text-red-500 text-sm">{{ errors.name }}</span>
           </div>
           
@@ -263,7 +263,7 @@
               required
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               :class="{ 'border-red-500': errors.email }"
-            />
+            >
             <span v-if="errors.email" class="text-red-500 text-sm">{{ errors.email }}</span>
           </div>
           
@@ -299,8 +299,8 @@
           <div class="flex justify-end space-x-3 pt-4">
             <button
               type="button"
-              @click="showCreateForm = false; selectedUser = null; formData = { name: '', email: '', role: 'user', status: 'active' }; errors = {}; errorMessage = ''"
               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              @click="showCreateForm = false; selectedUser = null; formData = { name: '', email: '', role: 'user', status: 'active' }; errors = {}; errorMessage = ''"
             >
               Annuler
             </button>
@@ -324,14 +324,14 @@
         </p>
         <div class="flex justify-end space-x-3">
           <button
-            @click="showDeleteConfirm = false; userToDelete = null"
             class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            @click="showDeleteConfirm = false; userToDelete = null"
           >
             Annuler
           </button>
           <button
-            @click="deleteUser(userToDelete?.id)"
             class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+            @click="deleteUser(userToDelete?.id)"
           >
             Supprimer
           </button>

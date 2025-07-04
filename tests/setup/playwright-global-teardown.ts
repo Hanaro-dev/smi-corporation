@@ -1,7 +1,7 @@
 /**
  * Configuration globale Playwright - Teardown
  */
-import { FullConfig } from '@playwright/test'
+import type { FullConfig } from '@playwright/test'
 
 async function globalTeardown(config: FullConfig) {
   console.log('🧽 Nettoyage global des tests Playwright...')

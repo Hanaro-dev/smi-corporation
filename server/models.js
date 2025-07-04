@@ -5,7 +5,7 @@
 import { databaseService } from './services/database-service.js';
 
 // Initialize database service and export models
-let User, Role, Permission, Page, Image, ImageVariant, sequelize;
+let User, Role, Permission, Page, Image, ImageVariant, Organigramme, Employee, sequelize;
 
 const initializeModels = async () => {
   await databaseService.initialize();
@@ -16,6 +16,8 @@ const initializeModels = async () => {
   Page = models.Page;
   Image = models.Image;
   ImageVariant = models.ImageVariant;
+  Organigramme = models.Organigramme;
+  Employee = models.Employee;
   sequelize = databaseService.sequelize;
 };
 
@@ -35,4 +37,4 @@ const syncDatabase = async () => {
 };
 
 // Export models and utilities
-export { User, Role, Permission, Page, Image, ImageVariant, sequelize, syncDatabase };
+export { User, Role, Permission, Page, Image, ImageVariant, Organigramme, Employee, sequelize, syncDatabase };

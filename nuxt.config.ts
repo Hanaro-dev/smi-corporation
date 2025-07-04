@@ -97,7 +97,7 @@ export default defineNuxtConfig({
 
   // CSRF protection configuration - Enhanced security
   csurf: {
-    enabled: false, // ❌ CSRF protection disabled temporarily
+    enabled: true, // ✅ CSRF protection enabled
     cookieKey: "XSRF-TOKEN",
     cookieHttpOnly: false, // Allow JS access for SPA compatibility
     cookieSameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
@@ -106,6 +106,7 @@ export default defineNuxtConfig({
     excludedUrls: [
       ["/api/_auth/session", "GET"],
       ["/api/csrf-token", "GET"],
+      // Temporairement exclure auth endpoints pour faciliter les tests
       ["/api/auth/login", "POST"],
       ["/api/auth/register", "POST"],
     ],
@@ -117,7 +118,7 @@ export default defineNuxtConfig({
         throw new Error("CSRF_SECRET environment variable is required in production");
       }
       console.warn("⚠️  Using default CSRF secret for development only");
-      return "dev-csrf-secret-change-in-production";
+      return "dev-csrf-secret-change-in-production-" + Math.random().toString(36).substring(2, 15);
     })(),
   },
 

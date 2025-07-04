@@ -2,7 +2,8 @@
  * Tests E2E pour le workflow administrateur
  */
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
-import { chromium, Browser, Page } from 'playwright'
+import type { Browser, Page } from 'playwright';
+import { chromium } from 'playwright'
 
 describe('Admin Workflow E2E', () => {
   let browser: Browser
