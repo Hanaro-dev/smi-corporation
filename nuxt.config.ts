@@ -70,7 +70,7 @@ export default defineNuxtConfig({
     "@nuxt/eslint",
     "@nuxt/fonts",
     "@nuxt/icon",
-    "@nuxt/image",
+    // "@nuxt/image", // Désactivé pour hébergement local complet
     "@nuxt/ui",
     "@pinia/nuxt",
     "nuxt-auth-utils",
