@@ -1,5 +1,6 @@
 import { Image } from '../../models.js'
-import { getCookie, getClientIP, getHeader } from 'h3'
+import { getCookie, getHeader, defineEventHandler, createError } from '../../utils/http-utils.js'
+import { getClientIP } from '../../utils/ip-utils.js'
 import { sessionDb, userDb, roleDb, auditDb } from '../../utils/mock-db.js'
 import { checkPermission } from '../../utils/permission-utils.js'
 import DOMPurify from 'dompurify'

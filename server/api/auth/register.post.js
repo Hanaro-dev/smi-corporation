@@ -1,5 +1,6 @@
 import { userDb, auditDb } from '../../utils/mock-db.js';
-import { validateUserRegistration, sanitizeInput, checkRateLimit } from '../../utils/input-validation.js';
+import { validateUserRegistration, sanitizeInput } from '../../utils/input-validation.js';
+import { checkRateLimit } from '../../utils/rate-limiter.js';
 import { ValidationError } from '../../utils/error-handler.js';
 import { getClientIP } from '../../utils/api-middleware.js';
 import bcrypt from 'bcryptjs';
@@ -8,7 +9,8 @@ export default defineEventHandler(async (event) => {
   const clientIP = getClientIP(event);
   
   // Rate limiting pour l'inscription
-  if (!checkRateLimit(clientIP, 3, 300000)) { // 3 tentatives par 5 minutes
+  const rateLimitResult = checkRateLimit(clientIP, { maxAttempts: 3, windowMs: 300000 }); // 3 tentatives par 5 minutes
+  if (!rateLimitResult.allowed) {
     throw createError({
       statusCode: 429,
       message: "Trop de tentatives d'inscription. Veuillez réessayer dans 5 minutes.",

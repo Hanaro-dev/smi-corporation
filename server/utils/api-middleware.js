@@ -1,10 +1,11 @@
 // Common API middleware for improved code quality and consistency
 import jwt from 'jsonwebtoken';
 import { config } from './env-validation.js';
-import { checkRateLimit } from './input-validation.js';
+import { checkRateLimit } from './rate-limiter.js';
 import { ValidationError } from './error-handler.js';
 import { userCache, cacheKeys } from './cache.js';
 import { userDb } from './mock-db.js';
+import { createError, getCookie, getHeader } from './http-utils.js';
 
 /**
  * Rate limiting middleware
@@ -16,7 +17,8 @@ export function rateLimit(maxRequests = 10, windowMs = 60000) {
   return (event) => {
     const clientIP = getClientIP(event);
     
-    if (!checkRateLimit(clientIP, maxRequests, windowMs)) {
+    const rateLimitResult = checkRateLimit(clientIP, { maxAttempts: maxRequests, windowMs });
+    if (!rateLimitResult.allowed) {
       throw createError({
         statusCode: 429,
         message: "Trop de requêtes. Veuillez réessayer plus tard."
@@ -323,10 +325,5 @@ export function compose(...middlewares) {
   };
 }
 
-// Helper to get client IP
-export function getClientIP(event) {
-  return getHeader(event, 'x-forwarded-for') || 
-         getHeader(event, 'x-real-ip') || 
-         event.node.req.socket.remoteAddress || 
-         'unknown';
-}
+// Import helper for client IP
+export { getClientIP } from './ip-utils.js';

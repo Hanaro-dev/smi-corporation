@@ -1,7 +1,8 @@
 /**
  * Rate Limiter pour les uploads d'images et autres opérations sensibles
  */
-import { getClientIP, setHeader } from 'h3';
+import { setHeader, createError } from './http-utils.js';
+import { getClientIP } from './ip-utils.js';
 
 // Map pour stocker les tentatives par IP
 const attempts = new Map();

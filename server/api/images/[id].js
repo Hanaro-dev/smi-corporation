@@ -1,5 +1,5 @@
 import { Image, ImageVariant, User } from '../../models.js'
-import { getCookie } from 'h3'
+import { getCookie, defineEventHandler, createError } from '../../utils/http-utils.js'
 import { sessionDb, userDb, roleDb } from '../../utils/mock-db.js'
 import { checkPermission } from '../../utils/permission-utils.js'
 

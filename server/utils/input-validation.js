@@ -225,67 +225,6 @@ function validatePageData(pageData) {
   };
 }
 
-/**
- * Rate limiting store with automatic cleanup
- */
-class RateLimitStore {
-  constructor() {
-    this.store = new Map();
-    this.maxSize = 1000;
-    // Auto-cleanup every 5 minutes
-    this.cleanupInterval = setInterval(() => this.cleanup(), 300000);
-  }
-  
-  cleanup() {
-    const now = Date.now();
-    const cutoff = now - 120000; // 2 minutes
-    
-    for (const [key, data] of this.store) {
-      if (data.timestamp < cutoff) {
-        this.store.delete(key);
-      }
-    }
-  }
-  
-  get(key) {
-    const data = this.store.get(key);
-    return data ? data.count : 0;
-  }
-  
-  set(key, count, timestamp = Date.now()) {
-    this.store.set(key, { count, timestamp });
-    
-    // Trigger cleanup if store gets too large
-    if (this.store.size > this.maxSize) {
-      this.cleanup();
-    }
-  }
-  
-  destroy() {
-    clearInterval(this.cleanupInterval);
-    this.store.clear();
-  }
-}
-
-const rateLimitStore = new RateLimitStore();
-
-/**
- * Enhanced rate limiting with better performance
- * @param {string} ip - IP address
- * @param {number} maxRequests - Maximum requests allowed
- * @param {number} windowMs - Time window in milliseconds
- * @returns {boolean} True if within limit
- */
-function checkRateLimit(ip, maxRequests = 5, windowMs = 60000) {
-  const now = Date.now();
-  const windowStart = Math.floor(now / windowMs);
-  const key = `${ip}:${windowStart}`;
-  
-  const count = rateLimitStore.get(key);
-  rateLimitStore.set(key, count + 1, now);
-  
-  return count < maxRequests;
-}
 
 /**
  * Generic input sanitization function
@@ -313,6 +252,5 @@ export {
   isValidSlug,
   validateUserRegistration,
   validateUserLogin,
-  validatePageData,
-  checkRateLimit
+  validatePageData
 };

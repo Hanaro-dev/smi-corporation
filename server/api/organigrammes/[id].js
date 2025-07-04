@@ -1,4 +1,5 @@
-import { defineEventHandler, createError, readBody, getCookie, getClientIP, getHeader } from "h3";
+import { defineEventHandler, createError, readBody, getCookie, getHeader } from "../../utils/http-utils.js";
+import { getClientIP } from "../../utils/ip-utils.js";
 import { Organigramme, Employee, User } from "../../models.js";
 import { sessionDb, userDb, roleDb, auditDb, organigrammeDb, employeeDb } from '../../utils/mock-db.js';
 import { checkPermission } from "../../utils/permission-utils.js";

@@ -1,5 +1,6 @@
 import { AuthService } from '../../services/auth-service.js';
-import { validateUserLogin, checkRateLimit } from '../../utils/input-validation.js';
+import { validateUserLogin } from '../../utils/input-validation.js';
+import { checkRateLimit } from '../../utils/rate-limiter.js';
 import { ValidationError } from '../../utils/error-handler.js';
 import { userDb, roleDb, sessionDb, auditDb } from '../../utils/mock-db.js';
 import { getClientIP } from '../../utils/api-middleware.js';
@@ -10,7 +11,8 @@ export default defineEventHandler(async (event) => {
   const clientIP = getClientIP(event);
   
   // Rate limiting check
-  if (!checkRateLimit(clientIP, 5, 60000)) {
+  const rateLimitResult = checkRateLimit(clientIP, { maxAttempts: 5, windowMs: 60000 });
+  if (!rateLimitResult.allowed) {
     throw createError({
       statusCode: 429,
       message: "Trop de tentatives de connexion. Veuillez réessayer dans une minute.",
