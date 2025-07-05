@@ -1,12 +1,140 @@
+/**
+ * Audit Service
+ * Centralized audit logging for consistent activity tracking
+ */
+import { getRequestIP, getHeader } from 'h3';
 import { auditDb } from '../utils/mock-db.js';
+import { AUDIT_ACTIONS } from '../constants/api-constants.js';
+
+export class AuditService {
+  /**
+   * Log an audit event
+   * @param {Object} event - H3 event object
+   * @param {string} action - Action performed
+   * @param {string} details - Description of the action
+   * @param {number} userId - ID of the user performing the action
+   * @param {number|null} targetId - ID of the target resource (optional)
+   * @param {Object} metadata - Additional metadata (optional)
+   */
+  static async log(event, action, details, userId, targetId = null, metadata = {}) {
+    try {
+      const auditData = {
+        userId,
+        action,
+        details,
+        targetId,
+        ipAddress: getRequestIP(event) || 'unknown',
+        userAgent: getHeader(event, 'user-agent') || 'unknown',
+        metadata: {
+          ...metadata,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      await auditDb.create(auditData);
+    } catch (error) {
+      console.error('Failed to log audit event:', error);
+      // Don't throw - audit logging should not break main functionality
+    }
+  }
+
+  /**
+   * Log authentication events
+   */
+  static async logLogin(event, user, success = true, reason = null) {
+    const action = success ? AUDIT_ACTIONS.LOGIN : AUDIT_ACTIONS.LOGIN_FAILED;
+    const userId = success ? user.id : null;
+    const details = success 
+      ? `Connexion réussie: ${user.email}` 
+      : `Tentative de connexion échouée: ${user?.email || 'email inconnu'}`;
+    
+    await this.log(event, action, details, userId, null, {
+      email: user?.email,
+      role: user?.role || 'unknown',
+      reason
+    });
+  }
+
+  static async logLogout(event, user) {
+    await this.log(event, AUDIT_ACTIONS.LOGOUT, `Déconnexion: ${user.email}`, user.id);
+  }
+
+  /**
+   * Log organigramme events
+   */
+  static async logOrganigrammeCreate(event, organigramme, userId) {
+    await this.log(
+      event, 
+      AUDIT_ACTIONS.ORGANIGRAMME_CREATE,
+      `Organigramme créé: ${organigramme.title}`,
+      userId,
+      organigramme.id,
+      { title: organigramme.title, status: organigramme.status }
+    );
+  }
+
+  static async logOrganigrammeUpdate(event, organigramme, userId) {
+    await this.log(
+      event,
+      AUDIT_ACTIONS.ORGANIGRAMME_UPDATE,
+      `Organigramme modifié: ${organigramme.title} (ID: ${organigramme.id})`,
+      userId,
+      organigramme.id,
+      { title: organigramme.title, status: organigramme.status }
+    );
+  }
+
+  static async logOrganigrammeDelete(event, organigramme, userId) {
+    await this.log(
+      event,
+      AUDIT_ACTIONS.ORGANIGRAMME_DELETE,
+      `Organigramme supprimé: ${organigramme.title} (ID: ${organigramme.id})`,
+      userId,
+      organigramme.id,
+      { title: organigramme.title }
+    );
+  }
+
+  /**
+   * Log user management events
+   */
+  static async logUserCreate(event, newUser, adminUserId) {
+    await this.log(
+      event,
+      AUDIT_ACTIONS.USER_CREATE,
+      `Utilisateur créé: ${newUser.email}`,
+      adminUserId,
+      newUser.id,
+      { email: newUser.email, role: newUser.role }
+    );
+  }
+
+  static async logUserUpdate(event, user, adminUserId) {
+    await this.log(
+      event,
+      AUDIT_ACTIONS.USER_UPDATE,
+      `Utilisateur modifié: ${user.email} (ID: ${user.id})`,
+      adminUserId,
+      user.id,
+      { email: user.email }
+    );
+  }
+
+  static async logUserDelete(event, user, adminUserId) {
+    await this.log(
+      event,
+      AUDIT_ACTIONS.USER_DELETE,
+      `Utilisateur supprimé: ${user.email} (ID: ${user.id})`,
+      adminUserId,
+      user.id,
+      { email: user.email }
+    );
+  }
+}
 
 /**
- * Journalise une action sur un utilisateur
- * @param {string} actionType - Type d'action (create, update, delete, login, logout)
- * @param {number} userId - ID de l'utilisateur concerné
- * @param {number} performedBy - ID de l'utilisateur qui a effectué l'action
- * @param {Object} details - Détails supplémentaires sur l'action
- * @returns {Object} - L'entrée de journal créée
+ * Legacy functions for backward compatibility
+ * @deprecated Use AuditService class methods instead
  */
 export const logUserAction = async (actionType, userId, performedBy, details = {}) => {
   return auditDb.log(
