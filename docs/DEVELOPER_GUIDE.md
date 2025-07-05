@@ -1,103 +1,103 @@
-# Developer Guide - SMI Corporation CMS
+# Guide Développeur - SMI Corporation CMS
 
-Complete development guide for contributing to and extending the SMI Corporation Content Management System.
+Guide de développement complet pour contribuer et étendre le système de gestion de contenu SMI Corporation.
 
-## Table of Contents
+## Table des Matières
 
-- [Development Setup](#development-setup)
-- [Project Structure](#project-structure)
-- [Development Workflow](#development-workflow)
-- [Frontend Development](#frontend-development)
-- [Backend Development](#backend-development)
-- [Database Management](#database-management)
-- [Testing](#testing)
-- [Styling Guidelines](#styling-guidelines)
-- [Security Considerations](#security-considerations)
-- [Performance Optimization](#performance-optimization)
-- [Deployment](#deployment)
-- [Troubleshooting](#troubleshooting)
+- [Configuration de Développement](#development-setup)
+- [Structure du Projet](#project-structure)
+- [Flux de Travail de Développement](#development-workflow)
+- [Développement Frontend](#frontend-development)
+- [Développement Backend](#backend-development)
+- [Gestion de Base de Données](#database-management)
+- [Tests](#testing)
+- [Directives de Style](#styling-guidelines)
+- [Considérations de Sécurité](#security-considerations)
+- [Optimisation des Performances](#performance-optimization)
+- [Déploiement](#deployment)
+- [Dépannage](#troubleshooting)
 
-## Development Setup
+## Configuration de Développement
 
-### Prerequisites
+### Prérequis
 
 ```bash
-# Required software
+# Logiciels requis
 Node.js >= 18.0.0
 npm >= 8.0.0
 Git >= 2.25.0
 
-# Recommended tools
-VS Code with Vue/Nuxt extensions
-Vue DevTools browser extension
-Postman or similar API testing tool
+# Outils recommandés
+VS Code avec extensions Vue/Nuxt
+Extension navigateur Vue DevTools
+Postman ou outil similaire de test d'API
 ```
 
-### Initial Setup
+### Configuration Initiale
 
 ```bash
-# Clone the repository
+# Cloner le dépôt
 git clone https://github.com/your-org/smi-corporation.git
 cd smi-corporation
 
-# Install dependencies
+# Installer les dépendances
 npm install
 
-# Copy environment configuration
+# Copier la configuration d'environnement
 cp .env.example .env
 
-# Start development server
+# Démarrer le serveur de développement
 npm run dev
 ```
 
-### Environment Configuration
+### Configuration d'Environnement
 
-Create a `.env` file with the following variables:
+Créer un fichier `.env` avec les variables suivantes :
 
 ```bash
-# Database Configuration
-USE_MOCK_DB=true                    # Use mock database for development
-DATABASE_URL=sqlite://./dev.db      # Real database URL (when USE_MOCK_DB=false)
+# Configuration Base de Données
+USE_MOCK_DB=true                    # Utiliser la base de données simulée pour le développement
+DATABASE_URL=sqlite://./dev.db      # URL base de données réelle (quand USE_MOCK_DB=false)
 
-# Authentication
+# Authentification
 JWT_SECRET=your-super-secret-key-here
 CSRF_SECRET=your-csrf-secret-here
 
-# File Upload
-MAX_FILE_SIZE=10485760              # 10MB in bytes
+# Téléchargement de Fichiers
+MAX_FILE_SIZE=10485760              # 10MB en octets
 UPLOAD_DIR=public/images
 
-# Development
+# Développement
 NODE_ENV=development
 NUXT_DEV_TOOLS=true
 ```
 
-### Development Commands
+### Commandes de Développement
 
 ```bash
-# Development server with hot reload
+# Serveur de développement avec rechargement à chaud
 npm run dev
 
-# Production build
+# Build de production
 npm run build
 
-# Preview production build
+# Aperçu du build de production
 npm run preview
 
-# Run tests
+# Exécuter les tests
 npm run test
-npm run test:watch                  # Watch mode
-npm run test:ui                     # Visual test interface
+npm run test:watch                  # Mode surveillance
+npm run test:ui                     # Interface de test visuelle
 
-# Code quality
-npm run lint                        # Check for linting errors
-npm run lint:fix                    # Auto-fix linting errors
+# Qualité du code
+npm run lint                        # Vérifier les erreurs de linting
+npm run lint:fix                    # Corriger automatiquement les erreurs de linting
 
-# Database operations
-npm run migrate                     # Run database migrations
-npm run migrate:analyze             # Analyze database performance
+# Opérations base de données
+npm run migrate                     # Exécuter les migrations de base de données
+npm run migrate:analyze             # Analyser les performances de la base de données
 
-# Development utilities
+# Utilitaires de développement
 npm run docs                        # View documentation
 ```
 

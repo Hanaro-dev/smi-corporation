@@ -1,83 +1,83 @@
-# User Guide - SMI Corporation CMS
+# Guide Utilisateur - SMI Corporation CMS
 
-Complete user guide for the SMI Corporation Content Management System.
+Guide utilisateur complet pour le système de gestion de contenu SMI Corporation.
 
-## Table of Contents
+## Table des Matières
 
-- [Getting Started](#getting-started)
-- [User Roles & Permissions](#user-roles--permissions)
-- [Navigation & Interface](#navigation--interface)
-- [Content Management](#content-management)
-- [BBCode Editor](#bbcode-editor)
-- [Media Management](#media-management)
-- [User Management](#user-management)
+- [Démarrage](#getting-started)
+- [Rôles Utilisateur et Permissions](#user-roles--permissions)
+- [Navigation et Interface](#navigation--interface)
+- [Gestion de Contenu](#content-management)
+- [Éditeur BBCode](#bbcode-editor)
+- [Gestion des Médias](#media-management)
+- [Gestion des Utilisateurs](#user-management)
 - [Administration](#administration)
-- [Tips & Best Practices](#tips--best-practices)
-- [Troubleshooting](#troubleshooting)
+- [Conseils et Bonnes Pratiques](#tips--best-practices)
+- [Dépannage](#troubleshooting)
 
-## Getting Started
+## Démarrage
 
-### Overview
+### Vue d'Ensemble
 
-Welcome to the SMI Corporation Content Management System! This powerful CMS allows you to create, manage, and publish content with advanced BBCode formatting capabilities, comprehensive user management, and intuitive media handling.
+Bienvenue dans le système de gestion de contenu SMI Corporation ! Ce CMS puissant vous permet de créer, gérer et publier du contenu avec des capacités de formatage BBCode avancées, une gestion d'utilisateurs complète et une gestion intuitive des médias.
 
-### Accessing the System
+### Accès au Système
 
-1. **Website Access**: Navigate to your organization's website URL
-2. **Login**: Click the "Login" button or go to `/auth/login`
-3. **Credentials**: Use the username/email and password provided by your administrator
+1. **Accès au Site Web** : Naviguez vers l'URL du site web de votre organisation
+2. **Connexion** : Cliquez sur le bouton "Connexion" ou allez à `/auth/login`
+3. **Identifiants** : Utilisez le nom d'utilisateur/email et le mot de passe fournis par votre administrateur
 
-### First Login
+### Première Connexion
 
-1. Enter your email address and password
-2. Click "Login" to access the system
-3. You'll be redirected to the appropriate dashboard based on your role:
-   - **Administrators**: Admin dashboard with full system access
-   - **Content Editors**: Main interface with content management tools
-   - **Regular Users**: Standard user interface
+1. Saisissez votre adresse email et votre mot de passe
+2. Cliquez sur "Connexion" pour accéder au système
+3. Vous serez redirigé vers le tableau de bord approprié selon votre rôle :
+   - **Administrateurs** : Tableau de bord admin avec accès complet au système
+   - **Éditeurs de Contenu** : Interface principale avec outils de gestion de contenu
+   - **Utilisateurs Réguliers** : Interface utilisateur standard
 
-### User Profile
+### Profil Utilisateur
 
-Access your profile by clicking your name in the top navigation:
-- View your account information
-- Update personal details
-- Change your password
-- Manage notification preferences
+Accédez à votre profil en cliquant sur votre nom dans la navigation supérieure :
+- Voir vos informations de compte
+- Mettre à jour vos détails personnels
+- Changer votre mot de passe
+- Gérer vos préférences de notification
 
-## User Roles & Permissions
+## Rôles Utilisateur et Permissions
 
-### Role Hierarchy
+### Hiérarchie des Rôles
 
-The system uses a role-based access control system with the following typical roles:
+Le système utilise un système de contrôle d'accès basé sur les rôles avec les rôles typiques suivants :
 
-#### Administrator
-- **Full system access**: Complete control over all features
-- **User management**: Create, edit, and delete user accounts
-- **Content management**: Create, edit, and publish all content
-- **Media management**: Upload, edit, and manage all media files
-- **System configuration**: Access to system settings and configuration
+#### Administrateur
+- **Accès complet au système** : Contrôle total sur toutes les fonctionnalités
+- **Gestion des utilisateurs** : Créer, éditer et supprimer les comptes utilisateur
+- **Gestion de contenu** : Créer, éditer et publier tout le contenu
+- **Gestion des médias** : Télécharger, éditer et gérer tous les fichiers médias
+- **Configuration système** : Accès aux paramètres et configuration du système
 
-#### Content Editor
-- **Content management**: Create, edit, and publish content
-- **Media management**: Upload and manage media files
-- **Limited user access**: View other users but cannot modify accounts
+#### Éditeur de Contenu
+- **Gestion de contenu** : Créer, éditer et publier du contenu
+- **Gestion des médias** : Télécharger et gérer les fichiers médias
+- **Accès utilisateur limité** : Voir les autres utilisateurs mais ne peut pas modifier les comptes
 
-#### Content Creator
-- **Content creation**: Create and edit content (requires approval for publishing)
-- **Media upload**: Upload media files for their content
-- **Profile management**: Manage their own profile only
+#### Créateur de Contenu
+- **Création de contenu** : Créer et éditer du contenu (nécessite approbation pour publication)
+- **Téléchargement de médias** : Télécharger des fichiers médias pour leur contenu
+- **Gestion de profil** : Gérer uniquement leur propre profil
 
-#### Viewer
-- **Read access**: View published content
-- **Profile management**: Manage their own profile only
+#### Visualiseur
+- **Accès lecture** : Voir le contenu publié
+- **Gestion de profil** : Gérer uniquement leur propre profil
 
-### Permission System
+### Système de Permissions
 
-The system uses granular permissions that can be customized:
-- `manage_users`: User account management
-- `manage_roles`: Role and permission management
-- `manage_pages`: Page creation and editing
-- `manage_media`: Media file management
+Le système utilise des permissions granulaires qui peuvent être personnalisées :
+- `manage_users` : Gestion des comptes utilisateur
+- `manage_roles` : Gestion des rôles et permissions
+- `manage_pages` : Création et édition de pages
+- `manage_media` : Gestion des fichiers médias
 - `publish_content`: Ability to publish content
 - `manage_audit`: Access to system audit logs
 

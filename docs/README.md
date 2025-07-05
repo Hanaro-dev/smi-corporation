@@ -1,100 +1,100 @@
 # 📚 SMI Corporation CMS - Documentation
 
-Complete documentation for the SMI Corporation Content Management System.
+Documentation complète pour le système de gestion de contenu SMI Corporation.
 
-## 📖 Documentation Overview
+## 📖 Aperçu de la Documentation
 
-### 🚀 Getting Started
-- **[User Guide](USER_GUIDE.md)** - Complete guide for end-users, content creators, and administrators
-- **[Developer Guide](DEVELOPER_GUIDE.md)** - Development setup, coding standards, and contribution guidelines
+### 🚀 Démarrage
+- **[Guide Utilisateur](USER_GUIDE.md)** - Guide complet pour les utilisateurs finaux, créateurs de contenu et administrateurs
+- **[Guide Développeur](DEVELOPER_GUIDE.md)** - Configuration de développement, standards de codage et directives de contribution
 
-### 🏗️ Technical Documentation  
-- **[API Reference](API_REFERENCE.md)** - Complete REST API documentation with endpoints and examples
-- **[System Architecture](ARCHITECTURE.md)** - Technical architecture, technology stack, and system design
-- **[BBCode System](BBCODE_SYSTEM.md)** - Advanced BBCode editor and custom tag documentation
+### 🏗️ Documentation Technique  
+- **[Référence API](API_REFERENCE.md)** - Documentation complète de l'API REST avec endpoints et exemples
+- **[Architecture Système](ARCHITECTURE.md)** - Architecture technique, pile technologique et conception système
+- **[Système BBCode](BBCODE_SYSTEM.md)** - Éditeur BBCode avancé et documentation des balises personnalisées
 
-## 🎯 Quick Navigation
+## 🎯 Navigation Rapide
 
-### For End Users
-- [Getting Started](USER_GUIDE.md#getting-started) - First login and basic navigation
-- [Creating Content](USER_GUIDE.md#content-management) - Page creation and editing
-- [BBCode Editor](USER_GUIDE.md#bbcode-editor) - Rich text formatting and custom tags
-- [Media Management](USER_GUIDE.md#media-management) - Image uploads and galleries
-- [Troubleshooting](USER_GUIDE.md#troubleshooting) - Common issues and solutions
+### Pour les Utilisateurs Finaux
+- [Démarrage](USER_GUIDE.md#getting-started) - Première connexion et navigation de base
+- [Création de Contenu](USER_GUIDE.md#content-management) - Création et édition de pages
+- [Éditeur BBCode](USER_GUIDE.md#bbcode-editor) - Formatage de texte riche et balises personnalisées
+- [Gestion des Médias](USER_GUIDE.md#media-management) - Téléchargement d'images et galeries
+- [Dépannage](USER_GUIDE.md#troubleshooting) - Problèmes courants et solutions
 
-### For Developers
-- [Development Setup](DEVELOPER_GUIDE.md#development-setup) - Local environment configuration
-- [API Endpoints](API_REFERENCE.md) - REST API reference and usage examples
-- [Frontend Development](DEVELOPER_GUIDE.md#frontend-development) - Vue.js and Nuxt.js patterns
-- [Backend Development](DEVELOPER_GUIDE.md#backend-development) - Server-side API development
-- [Testing](DEVELOPER_GUIDE.md#testing) - Testing strategies and examples
+### Pour les Développeurs
+- [Configuration de Développement](DEVELOPER_GUIDE.md#development-setup) - Configuration de l'environnement local
+- [Endpoints API](API_REFERENCE.md) - Référence API REST et exemples d'utilisation
+- [Développement Frontend](DEVELOPER_GUIDE.md#frontend-development) - Modèles Vue.js et Nuxt.js
+- [Développement Backend](DEVELOPER_GUIDE.md#backend-development) - Développement API côté serveur
+- [Tests](DEVELOPER_GUIDE.md#testing) - Stratégies de test et exemples
 
-### For Administrators
-- [User Management](USER_GUIDE.md#user-management) - Account and role administration
-- [System Configuration](USER_GUIDE.md#administration) - System settings and security
-- [Architecture Overview](ARCHITECTURE.md) - System design and technology choices
-- [Security Features](API_REFERENCE.md#authentication--security) - Authentication and security systems
+### Pour les Administrateurs
+- [Gestion des Utilisateurs](USER_GUIDE.md#user-management) - Administration des comptes et des rôles
+- [Configuration Système](USER_GUIDE.md#administration) - Paramètres système et sécurité
+- [Vue d'Ensemble de l'Architecture](ARCHITECTURE.md) - Conception système et choix technologiques
+- [Fonctionnalités de Sécurité](API_REFERENCE.md#authentication--security) - Systèmes d'authentification et de sécurité
 
-## 🛠️ System Overview
+## 🛠️ Aperçu du Système
 
-**SMI Corporation CMS** is a modern, full-stack content management system built with:
+**SMI Corporation CMS** est un système de gestion de contenu moderne et full-stack construit avec :
 
-- **Frontend**: Nuxt.js 3 with Vue.js 3, Tailwind CSS, and advanced BBCode editor
-- **Backend**: Nitro server with Sequelize ORM and MySQL/SQLite database
-- **Security**: JWT authentication, RBAC, CSRF protection, and input sanitization
-- **Features**: Hierarchical content, media management, user administration, and audit logging
+- **Frontend** : Nuxt.js 3 avec Vue.js 3, Tailwind CSS et éditeur BBCode avancé
+- **Backend** : Serveur Nitro avec Sequelize ORM et base de données MySQL/SQLite
+- **Sécurité** : Authentification JWT, RBAC, protection CSRF et validation des entrées
+- **Fonctionnalités** : Contenu hiérarchique, gestion des médias, administration des utilisateurs et journalisation d'audit
 
-## 📋 Feature Highlights
+## 📋 Fonctionnalités Principales
 
-### ✨ Content Management
-- Hierarchical page structure with up to 3 levels
-- Advanced BBCode editor with live preview
-- Custom components (organizational charts, galleries, user info)
-- Draft/publish workflow with content versioning
+### ✨ Gestion de Contenu
+- Structure de pages hiérarchique avec jusqu'à 3 niveaux
+- Éditeur BBCode avancé avec aperçu en direct
+- Composants personnalisés (organigrammes, galeries, informations utilisateur)
+- Flux de travail brouillon/publication avec versioning de contenu
 
-### 🔐 Security & Authentication
-- Role-based access control (RBAC) with granular permissions
-- JWT-based authentication with secure cookie storage
-- CSRF protection and rate limiting
-- Input validation and XSS prevention
+### 🔐 Sécurité et Authentification
+- Contrôle d'accès basé sur les rôles (RBAC) avec permissions granulaires
+- Authentification basée sur JWT avec stockage sécurisé des cookies
+- Protection CSRF et limitation du débit
+- Validation des entrées et prévention XSS
 
-### 📱 Media Management
-- Multi-format image support (JPEG, PNG, GIF, WebP, SVG)
-- Automatic image variants and optimization
-- Advanced image cropping and editing tools
-- Organized storage with search and filtering
+### 📱 Gestion des Médias
+- Support multi-formats d'images (JPEG, PNG, GIF, WebP, SVG)
+- Variantes d'images automatiques et optimisation
+- Outils avancés de recadrage et d'édition d'images
+- Stockage organisé avec recherche et filtrage
 
-### 👥 User Administration
-- Complete user lifecycle management
-- Flexible role and permission system
-- Activity monitoring and audit trails
-- Bulk operations and user analytics
+### 👥 Administration des Utilisateurs
+- Gestion complète du cycle de vie des utilisateurs
+- Système flexible de rôles et permissions
+- Surveillance des activités et pistes d'audit
+- Opérations en lot et analytiques utilisateur
 
-## 🚀 Quick Start
+## 🚀 Démarrage Rapide
 
-### For Users
-1. Navigate to your organization's CMS URL
-2. Log in with your credentials
-3. Refer to the [User Guide](USER_GUIDE.md) for detailed instructions
+### Pour les Utilisateurs
+1. Naviguez vers l'URL CMS de votre organisation
+2. Connectez-vous avec vos identifiants
+3. Référez-vous au [Guide Utilisateur](USER_GUIDE.md) pour des instructions détaillées
 
-### For Developers
-1. Clone the repository
-2. Follow the [Development Setup](DEVELOPER_GUIDE.md#development-setup) guide
-3. Review the [API Reference](API_REFERENCE.md) for integration details
+### Pour les Développeurs
+1. Clonez le dépôt
+2. Suivez le guide [Configuration de Développement](DEVELOPER_GUIDE.md#development-setup)
+3. Consultez la [Référence API](API_REFERENCE.md) pour les détails d'intégration
 
-### For System Administrators
-1. Review the [Architecture Documentation](ARCHITECTURE.md)
-2. Configure system settings per the [Administration Guide](USER_GUIDE.md#administration)
-3. Set up user roles using the [User Management](USER_GUIDE.md#user-management) documentation
+### Pour les Administrateurs Système
+1. Consultez la [Documentation Architecture](ARCHITECTURE.md)
+2. Configurez les paramètres système selon le [Guide d'Administration](USER_GUIDE.md#administration)
+3. Configurez les rôles utilisateur en utilisant la documentation [Gestion des Utilisateurs](USER_GUIDE.md#user-management)
 
-## 📞 Support & Contribution
+## 📞 Support et Contribution
 
-- **Issues**: Report bugs and feature requests via your organization's support channels
-- **Development**: Follow the [Developer Guide](DEVELOPER_GUIDE.md) for contribution guidelines
-- **Documentation**: This documentation is maintained alongside the codebase
+- **Problèmes** : Signalez les bugs et demandes de fonctionnalités via les canaux de support de votre organisation
+- **Développement** : Suivez le [Guide Développeur](DEVELOPER_GUIDE.md) pour les directives de contribution
+- **Documentation** : Cette documentation est maintenue avec le code source
 
 ---
 
-**Latest Update**: January 2025  
-**Documentation Version**: 2.0  
-**CMS Version**: Compatible with SMI Corporation CMS v1.x
+**Dernière Mise à Jour** : Janvier 2025  
+**Version Documentation** : 2.0  
+**Version CMS** : Compatible avec SMI Corporation CMS v1.x

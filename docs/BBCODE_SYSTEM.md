@@ -1,12 +1,12 @@
-# BBCode System Documentation
+# Documentation du Système BBCode
 
-## 🎯 Overview
+## 🎯 Vue d'Ensemble
 
-The SMI Corporation CMS features a comprehensive BBCode system that extends traditional text formatting with interactive components like organizational charts, image galleries, and dynamic user information. This system provides a secure, extensible platform for rich content creation.
+Le CMS SMI Corporation dispose d'un système BBCode complet qui étend le formatage de texte traditionnel avec des composants interactifs comme les organigrammes, galeries d'images et informations utilisateur dynamiques. Ce système fournit une plateforme sécurisée et extensible pour la création de contenu riche.
 
-## 🏗️ System Architecture
+## 🏗️ Architecture du Système
 
-### Core Components
+### Composants Centraux
 
 ```mermaid
 graph TD

@@ -1,45 +1,45 @@
-# SMI Corporation CMS - System Architecture
+# SMI Corporation CMS - Architecture Système
 
-Complete technical architecture documentation for the SMI Corporation Content Management System.
+Documentation complète de l'architecture technique pour le système de gestion de contenu SMI Corporation.
 
-## System Overview
+## Vue d'Ensemble du Système
 
-SMI Corporation CMS is a modern, full-stack content management system built on Nuxt.js 3, designed for scalability, security, and maintainability. The system provides comprehensive user management, content creation, media handling, and administrative capabilities with enterprise-grade security features.
+SMI Corporation CMS est un système de gestion de contenu moderne et full-stack construit sur Nuxt.js 3, conçu pour la scalabilité, la sécurité et la maintenabilité. Le système fournit une gestion complète des utilisateurs, de la création de contenu, de la gestion des médias et des capacités administratives avec des fonctionnalités de sécurité de niveau entreprise.
 
-## Architecture Principles
+## Principes d'Architecture
 
-### 🔒 Security-First Design
-- CSRF protection with configurable token validation
-- JWT-based authentication with secure cookie storage
-- Role-based access control (RBAC) with granular permissions
-- Input sanitization and validation at all layers
-- XSS protection using DOMPurify
-- Rate limiting on critical endpoints
+### 🔒 Conception Orientée Sécurité
+- Protection CSRF avec validation de token configurable
+- Authentification basée sur JWT avec stockage sécurisé des cookies
+- Contrôle d'accès basé sur les rôles (RBAC) avec permissions granulaires
+- Assainissement et validation des entrées à tous les niveaux
+- Protection XSS utilisant DOMPurify
+- Limitation de débit sur les endpoints critiques
 
-### 🧩 Modular Architecture
-- Component-based Vue.js frontend architecture
-- API-first design with RESTful endpoints
-- Separation of concerns across layers
-- Plugin-based extensibility
-- Reusable composables and utilities
+### 🧩 Architecture Modulaire
+- Architecture frontend Vue.js basée sur les composants
+- Conception API-first avec endpoints RESTful
+- Séparation des préoccupations entre les couches
+- Extensibilité basée sur les plugins
+- Composables et utilitaires réutilisables
 
-### 🚀 Performance Optimization
-- Server-side rendering (SSR) with Nuxt.js
-- Image optimization with automatic variant generation
-- Lazy loading and code splitting
-- Caching strategies at multiple levels
-- Database query optimization
+### 🚀 Optimisation des Performances
+- Rendu côté serveur (SSR) avec Nuxt.js
+- Optimisation d'images avec génération automatique de variantes
+- Chargement paresseux et division de code
+- Stratégies de mise en cache à plusieurs niveaux
+- Optimisation des requêtes de base de données
 
-### 🔧 Development Experience
-- TypeScript support throughout the stack
-- Hot module replacement for rapid development
-- Comprehensive error handling and logging
-- Mock database for development
-- Automated testing capabilities
+### 🔧 Expérience de Développement
+- Support TypeScript dans toute la pile
+- Remplacement de module à chaud pour le développement rapide
+- Gestion d'erreurs et journalisation complètes
+- Base de données simulée pour le développement
+- Capacités de tests automatisés
 
-## Technology Stack
+## Pile Technologique
 
-### Frontend Layer
+### Couche Frontend
 ```yaml
 Core Framework: Nuxt.js 3.17.4
   - Vue.js 3.5.16 (Composition API)
@@ -70,7 +70,7 @@ Validation & Forms:
   - Zod 3.25.67 (TypeScript-first validation)
 ```
 
-### Backend Layer
+### Couche Backend
 ```yaml
 Server Runtime: Nitro (Nuxt Server Engine)
   - Universal rendering capabilities
@@ -97,7 +97,7 @@ Image Processing:
   - Format optimization
 ```
 
-### Development Tools
+### Outils de Développement
 ```yaml
 Language: TypeScript 5.8.3
 Linting: ESLint 9.29.0 with Nuxt rules
@@ -106,11 +106,11 @@ Version Control: Git with Husky hooks
 Package Manager: NPM with package-lock.json
 ```
 
-## System Architecture Diagram
+## Diagramme d'Architecture Système
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    CLIENT BROWSER                           │
+│                 NAVIGATEUR CLIENT                           │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
 │  │   Pages     │  │ Components  │  │   Layouts   │        │
@@ -129,7 +129,7 @@ Package Manager: NPM with package-lock.json
                               │ HTTP/API Calls
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    SERVER SIDE                              │
+│                    CÔTÉ SERVEUR                              │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────────────────────────────────────────────────┤
 │  │                 NITRO SERVER                           │
@@ -144,7 +144,7 @@ Package Manager: NPM with package-lock.json
                               │ Database Operations
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   DATA LAYER                                │
+│                 COUCHE DONNÉES                                │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐              ┌─────────────┐              │
 │  │   MOCK DB   │              │  REAL DB    │              │
@@ -160,7 +160,7 @@ Package Manager: NPM with package-lock.json
                               │ File System
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                  FILE STORAGE                               │
+│              STOCKAGE DE FICHIERS                               │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐        │
 │  │   Images    │  │ Thumbnails  │  │   Public    │        │
@@ -168,12 +168,12 @@ Package Manager: NPM with package-lock.json
 │  └─────────────┘  └─────────────┘  └─────────────┘        │
 └─────────────────────────────────────────────────────────────┘
 ```
-- **Developer Experience**: Hot reloading, TypeScript support, comprehensive tooling
-- **Scalability**: Designed for both development (mock data) and production environments
+- **Expérience Développeur** : Rechargement à chaud, support TypeScript, outils complets
+- **Scalabilité** : Conçu pour les environnements de développement (données simulées) et de production
 
-## 🎯 Core Technologies
+## 🎯 Technologies Centrales
 
-### Frontend Stack
+### Pile Frontend
 ```yaml
 Framework: Nuxt.js 3.17.4
   - Vue.js 3.5.16 (Composition API)
@@ -199,7 +199,7 @@ Content Editing:
   - Validation system
 ```
 
-### Backend Stack
+### Pile Backend
 ```yaml
 Runtime: Nuxt Server API (Nitro)
   - Full-stack capabilities
@@ -225,34 +225,34 @@ Security:
   - Sharp 0.34.2 (Image processing)
 ```
 
-## 📁 Project Structure
+## 📁 Structure du Projet
 
 ```
 smi-corporation/
-├── app/                          # Nuxt Application Layer
-│   ├── components/               # Vue Components
-│   │   ├── BBCodeEditor.vue      # Advanced BBCode editor
-│   │   ├── BBCodeRenderer.vue    # Secure BBCode renderer
-│   │   ├── images/               # Image management components
-│   │   ├── pages/                # Page-specific components
-│   │   └── ui/                   # Reusable UI components
+├── app/                          # Couche Application Nuxt
+│   ├── components/               # Composants Vue
+│   │   ├── BBCodeEditor.vue      # Éditeur BBCode avancé
+│   │   ├── BBCodeRenderer.vue    # Moteur de rendu BBCode sécurisé
+│   │   ├── images/               # Composants de gestion d'images
+│   │   ├── pages/                # Composants spécifiques aux pages
+│   │   └── ui/                   # Composants UI réutilisables
 │   │
-│   ├── composables/              # Vue Composables
-│   │   ├── useBBCode.js          # BBCode system logic
-│   │   ├── useApi.js             # API calls with CSRF
-│   │   └── useToast.js           # Notification system
+│   ├── composables/              # Composables Vue
+│   │   ├── useBBCode.js          # Logique système BBCode
+│   │   ├── useApi.js             # Appels API avec CSRF
+│   │   └── useToast.js           # Système de notifications
 │   │
-│   ├── layouts/                  # Application Layouts
-│   │   ├── default.vue           # Public layout
-│   │   └── admin.vue             # Administration layout
+│   ├── layouts/                  # Layouts d'Application
+│   │   ├── default.vue           # Layout public
+│   │   └── admin.vue             # Layout d'administration
 │   │
-│   ├── middleware/               # Route Middleware
-│   │   ├── auth.js               # Authentication guard
-│   │   └── pages.global.js       # Dynamic routing
+│   ├── middleware/               # Middleware de Routes
+│   │   ├── auth.js               # Garde d'authentification
+│   │   └── pages.global.js       # Routage dynamique
 │   │
-│   ├── pages/                    # Application Pages
-│   │   ├── admin/                # Administration interface
-│   │   │   ├── index.vue         # Dashboard
+│   ├── pages/                    # Pages de l'Application
+│   │   ├── admin/                # Interface d'administration
+│   │   │   ├── index.vue         # Tableau de bord
 │   │   │   ├── pages.vue         # Page management
 │   │   │   ├── users.vue         # User management
 │   │   │   └── images.vue        # Media management

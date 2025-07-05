@@ -1,42 +1,42 @@
-# API Reference - SMI Corporation CMS
+# Référence API - SMI Corporation CMS
 
-Complete API documentation for the SMI Corporation Content Management System.
+Documentation complète de l'API pour le système de gestion de contenu SMI Corporation.
 
-## Overview
+## Vue d'ensemble
 
-The SMI Corporation CMS provides a comprehensive REST API for managing users, content, media, and system administration. The API follows RESTful conventions and uses JSON for data exchange.
+Le CMS SMI Corporation fournit une API REST complète pour la gestion des utilisateurs, du contenu, des médias et de l'administration système. L'API suit les conventions RESTful et utilise JSON pour l'échange de données.
 
-**Base URL:** `/api`  
-**Authentication:** JWT-based with httpOnly cookies  
-**Content-Type:** `application/json` (except file uploads)  
-**CSRF Protection:** Configurable token-based protection  
+**URL de base :** `/api`  
+**Authentification :** Basée sur JWT avec cookies httpOnly  
+**Content-Type :** `application/json` (sauf téléchargements de fichiers)  
+**Protection CSRF :** Protection configurable basée sur les tokens  
 
-## Table of Contents
+## Table des Matières
 
-- [Authentication & Security](#authentication--security)
-- [User Management](#user-management)  
-- [Roles & Permissions](#roles--permissions)
-- [Content Management](#content-management)
-- [Media Management](#media-management)
-- [System & Audit](#system--audit)
-- [Error Handling](#error-handling)
-- [Rate Limiting](#rate-limiting)
+- [Authentification et Sécurité](#authentication--security)
+- [Gestion des Utilisateurs](#user-management)  
+- [Rôles et Permissions](#roles--permissions)
+- [Gestion de Contenu](#content-management)
+- [Gestion des Médias](#media-management)
+- [Système et Audit](#system--audit)
+- [Gestion des Erreurs](#error-handling)
+- [Limitation de Débit](#rate-limiting)
 
 ---
 
-## Authentication & Security
+## Authentification et Sécurité
 
-### Login
+### Connexion
 **POST** `/api/auth/login`
 
-Authenticate user and create session.
+Authentifier l'utilisateur et créer une session.
 
-**Request Body:**
+**Corps de la Requête :**
 ```json
 {
   "email": "user@example.com",
   "password": "userpassword",
-  "redirect": "/admin" // optional, default: "/"
+  "redirect": "/admin" // optionnel, par défaut: "/"
 }
 ```
 
@@ -60,35 +60,35 @@ Authenticate user and create session.
 }
 ```
 
-**Security Features:**
-- Rate limiting: 5 attempts per minute per IP
-- Input validation and sanitization
-- Audit logging
-- Secure password verification
+**Fonctionnalités de Sécurité :**
+- Limitation de débit : 5 tentatives par minute par IP
+- Validation et assainissement des entrées
+- Journalisation d'audit
+- Vérification sécurisée des mots de passe
 
-**Error Responses:**
-- `400` - Validation errors
-- `401` - Invalid credentials
-- `429` - Rate limit exceeded
+**Réponses d'Erreur :**
+- `400` - Erreurs de validation
+- `401` - Identifiants invalides
+- `429` - Limite de débit dépassée
 
-### Enhanced Login
+### Connexion Améliorée
 **POST** `/api/auth/login-improved`
 
-Enhanced login with AuthService integration and better tracking.
+Connexion améliorée avec intégration AuthService et meilleur suivi.
 
-Same request/response format as standard login with additional security features:
-- Enhanced client IP detection
-- User agent tracking
-- Improved audit logging
+Même format de requête/réponse que la connexion standard avec des fonctionnalités de sécurité supplémentaires :
+- Détection IP client améliorée
+- Suivi de l'agent utilisateur
+- Journalisation d'audit améliorée
 
-### Logout
+### Déconnexion
 **POST** `/api/auth/logout`
 
-Terminate user session.
+Terminer la session utilisateur.
 
-**Request:** No body required
+**Requête :** Aucun corps requis
 
-**Response (200):**
+**Réponse (200) :**
 ```json
 {
   "success": true,
@@ -96,18 +96,18 @@ Terminate user session.
 }
 ```
 
-**Actions Performed:**
-- Deletes server session
-- Removes authentication cookie
-- Clears user context
-- Logs logout event
+**Actions Effectuées :**
+- Supprime la session serveur
+- Retire le cookie d'authentification
+- Efface le contexte utilisateur
+- Enregistre l'événement de déconnexion
 
-### User Registration
+### Inscription Utilisateur
 **POST** `/api/auth/register`
 
-Register new user account.
+Enregistrer un nouveau compte utilisateur.
 
-**Request Body:**
+**Corps de la Requête :**
 ```json
 {
   "email": "newuser@example.com",
@@ -129,17 +129,17 @@ Register new user account.
 }
 ```
 
-**Validation:**
-- Email uniqueness check
-- Required field validation
-- Password strength (production TODO)
+**Validation :**
+- Vérification de l'unicité de l'email
+- Validation des champs requis
+- Force du mot de passe (TODO production)
 
-### Session Validation
+### Validation de Session
 **GET** `/api/_auth/session`
 
-Validate current session and retrieve user information.
+Valider la session actuelle et récupérer les informations utilisateur.
 
-**Headers:** Requires authentication cookie
+**En-têtes :** Requiert le cookie d'authentification
 
 **Response (200):**
 ```json
@@ -165,10 +165,10 @@ Validate current session and retrieve user information.
 }
 ```
 
-### CSRF Token
+### Token CSRF
 **GET** `/api/csrf-token`
 
-Initialize CSRF protection token.
+Initialiser le token de protection CSRF.
 
 **Response (200):**
 ```json
@@ -181,21 +181,21 @@ Initialize CSRF protection token.
 
 ---
 
-## User Management
+## Gestion des Utilisateurs
 
-All user management endpoints require authentication and appropriate permissions.
+Tous les endpoints de gestion des utilisateurs nécessitent une authentification et des permissions appropriées.
 
-### List Users
+### Lister les Utilisateurs
 **GET** `/api/users`
 
-Retrieve paginated list of users.
+Récupérer une liste paginée des utilisateurs.
 
-**Required Permission:** `manage_users`
+**Permission Requise :** `manage_users`
 
-**Query Parameters:**
-- `page` (number, default: 1) - Page number
-- `limit` (number, default: 10) - Items per page
-- `role_id` (number, optional) - Filter by role ID
+**Paramètres de Requête :**
+- `page` (nombre, par défaut : 1) - Numéro de page
+- `limit` (nombre, par défaut : 10) - Éléments par page
+- `role_id` (nombre, optionnel) - Filtrer par ID de rôle
 
 **Response (200):**
 ```json
@@ -221,12 +221,12 @@ Retrieve paginated list of users.
 }
 ```
 
-### Create User
+### Créer un Utilisateur
 **POST** `/api/users`
 
-Create new user account.
+Créer un nouveau compte utilisateur.
 
-**Required Permission:** `manage_users`
+**Permission Requise :** `manage_users`
 
 **Request Body:**
 ```json
@@ -254,17 +254,17 @@ Create new user account.
 }
 ```
 
-**Validation:**
-- Email uniqueness
-- Role existence
-- Required fields
+**Validation :**
+- Unicité de l'email
+- Existence du rôle
+- Champs requis
 
-### Get User
+### Obtenir un Utilisateur
 **GET** `/api/users/:id`
 
-Retrieve specific user information.
+Récupérer les informations d'un utilisateur spécifique.
 
-**Access Control:** Own profile OR `manage_users` permission
+**Contrôle d'Accès :** Propre profil OU permission `manage_users`
 
 **Response (200):**
 ```json
@@ -283,14 +283,14 @@ Retrieve specific user information.
 }
 ```
 
-### Update User
+### Mettre à Jour un Utilisateur
 **PUT** `/api/users/:id`
 
-Update user information.
+Mettre à jour les informations utilisateur.
 
-**Access Control:** Own profile OR `manage_users` permission
+**Contrôle d'Accès :** Propre profil OU permission `manage_users`
 
-**Request Body:** (all fields optional)
+**Corps de la Requête :** (tous les champs optionnels)
 ```json
 {
   "name": "John Updated",
@@ -301,11 +301,11 @@ Update user information.
 }
 ```
 
-**Special Rules:**
-- Role changes require `manage_users` permission
-- Email uniqueness validation
-- Session invalidation on role change
-- Complete audit trail
+**Règles Spéciales :**
+- Les changements de rôle nécessitent la permission `manage_users`
+- Validation de l'unicité de l'email
+- Invalidation de session lors du changement de rôle
+- Piste d'audit complète
 
 **Response (200):**
 ```json
@@ -319,14 +319,14 @@ Update user information.
 }
 ```
 
-### Delete User
+### Supprimer un Utilisateur
 **DELETE** `/api/users/:id`
 
-Delete user account.
+Supprimer un compte utilisateur.
 
-**Required Permission:** `manage_users`
+**Permission Requise :** `manage_users`
 
-**Restrictions:** Cannot delete own account
+**Restrictions :** Ne peut pas supprimer son propre compte
 
 **Response (200):**
 ```json
@@ -336,35 +336,35 @@ Delete user account.
 }
 ```
 
-**Actions:**
-- Cleans up user sessions
-- Removes user from database
-- Audit logging
+**Actions :**
+- Nettoie les sessions utilisateur
+- Supprime l'utilisateur de la base de données
+- Journalisation d'audit
 
-### Bulk Delete User
+### Suppression en Lot d'Utilisateur
 **DELETE** `/api/users`
 
-Delete user by query parameter.
+Supprimer un utilisateur par paramètre de requête.
 
-**Required Permission:** `manage_users`
+**Permission Requise :** `manage_users`
 
-**Query Parameters:**
-- `id` (number, required) - User ID to delete
+**Paramètres de Requête :**
+- `id` (nombre, requis) - ID de l'utilisateur à supprimer
 
-**Same response and restrictions as individual delete**
+**Même réponse et restrictions que la suppression individuelle**
 
 ---
 
-## Roles & Permissions
+## Rôles et Permissions
 
-Role-based access control system with granular permissions.
+Système de contrôle d'accès basé sur les rôles avec des permissions granulaires.
 
-### List Roles
+### Lister les Rôles
 **GET** `/api/roles`
 
-Retrieve all roles with their permissions.
+Récupérer tous les rôles avec leurs permissions.
 
-**Required:** Authentication
+**Requis :** Authentification
 
 **Response (200):**
 ```json
@@ -387,21 +387,21 @@ Retrieve all roles with their permissions.
 ]
 ```
 
-### Create Role
+### Créer un Rôle
 **POST** `/api/roles`
 
-Create new role.
+Créer un nouveau rôle.
 
-**Required Permission:** `manage_roles`
+**Permission Requise :** `manage_roles`
 
-**Request Body:**
+**Corps de la Requête :**
 ```json
 {
   "name": "editor"
 }
 ```
 
-**Response (201):**
+**Réponse (201) :**
 ```json
 {
   "success": true,
@@ -413,14 +413,14 @@ Create new role.
 }
 ```
 
-**Validation:** Name uniqueness
+**Validation :** Unicité du nom
 
-### Get Role
+### Obtenir un Rôle
 **GET** `/api/roles/:id`
 
-Retrieve specific role with permissions.
+Récupérer un rôle spécifique avec ses permissions.
 
-**Required:** Authentication
+**Requis :** Authentification
 
 **Response (200):**
 ```json
@@ -437,30 +437,30 @@ Retrieve specific role with permissions.
 }
 ```
 
-### Update Role
+### Mettre à Jour un Rôle
 **PUT** `/api/roles/:id`
 
-Update role name.
+Mettre à jour le nom du rôle.
 
-**Required Permission:** `manage_roles`
+**Permission Requise :** `manage_roles`
 
-**Request Body:**
+**Corps de la Requête :**
 ```json
 {
   "name": "super_admin"
 }
 ```
 
-**Validation:** Name uniqueness
+**Validation :** Unicité du nom
 
-### Delete Role
+### Supprimer un Rôle
 **DELETE** `/api/roles/:id`
 
-Delete role.
+Supprimer un rôle.
 
-**Required Permission:** `manage_roles`
+**Permission Requise :** `manage_roles`
 
-**Restrictions:** Cannot delete role assigned to users
+**Restrictions :** Ne peut pas supprimer un rôle assigné aux utilisateurs
 
 **Response (200):**
 ```json
@@ -470,12 +470,12 @@ Delete role.
 }
 ```
 
-### Role Permissions
+### Permissions du Rôle
 **GET** `/api/roles/:id/permissions`
 
-Get all permissions for specific role.
+Obtenir toutes les permissions pour un rôle spécifique.
 
-**Required:** Authentication
+**Requis :** Authentification
 
 **Response (200):**
 ```json
@@ -488,12 +488,12 @@ Get all permissions for specific role.
 ]
 ```
 
-### Assign Permission to Role
+### Assigner une Permission au Rôle
 **POST** `/api/roles/:id/permissions`
 
-Assign permission to role.
+Assigner une permission à un rôle.
 
-**Required Permission:** `manage_permissions`
+**Permission Requise :** `manage_permissions`
 
 **Request Body:**
 ```json
@@ -510,20 +510,20 @@ Assign permission to role.
 }
 ```
 
-**Validation:**
-- Role existence
-- Permission existence
-- Duplicate assignment check
+**Validation :**
+- Existence du rôle
+- Existence de la permission
+- Vérification des assignations en double
 
-### Remove Permission from Role
+### Retirer une Permission du Rôle
 **DELETE** `/api/roles/:id/permissions`
 
-Remove permission from role.
+Retirer une permission d'un rôle.
 
-**Required Permission:** `manage_permissions`
+**Permission Requise :** `manage_permissions`
 
-**Query Parameters:**
-- `permissionId` (number, required) - Permission ID to remove
+**Paramètres de Requête :**
+- `permissionId` (nombre, requis) - ID de la permission à retirer
 
 **Response (200):**
 ```json
@@ -533,12 +533,12 @@ Remove permission from role.
 }
 ```
 
-### List Permissions
+### Lister les Permissions
 **GET** `/api/permissions`
 
-Retrieve all permissions.
+Récupérer toutes les permissions.
 
-**Required:** Authentication
+**Requis :** Authentification
 
 **Response (200):**
 ```json
@@ -552,12 +552,12 @@ Retrieve all permissions.
 ]
 ```
 
-### Create Permission
+### Créer une Permission
 **POST** `/api/permissions`
 
-Create new permission.
+Créer une nouvelle permission.
 
-**Required Permission:** `manage_permissions`
+**Permission Requise :** `manage_permissions`
 
 **Request Body:**
 ```json
@@ -567,14 +567,14 @@ Create new permission.
 }
 ```
 
-**Validation:** Name uniqueness
+**Validation :** Unicité du nom
 
-### Update Permission
+### Mettre à Jour une Permission
 **PUT** `/api/permissions/:id`
 
-Update permission.
+Mettre à jour une permission.
 
-**Required Permission:** `manage_permissions`
+**Permission Requise :** `manage_permissions`
 
 **Request Body:**
 ```json
@@ -584,30 +584,30 @@ Update permission.
 }
 ```
 
-### Delete Permission
+### Supprimer une Permission
 **DELETE** `/api/permissions/:id`
 
-Delete permission.
+Supprimer une permission.
 
-**Required Permission:** `manage_permissions`
+**Permission Requise :** `manage_permissions`
 
-**Restrictions:** Cannot delete permission assigned to roles
+**Restrictions :** Ne peut pas supprimer une permission assignée aux rôles
 
 ---
 
-## Content Management
+## Gestion de Contenu
 
-Dynamic page management system with hierarchical structure.
+Système de gestion de pages dynamiques avec structure hiérarchique.
 
-### List Pages
+### Lister les Pages
 **GET** `/api/pages`
 
-Retrieve paginated list of pages.
+Récupérer une liste paginée des pages.
 
-**Query Parameters:**
-- `page` (number, default: 1) - Page number
-- `limit` (number, default: 10) - Items per page
-- `search` (string, optional) - Search in titles
+**Paramètres de Requête :**
+- `page` (nombre, par défaut : 1) - Numéro de page
+- `limit` (nombre, par défaut : 10) - Éléments par page
+- `search` (chaîne, optionnel) - Recherche dans les titres
 
 **Response (200):**
 ```json
@@ -632,19 +632,19 @@ Retrieve paginated list of pages.
 }
 ```
 
-### List Published Pages
+### Lister les Pages Publiées
 **GET** `/api/pages/published`
 
-Retrieve only published pages.
+Récupérer uniquement les pages publiées.
 
-**Same parameters and response format as List Pages**
+**Mêmes paramètres et format de réponse que Lister les Pages**
 
-**Filter:** `status: 'published'`
+**Filtre :** `status: 'published'`
 
-### Get Page Tree
+### Obtenir l'Arbre des Pages
 **GET** `/api/pages/tree`
 
-Retrieve hierarchical page structure.
+Récupérer la structure hiérarchique des pages.
 
 **Response (200):**
 ```json
@@ -667,14 +667,14 @@ Retrieve hierarchical page structure.
 }
 ```
 
-**Features:**
-- Full hierarchy support
-- Compatible with both mock and real database
+**Fonctionnalités :**
+- Support complet de la hiérarchie
+- Compatible avec les bases de données simulaires et réelles
 
-### Get Page by Slug
+### Obtenir une Page par Slug
 **GET** `/api/pages/by-slug/:slug`
 
-Retrieve page by slug identifier.
+Récupérer une page par identifiant slug.
 
 **Response (200):**
 ```json
@@ -696,28 +696,28 @@ Retrieve page by slug identifier.
 }
 ```
 
-### Get Page by ID
+### Obtenir une Page par ID
 **GET** `/api/pages/:id`
 
-Retrieve specific page by ID.
+Récupérer une page spécifique par ID.
 
-**Same response format as Get Page by Slug**
+**Même format de réponse que Obtenir une Page par Slug**
 
-### Create Page
+### Créer une Page
 **POST** `/api/pages`
 
-Create new page.
+Créer une nouvelle page.
 
-**Required:** Authentication
+**Requis :** Authentification
 
-**Request Body:**
+**Corps de la Requête :**
 ```json
 {
   "title": "New Page",
   "content": "<p>Page content here</p>",
-  "slug": "new-page", // optional, auto-generated if not provided
-  "status": "draft", // optional, default: "draft"
-  "parentId": 1 // optional, for hierarchy
+  "slug": "new-page", // optionnel, auto-généré si non fourni
+  "status": "draft", // optionnel, par défaut: "draft"
+  "parentId": 1 // optionnel, pour la hiérarchie
 }
 ```
 
@@ -738,25 +738,25 @@ Create new page.
 }
 ```
 
-**Features:**
-- Auto-slug generation from title
-- Content sanitization with DOMPurify
-- Hierarchy validation (max 3 levels deep)
-- Slug uniqueness validation
+**Fonctionnalités :**
+- Génération automatique de slug à partir du titre
+- Assainissement du contenu avec DOMPurify
+- Validation de la hiérarchie (max 3 niveaux de profondeur)
+- Validation de l'unicité du slug
 
-**Validation Errors:**
-- Slug already exists
-- Parent doesn't exist
-- Maximum hierarchy depth exceeded
+**Erreurs de Validation :**
+- Le slug existe déjà
+- Le parent n'existe pas
+- Profondeur maximale de la hiérarchie dépassée
 
-### Update Page
+### Mettre à Jour une Page
 **PUT** `/api/pages/:id`
 
-Update existing page.
+Mettre à jour une page existante.
 
-**Required:** Authentication
+**Requis :** Authentification
 
-**Request Body:** (all fields optional)
+**Corps de la Requête :** (tous les champs optionnels)
 ```json
 {
   "title": "Updated Page Title",
@@ -779,17 +779,17 @@ Update existing page.
 }
 ```
 
-**Special Validation:**
-- Prevents circular parent relationships
-- Hierarchy depth validation for parent changes
-- Slug uniqueness (excluding current page)
+**Validation Spéciale :**
+- Empêche les relations parent circulaires
+- Validation de la profondeur de la hiérarchie pour les changements de parent
+- Unicité du slug (excluant la page actuelle)
 
-### Update Page Status
+### Mettre à Jour le Statut de la Page
 **PATCH** `/api/pages/:id/status`
 
-Update only the page status.
+Mettre à jour uniquement le statut de la page.
 
-**Required:** Authentication
+**Requis :** Authentification
 
 **Request Body:**
 ```json
@@ -810,12 +810,12 @@ Update only the page status.
 }
 ```
 
-### Reorder Pages
+### Réorganiser les Pages
 **PATCH** `/api/pages/:id/order`
 
-Change page order within same parent.
+Changer l'ordre des pages dans le même parent.
 
-**Required:** Authentication
+**Requis :** Authentification
 
 **Request Body:**
 ```json
@@ -832,18 +832,18 @@ Change page order within same parent.
 }
 ```
 
-**Features:**
-- Atomic reordering with database transactions
-- Automatic adjustment of other page orders
+**Fonctionnalités :**
+- Réorganisation atomique avec transactions de base de données
+- Ajustement automatique de l'ordre des autres pages
 
-### Delete Page
+### Supprimer une Page
 **DELETE** `/api/pages/:id`
 
-Delete page.
+Supprimer une page.
 
-**Required:** Authentication
+**Requis :** Authentification
 
-**Restrictions:** Cannot delete pages with children
+**Restrictions :** Ne peut pas supprimer les pages avec des enfants
 
 **Response (200):**
 ```json
@@ -853,9 +853,9 @@ Delete page.
 }
 ```
 
-**Actions:**
-- Reorders remaining sibling pages
-- Validates no child pages exist
+**Actions :**
+- Réorganise les pages frères restantes
+- Valide qu'aucune page enfant n'existe
 
 ---
 
