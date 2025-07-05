@@ -41,11 +41,9 @@ export function generateSlug(title, options = {}) {
     removeSpecialChars = true
   } = options;
 
-  let slug = title.trim();
-
   // Use modern Intl.Collator for better performance and Unicode support
-  const normalizedTitle = title.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
+  const normalizedTitle = title.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  
   let slug = normalizedTitle;
 
   // Convertir en minuscules si demandé
