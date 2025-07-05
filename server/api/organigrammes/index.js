@@ -46,9 +46,13 @@ export default defineEventHandler(async (event) => {
     const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
     delete userWithoutPassword.password;
     
+    // Ajouter les permissions à l'utilisateur pour la fonction checkPermission
+    const permissions = role.getPermissions();
+    userWithoutPassword.permissions = permissions.map(p => p.name);
+    
     event.context.user = userWithoutPassword;
     event.context.userRole = role;
-    event.context.permissions = role.getPermissions();
+    event.context.permissions = permissions;
 
     const method = event.node.req.method;
 
