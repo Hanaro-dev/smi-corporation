@@ -29,7 +29,13 @@
     "docs:validate": "npx swagger-parser validate docs/api/openapi.yaml",
     "monitoring:dashboard": "npx http-server docs/monitoring -p 3002 -o dashboard.html",
     "monitoring:test": "curl -s http://localhost:3000/api/monitoring/health | jq '.'",
-    "monitoring:metrics": "curl -s http://localhost:3000/api/monitoring/metrics | jq '.data.application.counters'"
+    "monitoring:metrics": "curl -s http://localhost:3000/api/monitoring/metrics | jq '.data.application.counters'",
+    "deploy:infomaniak": "./scripts/deploy-infomaniak.sh",
+    "deploy:staging": "./scripts/deploy-infomaniak.sh staging",
+    "db:export": "node scripts/export-mock-data.js",
+    "db:migrate": "node scripts/migrate-to-mysql.js",
+    "db:reset": "node scripts/reset-database.js",
+    "db:seed": "node scripts/seed-database.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
