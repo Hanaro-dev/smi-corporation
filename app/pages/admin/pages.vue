@@ -471,7 +471,7 @@ import { useBBCode } from "~/composables/useBBCode";
 // Configuration de la page
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth',
+  middleware: 'admin',
   permission: 'edit' // Permission requise pour gérer les pages
 });
 

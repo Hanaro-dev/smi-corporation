@@ -385,7 +385,7 @@ import { toast } from "~/composables/useToast";
 // Configuration de la page
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth',
+  middleware: 'admin',
   permission: 'manage_permissions'
 });
 

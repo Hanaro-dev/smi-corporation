@@ -52,7 +52,7 @@ import { toast } from '~/composables/useToast';
 
 definePageMeta({
   layout: 'admin',
-  middleware: ['auth']
+  middleware: 'admin'
 });
 
 const route = useRoute();

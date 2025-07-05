@@ -103,6 +103,11 @@ import { storeToRefs } from 'pinia';
 import { useAuthStore } from '~/stores/auth';
 import { toast } from '~/composables/useToast';
 
+definePageMeta({
+  layout: 'admin',
+  middleware: 'admin'
+});
+
 // Store et composables
 const auth = useAuthStore();
 const { user } = storeToRefs(auth);

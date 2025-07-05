@@ -212,6 +212,8 @@ const initializeUsers = async () => {
       username: "admin",
       password: adminHashedPassword,
       role_id: 1, // Admin role
+      status: "active",
+      lastLogin: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // Il y a 1 heure
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       toJSON: function() {
@@ -227,6 +229,8 @@ const initializeUsers = async () => {
       username: "editeur",
       password: editorHashedPassword,
       role_id: 2, // Editor role
+      status: "active",
+      lastLogin: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // Il y a 1 jour
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       toJSON: function() {
@@ -242,6 +246,8 @@ const initializeUsers = async () => {
       username: "user",
       password: userHashedPassword,
       role_id: 3, // User role
+      status: "active",
+      lastLogin: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       toJSON: function() {
@@ -330,6 +336,8 @@ export const userDb = {
       ...userData,
       password: hashedPassword, // Remplacer par le mot de passe haché
       role_id: userData.role_id || 3, // Rôle par défaut: user
+      status: userData.status || "active", // Statut par défaut: active
+      lastLogin: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       toJSON: function() {

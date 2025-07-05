@@ -167,10 +167,10 @@
                 <div class="flex items-center space-x-2 mt-1">
                   <span 
                     class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                    :class="getRoleClass(user.role)"
+                    :class="getRoleClass(user.Role?.name || 'user')"
                   >
-                    <Icon :name="getRoleIcon(user.role)" class="w-3 h-3 mr-1" />
-                    {{ user.role }}
+                    <Icon :name="getRoleIcon(user.Role?.name || 'user')" class="w-3 h-3 mr-1" />
+                    {{ user.Role?.name || 'user' }}
                   </span>
                   <span 
                     class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
@@ -270,15 +270,15 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rôle</label>
             <select
-              v-model="formData.role"
+              v-model="formData.role_id"
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-              :class="{ 'border-red-500': errors.role }"
+              :class="{ 'border-red-500': errors.role_id }"
             >
-              <option value="user">Utilisateur</option>
-              <option value="editor">Editeur</option>
-              <option value="admin">Administrateur</option>
+              <option :value="3">Utilisateur</option>
+              <option :value="2">Editeur</option>
+              <option :value="1">Administrateur</option>
             </select>
-            <span v-if="errors.role" class="text-red-500 text-sm">{{ errors.role }}</span>
+            <span v-if="errors.role_id" class="text-red-500 text-sm">{{ errors.role_id }}</span>
           </div>
           
           <div>
@@ -300,7 +300,7 @@
             <button
               type="button"
               class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              @click="showCreateForm = false; selectedUser = null; formData = { name: '', email: '', role: 'user', status: 'active' }; errors = {}; errorMessage = ''"
+              @click="showCreateForm = false; selectedUser = null; formData = { name: '', email: '', role_id: 3, status: 'active' }; errors = {}; errorMessage = ''"
             >
               Annuler
             </button>
@@ -348,7 +348,7 @@ import { useApi } from "~/composables/useApi";
 // Configuration de la page
 definePageMeta({
   layout: 'admin',
-  middleware: 'auth',
+  middleware: 'admin',
   permission: 'manage_users'
 });
 
@@ -361,7 +361,7 @@ const showCreateForm = ref(false);
 const showDeleteConfirm = ref(false);
 const selectedUser = ref(null);
 const userToDelete = ref(null);
-const newUser = ref({ name: "", email: "", role: "user", status: "active" });
+const newUser = ref({ name: "", email: "", role_id: 3, status: "active" });
 const errors = ref({});
 const errorMessage = ref("");
 
@@ -377,7 +377,7 @@ const api = useApi();
 const formData = ref({
   name: '',
   email: '',
-  role: 'user',
+  role_id: 3, // 3 = user role
   status: 'active'
 });
 
@@ -387,14 +387,14 @@ watch(selectedUser, (user) => {
     formData.value = {
       name: user.name || '',
       email: user.email || '',
-      role: user.role || 'user',
+      role_id: user.role_id || 3,
       status: user.status || 'active'
     };
   } else {
     formData.value = {
       name: newUser.value.name,
       email: newUser.value.email,
-      role: newUser.value.role,
+      role_id: newUser.value.role_id,
       status: newUser.value.status
     };
   }
@@ -405,7 +405,7 @@ watch(showCreateForm, (isShowing) => {
     formData.value = {
       name: newUser.value.name,
       email: newUser.value.email,
-      role: newUser.value.role,
+      role_id: newUser.value.role_id,
       status: newUser.value.status
     };
   }
@@ -426,7 +426,7 @@ const filteredUsers = computed(() => {
   
   // Filtrer par rôle
   if (roleFilter.value !== 'all') {
-    filtered = filtered.filter(user => user.role === roleFilter.value);
+    filtered = filtered.filter(user => user.Role?.name === roleFilter.value);
   }
   
   // Filtrer par statut
@@ -439,7 +439,7 @@ const filteredUsers = computed(() => {
 
 const totalPages = computed(() => Math.ceil(totalUsers.value / itemsPerPage));
 const activeUsers = computed(() => users.value.filter(u => u.status === 'active').length);
-const adminUsers = computed(() => users.value.filter(u => u.role === 'admin').length);
+const adminUsers = computed(() => users.value.filter(u => u.Role?.name === 'admin').length);
 
 // Utility functions
 const getUserInitials = (name) => {
@@ -510,18 +510,18 @@ const validateAndCreateUser = async () => {
     const userData = {
       name: formData.value.name,
       email: formData.value.email,
-      role: formData.value.role,
+      role_id: formData.value.role_id,
       status: formData.value.status
     };
     
-    const response = await api.post('/api/users', userData);
+    await api.post('/api/users', userData);
     
     // Succès
     await fetchUsers();
     showCreateForm.value = false;
     selectedUser.value = null;
-    formData.value = { name: "", email: "", role: "user", status: "active" };
-    newUser.value = { name: "", email: "", role: "user", status: "active" };
+    formData.value = { name: "", email: "", role_id: 3, status: "active" };
+    newUser.value = { name: "", email: "", role_id: 3, status: "active" };
     errors.value = {};
     errorMessage.value = "";
     
@@ -536,23 +536,28 @@ const validateAndCreateUser = async () => {
 };
 
 const updateUser = async () => {
-  if (!selectedUser.value) return;
+  if (!selectedUser.value || !selectedUser.value.id) {
+    console.error("Aucun utilisateur sélectionné ou ID manquant");
+    errorMessage.value = "Erreur : aucun utilisateur sélectionné";
+    return;
+  }
   
   try {
+    const userId = selectedUser.value.id; // Capturer l'ID avant toute opération async
     const userData = {
       name: formData.value.name,
       email: formData.value.email,
-      role: formData.value.role,
+      role_id: formData.value.role_id,
       status: formData.value.status
     };
     
-    const response = await api.put(`/api/users/${selectedUser.value.id}`, userData);
+    await api.put(`/api/users/${userId}`, userData);
     
     // Succès
     await fetchUsers();
     showCreateForm.value = false;
     selectedUser.value = null;
-    formData.value = { name: "", email: "", role: "user", status: "active" };
+    formData.value = { name: "", email: "", role_id: 3, status: "active" };
     errors.value = {};
     errorMessage.value = "";
     
@@ -590,7 +595,7 @@ const deleteUser = async (id) => {
 
 const exportUsers = () => {
   // Export functionality
-  const csv = users.value.map(u => `${u.name},${u.email},${u.role},${u.status}`).join('\n');
+  const csv = users.value.map(u => `${u.name},${u.email},${u.Role?.name || 'user'},${u.status}`).join('\n');
   const blob = new Blob(['Name,Email,Role,Status\n' + csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

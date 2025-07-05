@@ -139,6 +139,12 @@ import { useAuthStore } from '~/stores/auth'
 const auth = useAuthStore()
 const { user } = storeToRefs(auth)
 
+// Page metadata
+definePageMeta({
+  layout: 'admin',
+  middleware: 'admin'
+})
+
 // Computed properties
 const userInitials = computed(() => {
   if (!user.value?.name) return '?'
