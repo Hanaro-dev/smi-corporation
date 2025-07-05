@@ -35,7 +35,8 @@
     "db:export": "node scripts/export-mock-data.js",
     "db:migrate": "node scripts/migrate-to-mysql.js",
     "db:reset": "node scripts/reset-database.js",
-    "db:seed": "node scripts/seed-database.js"
+    "db:seed": "node scripts/seed-database.js",
+    "commit": "git-cz"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
@@ -90,10 +91,19 @@
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "commitizen": "^4.3.1",
+    "cz-customizable": "^7.4.0",
     "happy-dom": "^18.0.1",
     "ofetch": "^1.4.1",
     "playwright": "^1.53.2",
     "supertest": "^7.1.1",
     "vitest": "^3.2.4"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-customizable"
+    },
+    "cz-customizable": {
+      "config": ".cz-config.cjs"
+    }
   }
 }
