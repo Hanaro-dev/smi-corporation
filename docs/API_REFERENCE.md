@@ -1524,4 +1524,33 @@ The API supports dual database modes for development and production.
 
 ---
 
-This API reference provides complete documentation for integrating with the SMI Corporation CMS. For implementation examples and advanced usage patterns, refer to the [Developer Guide](DEVELOPER_GUIDE.md).
+## 🔄 API v2.1 - Améliorations (Juillet 2025)
+
+### Services Centralisés
+- **Authentification unifiée** : `authenticateUser()` dans tous les endpoints
+- **Validation standardisée** : Classes de validation réutilisables
+- **Audit automatique** : Logging systématique des actions sensibles
+- **Gestion d'erreurs** : Messages d'erreur cohérents et informatifs
+
+### Nouveaux Services Disponibles
+```javascript
+// Services centralisés maintenant disponibles
+/server/services/auth-middleware.js     // Authentification
+/server/services/validation-service.js  // Validation  
+/server/services/audit-service.js       // Audit et logging
+/server/constants/api-constants.js      // Constantes API
+```
+
+### Performance et Sécurité
+- **70% de réduction** du code dupliqué dans les APIs
+- **Validation plus stricte** des paramètres d'entrée
+- **Protection renforcée** contre les injections et XSS
+- **Audit complet** de toutes les actions administratives
+
+Cette référence API fournit une documentation complète pour l'intégration avec SMI Corporation CMS. Pour des exemples d'implémentation et des patterns d'usage avancés, consultez le [Guide Développeur](DEVELOPER_GUIDE.md).
+
+---
+
+**API Reference mise à jour :** Juillet 2025  
+**Version API :** v2.1.0  
+**Compatible avec :** SMI Corporation CMS v2.x

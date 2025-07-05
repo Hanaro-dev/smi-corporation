@@ -775,4 +775,30 @@ For critical issues:
 4. **Escalation**: Understand escalation procedures for urgent issues
 5. **Business Continuity**: Know alternative procedures for critical tasks
 
-This user guide provides comprehensive information for effectively using the SMI Corporation CMS. For technical details and development information, refer to the [Developer Guide](DEVELOPER_GUIDE.md) and [API Reference](API_REFERENCE.md).
+## 🚀 Nouvelles Fonctionnalités (Juillet 2025)
+
+### Interface Améliorée
+- **Validation en temps réel** dans les formulaires
+- **Messages d'erreur plus clairs** et contextuels
+- **Performance accrue** avec chargement plus rapide
+- **Expérience utilisateur optimisée** sur tous les écrans
+
+### Sécurité Renforcée
+- **Audit logging détaillé** de toutes les actions
+- **Protection améliorée** contre les attaques malveillantes
+- **Sessions plus sécurisées** avec gestion automatique
+- **Validation stricte** des données saisies
+
+### Gestion de Contenu
+- **Éditeur plus stable** avec moins de bugs
+- **Prévisualisation améliorée** du contenu BBCode
+- **Sauvegarde automatique** du travail en cours
+- **Interface d'administration modernisée**
+
+Ce guide utilisateur fournit des informations complètes pour utiliser efficacement SMI Corporation CMS. Pour les détails techniques et les informations de développement, consultez le [Guide Développeur](DEVELOPER_GUIDE.md) et la [Référence API](API_REFERENCE.md).
+
+---
+
+**Guide utilisateur mis à jour :** Juillet 2025  
+**Version interface :** 2.1.0  
+**Compatible avec :** SMI Corporation CMS v2.x

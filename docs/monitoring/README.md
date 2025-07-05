@@ -99,7 +99,7 @@ userLogger.info('Action réalisée'); // Inclut userId et session
 
 ```json
 {
-  "timestamp": "2025-01-02T10:30:00.000Z",
+  "timestamp": "2025-07-05T14:30:00.000Z",
   "level": "info",
   "message": "User login successful",
   "service": "smi-cms",
@@ -249,14 +249,14 @@ curl http://localhost:3000/api/monitoring/health?detailed=true
   "success": true,
   "data": {
     "status": "healthy",
-    "lastCheck": "2025-01-02T10:30:00.000Z",
+    "lastCheck": "2025-07-05T14:30:00.000Z",
     "consecutiveFailures": 0,
     "checks": {
       "database": {
         "status": "healthy",
         "message": "Database connection successful",
         "duration": 45,
-        "lastCheck": "2025-01-02T10:30:00.000Z"
+        "lastCheck": "2025-07-05T14:30:00.000Z"
       }
     }
   }
@@ -287,7 +287,7 @@ curl http://localhost:3000/api/monitoring/status
 ```json
 {
   "status": "healthy",
-  "timestamp": "2025-01-02T10:30:00.000Z"
+  "timestamp": "2025-07-05T14:30:00.000Z"
 }
 ```
 

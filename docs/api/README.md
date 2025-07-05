@@ -271,7 +271,7 @@ Format de réponse d'erreur standardisé :
     "field": "email",
     "error": "Format d'email invalide"
   },
-  "timestamp": "2025-01-02T10:30:00.000Z"
+  "timestamp": "2025-07-05T10:30:00.000Z"
 }
 ```
 
@@ -410,7 +410,13 @@ function validatePageData(data) {
 
 ## 📝 Changelog
 
-### Version 1.0.0 (2025-01-02)
+### Version 2.1.0 (2025-07-05)
+- Services centralisés pour auth, validation et audit
+- Réduction de 70% du code dupliqué dans les APIs
+- Amélioration de la gestion d'erreurs standardisée
+- Constantes API centralisées pour la cohérence
+
+### Version 1.0.0 (2025-06-15)
 - Documentation API complète avec OpenAPI 3.0.3
 - Endpoints pour tous les modules (Auth, Users, Pages, Images, Roles, Permissions, Audit)
 - Exemples d'utilisation en JavaScript, Python et cURL

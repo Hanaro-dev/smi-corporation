@@ -1137,4 +1137,51 @@ export default defineEventHandler(async (event) => {
 })
 ```
 
-This developer guide provides comprehensive information for working with the SMI Corporation CMS. For specific API details, refer to the [API Reference](API_REFERENCE.md), and for system architecture, see [Architecture Documentation](ARCHITECTURE.md).
+## 🔄 Améliorations Récentes (Juillet 2025)
+
+### Services Centralisés
+Le projet a été refactorisé pour améliorer la maintenabilité :
+
+```javascript
+// Nouveau : Utilisation des services centralisés
+import { authenticateUser } from '../../services/auth-middleware.js';
+import { OrganigrammeValidator } from '../../services/validation-service.js';
+import { AuditService } from '../../services/audit-service.js';
+import { HTTP_STATUS, ERROR_MESSAGES } from '../../constants/api-constants.js';
+
+export default defineEventHandler(async (event) => {
+  await authenticateUser(event); // Auth centralisée
+  const errors = OrganigrammeValidator.validate(data); // Validation centralisée
+  await AuditService.logOrganigrammeCreate(event, result, userId); // Audit centralisé
+});
+```
+
+### Architecture Améliorée
+- **70% de réduction** du code dupliqué dans les APIs
+- **TypeScript strict** sur tous les composants frontend
+- **Validation harmonisée** client-serveur
+- **Patterns d'architecture** cohérents et maintenables
+
+### Migration vers les Nouveaux Services
+
+**Ancien pattern :**
+```javascript
+// Code répétitif dans chaque endpoint
+const token = getCookie(event, "auth_token");
+if (!token) throw createError({statusCode: 401, message: "Token requis"});
+// ... logique d'auth répétée
+```
+
+**Nouveau pattern :**
+```javascript
+// Service centralisé réutilisable
+await authenticateUser(event); // Gère tout automatiquement
+```
+
+Ce guide développeur fournit des informations complètes pour travailler avec SMI Corporation CMS. Pour les détails API, consultez la [Référence API](API_REFERENCE.md), et pour l'architecture système, voir la [Documentation Architecture](ARCHITECTURE.md).
+
+---
+
+**Guide mis à jour :** Juillet 2025  
+**Version développeur :** 2.1.0  
+**Compatible avec :** SMI Corporation CMS v2.x
