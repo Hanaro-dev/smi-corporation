@@ -1,5 +1,4 @@
-import { defineEventHandler, createError, getQuery, readBody, getCookie, getHeader } from "../../utils/http-utils.js";
-import { getClientIP } from "../../utils/ip-utils.js";
+import { defineEventHandler, createError, getQuery, readBody, getCookie, getHeader, getRequestIP } from 'h3';
 import { Organigramme, Employee, User, sequelize } from "../../models.js";
 import { Op } from "sequelize";
 import { sessionDb, userDb, roleDb, auditDb, organigrammeDb, employeeDb } from '../../utils/mock-db.js';
@@ -193,7 +192,7 @@ export default defineEventHandler(async (event) => {
           userId: event.context.user.id,
           action: 'organigramme_create',
           details: `Organigramme créé: ${sanitizedTitle}`,
-          ipAddress: getClientIP(event) || 'unknown',
+          ipAddress: getRequestIP(event) || 'unknown',
           userAgent: getHeader(event, 'user-agent') || 'unknown'
         });
         

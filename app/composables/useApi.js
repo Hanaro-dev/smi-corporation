@@ -26,10 +26,8 @@ export const useApi = () => {
     return null;
   };
 
-  // Wrapper pour $fetch avec CSRF automatique
+  // Wrapper pour $fetch avec CSRF automatique (désactivé en développement)
   const apiCall = async (url, options = {}) => {
-    const csrfToken = getCsrfToken();
-    
     // Configuration par défaut
     const defaultOptions = {
       headers: {
@@ -38,28 +36,28 @@ export const useApi = () => {
       }
     };
 
-    // Ajouter le token CSRF pour les méthodes qui en ont besoin
-    const methodsNeedingCsrf = ['POST', 'PUT', 'DELETE', 'PATCH'];
-    const method = options.method?.toUpperCase() || 'GET';
-    
-    if (methodsNeedingCsrf.includes(method)) {
-      if (!csrfToken) {
-        console.warn('CSRF token not found, attempting to initialize...');
-        try {
-          await $fetch('/api/csrf-token', { method: 'GET', credentials: 'include' });
-          await new Promise(resolve => setTimeout(resolve, 100)); // Wait a bit
-          const newToken = getCsrfToken();
-          if (newToken) {
-            defaultOptions.headers['X-XSRF-TOKEN'] = newToken;
-            console.log('CSRF token initialized successfully');
-          } else {
-            console.error('Failed to get CSRF token after initialization');
+    // CSRF seulement en production
+    if (process.env.NODE_ENV === 'production') {
+      const csrfToken = getCsrfToken();
+      const methodsNeedingCsrf = ['POST', 'PUT', 'DELETE', 'PATCH'];
+      const method = options.method?.toUpperCase() || 'GET';
+      
+      if (methodsNeedingCsrf.includes(method)) {
+        if (!csrfToken) {
+          console.warn('CSRF token not found, attempting to initialize...');
+          try {
+            await $fetch('/api/csrf-token', { method: 'GET', credentials: 'include' });
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const newToken = getCsrfToken();
+            if (newToken) {
+              defaultOptions.headers['csrf-token'] = newToken;
+            }
+          } catch (error) {
+            console.error('Failed to initialize CSRF token:', error);
           }
-        } catch (error) {
-          console.error('Failed to initialize CSRF token:', error);
+        } else {
+          defaultOptions.headers['csrf-token'] = csrfToken;
         }
-      } else {
-        defaultOptions.headers['X-XSRF-TOKEN'] = csrfToken;
       }
     }
 

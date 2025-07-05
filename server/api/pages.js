@@ -1,4 +1,4 @@
-import { defineEventHandler, createError, getQuery, readBody, getCookie } from "../utils/http-utils.js";
+import { defineEventHandler, createError, getQuery, readBody, getCookie, getMethod } from 'h3';
 import DOMPurify from "dompurify";
 import { validatePageInput } from "../utils/validators";
 import { Page, sequelize } from "../models.js";

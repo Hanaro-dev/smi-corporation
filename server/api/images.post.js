@@ -6,8 +6,7 @@ import sharp from "sharp";
 import { fileTypeFromBuffer } from "file-type";
 import sizeOf from "image-size";
 import { Image, ImageVariant } from "../models.js";
-import { getCookie, getHeader, defineEventHandler, createError } from "../utils/http-utils.js";
-import { getClientIP } from "../utils/ip-utils.js";
+import { getCookie, getHeader, defineEventHandler, createError, getRequestIP, readMultipartFormData } from 'h3';
 import { sessionDb, userDb, roleDb, auditDb } from '../utils/mock-db.js';
 import { checkPermission } from "../utils/permission-utils.js";
 import DOMPurify from "dompurify";
@@ -34,7 +33,7 @@ const VARIANTS = {
 export default defineEventHandler(async (event) => {
   try {
     // 1. Vérification du rate limiting (avant authentification pour éviter les attaques)
-    const clientIP = getClientIP(event) || 'unknown';
+    const clientIP = getRequestIP(event) || 'unknown';
     const rateLimitResult = checkRateLimit(clientIP, imageUploadRateLimit);
     
     if (!rateLimitResult.allowed) {
@@ -288,7 +287,7 @@ export default defineEventHandler(async (event) => {
       userId: userId,
       action: 'image_upload',
       details: `Image uploadée: ${sanitizedTitle || file.filename} (${fileType.ext})`,
-      ipAddress: getClientIP(event) || 'unknown',
+      ipAddress: getRequestIP(event) || 'unknown',
       userAgent: getHeader(event, 'user-agent') || 'unknown'
     });
     

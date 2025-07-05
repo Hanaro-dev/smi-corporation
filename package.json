@@ -79,6 +79,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "@iconify-json/heroicons": "^1.2.2",
     "@iconify-json/lucide": "^1.2.49",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",

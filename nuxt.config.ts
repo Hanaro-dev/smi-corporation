@@ -70,7 +70,7 @@ export default defineNuxtConfig({
     "@nuxt/eslint",
     "@nuxt/fonts",
     "@nuxt/icon",
-    // "@nuxt/image", // Désactivé pour hébergement local complet
+    // "@nuxt/image", // Désactivé - problème renderer$1
     "@nuxt/ui",
     "@pinia/nuxt",
     "nuxt-auth-utils",
@@ -89,36 +89,35 @@ export default defineNuxtConfig({
     typedPages: true,
   },
 
+
   // Build optimizations
   build: {
     transpile:
       process.env.NODE_ENV === "production" ? ["vue-toastification"] : [],
   },
 
-  // CSRF protection configuration - Enhanced security
+  // CSRF protection configuration - Désactivé en développement
   csurf: {
-    enabled: true, // ✅ CSRF protection enabled
+    enabled: process.env.NODE_ENV === "production", // ✅ CSRF seulement en production
     cookieKey: "XSRF-TOKEN",
-    cookieHttpOnly: false, // Allow JS access for SPA compatibility
-    cookieSameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+    headerName: "csrf-token",
+    cookieHttpOnly: false,
+    cookieSameSite: "lax",
     cookieSecure: process.env.NODE_ENV === "production",
     methods: ["POST", "PUT", "DELETE", "PATCH"],
     excludedUrls: [
       ["/api/_auth/session", "GET"],
       ["/api/csrf-token", "GET"],
-      // Temporairement exclure auth endpoints pour faciliter les tests
-      ["/api/auth/login", "POST"],
-      ["/api/auth/register", "POST"],
+      ["/api/csrf-debug", "GET"],
     ],
     https: process.env.NODE_ENV === "production",
     methodsToProtect: ["POST", "PUT", "DELETE", "PATCH"],
-    addCsrfTokenToEventCtx: true,
+    addCsrfTokenToEventCtx: process.env.NODE_ENV === "production",
     secret: process.env.CSRF_SECRET || (() => {
       if (process.env.NODE_ENV === "production") {
         throw new Error("CSRF_SECRET environment variable is required in production");
       }
-      console.warn("⚠️  Using default CSRF secret for development only");
-      return "dev-csrf-secret-change-in-production-" + Math.random().toString(36).substring(2, 15);
+      return "dev-csrf-secret-disabled-in-development";
     })(),
   },
 

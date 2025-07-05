@@ -1,8 +1,15 @@
 /**
  * Plugin pour injecter le token CSRF dans un meta tag
+ * Désactivé en développement
  */
 
 export default defineNuxtPlugin(async () => {
+  // Seulement en production
+  if (process.env.NODE_ENV !== 'production') {
+    console.info('🔧 CSRF meta tag injection disabled in development');
+    return;
+  }
+
   // Ne s'exécute que côté client
   if (import.meta.server) return;
 

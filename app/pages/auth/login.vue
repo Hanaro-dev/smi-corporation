@@ -87,16 +87,13 @@ import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useApi } from "~/composables/useApi";
 import { toast } from "~/composables/useToast";
-import { useAuthStore } from "~/stores/auth";
-
 const email = ref("");
 const password = ref("");
 const loading = ref(false);
 const error = ref("");
 const router = useRouter();
-const api = useApi();
 const { success, error: showError } = toast;
-const authStore = useAuthStore();
+const { login: authLogin } = useAuth();
 
 // Récupérer l'URL de redirection depuis la query string ou utiliser la page d'accueil par défaut
 const route = useRoute();
@@ -107,37 +104,28 @@ const handleLogin = async () => {
   loading.value = true;
   
   try {
-    const response = await api.post('/api/auth/login', {
+    const result = await authLogin({
       email: email.value,
-      password: password.value,
-      redirect: redirectTo.value
+      password: password.value
     });
 
-    // Mettre à jour le store auth avec les données utilisateur
-    authStore.login(response);
-    
-    // Initialiser aussi desde la session pour charger les permissions
-    await authStore.initializeFromSession();
-    
-    // Mettre à jour l'état global
-    const userState = useState('user');
-    userState.value = authStore.user;
-
-    // Utiliser la redirection fournie par l'API ou la redirection par défaut
-    const destination = response.redirect || "/";
-    
-    // Afficher un toast de succès
-    success(`Bienvenue, ${response.user.name}!`);
-    
-    // Vider les champs
-    email.value = "";
-    password.value = "";
-    
-    // Rediriger l'utilisateur
-    router.push(destination);
+    if (result.success) {
+      // Afficher un toast de succès
+      success(`Connexion réussie!`);
+      
+      // Vider les champs
+      email.value = "";
+      password.value = "";
+      
+      // Rediriger l'utilisateur
+      router.push(redirectTo.value);
+    } else {
+      error.value = result.error || "Erreur lors de la connexion.";
+      showError(error.value);
+    }
   } catch (e) {
     console.error("Erreur login:", e);
-    error.value = e.data?.message || "Erreur lors de la connexion.";
+    error.value = e.message || "Erreur lors de la connexion.";
     showError(error.value);
   } finally {
     loading.value = false;

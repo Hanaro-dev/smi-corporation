@@ -1,17 +1,37 @@
-export default defineNuxtRouteMiddleware((to) => {
-  const user = useState('user');
+export default defineNuxtRouteMiddleware(async (to) => {
+  const { user, isAuthenticated, hasPermission, initAuth } = useAuth()
   
-  // Debug info
-  console.log('Auth middleware check:', {
-    route: to.path,
-    requiredPermission: to.meta.permission,
-    user: user.value,
-    userPermissions: user.value?.permissions,
-    hasPermission: user.value?.permissions?.includes(to.meta.permission)
-  });
+  // Si pas authentifié, essayer d'initialiser depuis la session
+  if (!isAuthenticated.value) {
+    console.log('User not authenticated, trying to init from session...')
+    const success = await initAuth()
+    
+    if (!success) {
+      console.log('No valid session, redirecting to login')
+      return navigateTo('/auth/login?redirect=' + encodeURIComponent(to.path))
+    }
+  }
   
-  if (!user.value || !user.value.permissions?.includes(to.meta.permission)) {
-    console.log('Access denied, redirecting to home');
-    return navigateTo('/'); // Redirige si l'utilisateur n'a pas la permission
+  // Vérifier les permissions si requises
+  const requiredPermission = to.meta.permission
+  
+  if (requiredPermission) {
+    const access = hasPermission(requiredPermission)
+    
+    console.log('Auth middleware check:', {
+      route: to.path,
+      requiredPermission,
+      user: user.value?.name,
+      userRole: user.value?.Role?.name,
+      hasAccess: access
+    })
+    
+    if (!access) {
+      console.log('Access denied, insufficient permissions')
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Accès refusé - Permissions insuffisantes'
+      })
+    }
   }
 });

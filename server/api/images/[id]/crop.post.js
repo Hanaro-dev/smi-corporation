@@ -4,8 +4,7 @@ import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import sizeOf from "image-size";
 import { Image, ImageVariant } from "../../../models.js";
-import { getCookie, getHeader, defineEventHandler, createError } from "../../../utils/http-utils.js";
-import { getClientIP } from "../../../utils/ip-utils.js";
+import { getCookie, getHeader, defineEventHandler, createError, getRequestIP, readBody } from 'h3';
 import { sessionDb, userDb, roleDb, auditDb } from '../../../utils/mock-db.js';
 import { checkPermission } from "../../../utils/permission-utils.js";
 
@@ -226,7 +225,7 @@ export default defineEventHandler(async (event) => {
       userId: event.context.user.id,
       action: 'image_crop',
       details: `Image recadrée: ${updatedImage.originalFilename || updatedImage.filename} (ID: ${id})`,
-      ipAddress: getClientIP(event) || 'unknown',
+      ipAddress: getRequestIP(event) || 'unknown',
       userAgent: getHeader(event, 'user-agent') || 'unknown'
     });
     

@@ -1,4 +1,4 @@
-import { defineEventHandler, createError } from "../../utils/http-utils.js";
+import { defineEventHandler, createError } from 'h3';
 import { Organigramme, Employee, User } from "../../models.js";
 import { organigrammeDb, employeeDb, userDb } from '../../utils/mock-db.js';
 import dotenv from "dotenv";

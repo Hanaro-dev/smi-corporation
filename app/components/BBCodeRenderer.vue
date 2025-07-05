@@ -551,19 +551,30 @@ const renderCustomBreadcrumb = () => {
  * Espacement et présentation cohérents
  */
 .bbcode-content :deep(.callout) {
-  @apply my-4;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .bbcode-content :deep(.image-gallery-container) {
-  @apply my-6;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .bbcode-content :deep(.org-chart) {
-  @apply my-6;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .bbcode-content :deep(.custom-breadcrumb) {
-  @apply my-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.dark .bbcode-content :deep(.custom-breadcrumb) {
+  background-color: #1f2937;
 }
 
 /**
@@ -584,11 +595,12 @@ const renderCustomBreadcrumb = () => {
  */
 @media (max-width: 640px) {
   .bbcode-content :deep(.image-gallery) {
-    @apply grid-cols-1;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
   
   .bbcode-content :deep(.org-person) {
-    @apply text-sm;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 }
 </style>

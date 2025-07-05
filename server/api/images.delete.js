@@ -1,8 +1,7 @@
 import { unlink } from 'fs/promises'
 import { join, dirname } from 'path'
 import { Image, ImageVariant } from '../models.js'
-import { getCookie, getHeader, defineEventHandler, createError } from '../utils/http-utils.js'
-import { getClientIP } from '../utils/ip-utils.js'
+import { getCookie, getHeader, defineEventHandler, createError, getRequestIP, readBody } from 'h3'
 import { sessionDb, userDb, roleDb, auditDb } from '../utils/mock-db.js'
 import { checkPermission } from '../utils/permission-utils.js'
 import { checkRateLimit, imageDeletionRateLimit } from '../utils/rate-limiter.js'
@@ -10,7 +9,7 @@ import { checkRateLimit, imageDeletionRateLimit } from '../utils/rate-limiter.js
 export default defineEventHandler(async (event) => {
   try {
     // 1. Vérification du rate limiting
-    const clientIP = getClientIP(event) || 'unknown';
+    const clientIP = getRequestIP(event) || 'unknown';
     const rateLimitResult = checkRateLimit(clientIP, imageDeletionRateLimit);
     
     if (!rateLimitResult.allowed) {
@@ -133,7 +132,7 @@ export default defineEventHandler(async (event) => {
       userId: event.context.user.id,
       action: 'image_delete',
       details: `Image supprimée: ${image.originalFilename || image.filename} (ID: ${image.id})`,
-      ipAddress: getClientIP(event) || 'unknown',
+      ipAddress: getRequestIP(event) || 'unknown',
       userAgent: getHeader(event, 'user-agent') || 'unknown'
     });
     

@@ -1,8 +1,10 @@
+import { defineEventHandler, createError, getMethod, readBody, getCookie, getQuery } from 'h3';
 import { ERROR_MESSAGES } from "../constants/messages";
 import { requirePermission } from "../middleware/check-permission.js";
 import { validateUser, validateLoginInput } from "../utils/validators";
 import jwt from 'jsonwebtoken';
 import { userDb, sessionDb, roleDb, auditDb } from "../utils/mock-db.js";
+import { checkPermission } from "../utils/permission-utils.js";
 
 export default defineEventHandler(async (event) => {
   const method = getMethod(event);
@@ -123,8 +125,42 @@ export default defineEventHandler(async (event) => {
   // POST /api/users (Création d'un utilisateur)
   if (method === "POST") {
     // Pour la création d'utilisateurs, vérifier l'authentification et la permission
-    await auth(event);
-    await requirePermission("manage_users")(event);
+    // Authentification comme dans les autres endpoints
+    const token = getCookie(event, "auth_token");
+    
+    if (!token) {
+      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
+    }
+    
+    const session = sessionDb.findByToken(token);
+    if (!session) {
+      throw createError({ statusCode: 401, message: "Session invalide." });
+    }
+    
+    const authUser = await userDb.findById(session.userId);
+    if (!authUser) {
+      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
+    }
+
+    // Récupérer le rôle de l'utilisateur avec ses permissions
+    const role = roleDb.findByPk(authUser.role_id);
+    if (!role) {
+      throw createError({
+        statusCode: 500,
+        message: "Rôle utilisateur non trouvé."
+      });
+    }
+
+    // Mettre l'utilisateur dans le contexte
+    const userWithoutPassword = authUser.toJSON ? authUser.toJSON() : { ...authUser };
+    delete userWithoutPassword.password;
+    
+    event.context.user = userWithoutPassword;
+    event.context.userRole = role;
+    event.context.permissions = role.getPermissions();
+
+    // Vérifier les permissions
+    await checkPermission(event, "manage_users");
     
     const body = await readBody(event);
     const errors = validateUser(body, false); // false car c'est une création
@@ -165,12 +201,12 @@ export default defineEventHandler(async (event) => {
     });
     
     // Journaliser la création
-    const authUser = event.context.user;
+    const currentUser = event.context.user;
     auditDb.log(
       'create',
       'user',
       newUser.id,
-      authUser.id,
+      currentUser.id,
       { email: newUser.email, role_id: newUser.role_id }
     );
     
@@ -182,8 +218,42 @@ export default defineEventHandler(async (event) => {
 
   // DELETE /api/users (Suppression d'un utilisateur par ID dans les paramètres)
   if (method === "DELETE") {
-    await auth(event); // Protéger cette route
-    await requirePermission("manage_users")(event); // Vérifier les permissions
+    // Authentification comme dans les autres endpoints
+    const token = getCookie(event, "auth_token");
+    
+    if (!token) {
+      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
+    }
+    
+    const session = sessionDb.findByToken(token);
+    if (!session) {
+      throw createError({ statusCode: 401, message: "Session invalide." });
+    }
+    
+    const authUser = await userDb.findById(session.userId);
+    if (!authUser) {
+      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
+    }
+
+    // Récupérer le rôle de l'utilisateur avec ses permissions
+    const role = roleDb.findByPk(authUser.role_id);
+    if (!role) {
+      throw createError({
+        statusCode: 500,
+        message: "Rôle utilisateur non trouvé."
+      });
+    }
+
+    // Mettre l'utilisateur dans le contexte
+    const userWithoutPassword = authUser.toJSON ? authUser.toJSON() : { ...authUser };
+    delete userWithoutPassword.password;
+    
+    event.context.user = userWithoutPassword;
+    event.context.userRole = role;
+    event.context.permissions = role.getPermissions();
+
+    // Vérifier les permissions
+    await checkPermission(event, "manage_users");
     
     const { id } = getQuery(event);
     if (!id) {
@@ -203,8 +273,8 @@ export default defineEventHandler(async (event) => {
     }
     
     // Empêcher la suppression de son propre compte
-    const authUser = event.context.user;
-    if (user.id === authUser.id) {
+    const currentUser = event.context.user;
+    if (user.id === currentUser.id) {
       throw createError({
         statusCode: 403,
         message: "Vous ne pouvez pas supprimer votre propre compte."
@@ -236,7 +306,7 @@ export default defineEventHandler(async (event) => {
       'delete',
       'user',
       userInfo.id,
-      authUser.id,
+      currentUser.id,
       userInfo
     );
     

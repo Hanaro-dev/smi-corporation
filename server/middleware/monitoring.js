@@ -3,7 +3,7 @@
  */
 import { logger } from '../services/logger-service.js';
 import { metrics } from '../services/metrics-service.js';
-import { defineEventHandler } from '../utils/http-utils.js';
+import { defineEventHandler } from 'h3';
 
 export default defineEventHandler(async (event) => {
   // Only monitor API routes

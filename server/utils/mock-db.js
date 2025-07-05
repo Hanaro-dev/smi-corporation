@@ -1196,3 +1196,167 @@ export const employeeDb = {
     return false;
   }
 };
+
+// Structure de données pour stocker les images
+let images = [
+  {
+    id: 1,
+    filename: "logo-smi.jpg",
+    originalName: "logo-smi-corporation.jpg",
+    url: "/uploads/images/logo-smi.jpg",
+    mimeType: "image/jpeg",
+    size: 45678,
+    width: 800,
+    height: 600,
+    alt: "Logo SMI Corporation",
+    caption: "Logo officiel de SMI Corporation",
+    userId: 1,
+    isPublic: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 2,
+    filename: "banner-accueil.jpg",
+    originalName: "banner-accueil-smi.jpg",
+    url: "/uploads/images/banner-accueil.jpg",
+    mimeType: "image/jpeg",
+    size: 123456,
+    width: 1920,
+    height: 1080,
+    alt: "Bannière page d'accueil",
+    caption: "Image de bannière pour la page d'accueil",
+    userId: 1,
+    isPublic: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  },
+  {
+    id: 3,
+    filename: "equipe-direction.jpg",
+    originalName: "photo-equipe-direction.jpg",
+    url: "/uploads/images/equipe-direction.jpg",
+    mimeType: "image/jpeg",
+    size: 89012,
+    width: 1200,
+    height: 800,
+    alt: "Équipe de direction",
+    caption: "Photo de l'équipe de direction SMI Corporation",
+    userId: 2,
+    isPublic: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    toJSON: function() { return {...this}; }
+  }
+];
+
+export const imageDb = {
+  findAll: async (options = {}) => {
+    let result = [...images];
+    
+    // Filtrage par where
+    if (options.where) {
+      Object.keys(options.where).forEach(key => {
+        const value = options.where[key];
+        result = result.filter(img => {
+          if (typeof value === 'object' && value.length) {
+            // Gérer les tableaux (IN clause)
+            return value.includes(img[key]);
+          }
+          return img[key] === value;
+        });
+      });
+    }
+    
+    // Pagination
+    if (options.offset) {
+      result = result.slice(options.offset);
+    }
+    if (options.limit) {
+      result = result.slice(0, options.limit);
+    }
+    
+    return result;
+  },
+  
+  findOne: async (options = {}) => {
+    if (options.where) {
+      return images.find(img => {
+        return Object.keys(options.where).every(key => 
+          img[key] === options.where[key]
+        );
+      }) || null;
+    }
+    return images[0] || null;
+  },
+  
+  findByPk: async (id) => {
+    return images.find(img => img.id === parseInt(id)) || null;
+  },
+  
+  findAndCountAll: async (options = {}) => {
+    const allResults = await imageDb.findAll({ where: options.where });
+    const count = allResults.length;
+    
+    let result = allResults;
+    if (options.offset) {
+      result = result.slice(options.offset);
+    }
+    if (options.limit) {
+      result = result.slice(0, options.limit);
+    }
+    
+    return { count, rows: result };
+  },
+  
+  create: async (data) => {
+    const newImage = {
+      id: Math.max(...images.map(img => img.id), 0) + 1,
+      filename: data.filename,
+      originalName: data.originalName,
+      url: data.url || `/uploads/images/${data.filename}`,
+      mimeType: data.mimeType,
+      size: data.size || 0,
+      width: data.width || 0,
+      height: data.height || 0,
+      alt: data.alt || '',
+      caption: data.caption || '',
+      userId: data.userId || 1,
+      isPublic: data.isPublic !== undefined ? data.isPublic : true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      toJSON: function() { return {...this}; }
+    };
+    images.push(newImage);
+    return newImage;
+  },
+  
+  update: (id, data) => {
+    const index = images.findIndex(img => img.id === parseInt(id));
+    if (index !== -1) {
+      images[index] = {
+        ...images[index],
+        ...data,
+        updatedAt: new Date().toISOString()
+      };
+      return images[index];
+    }
+    return null;
+  },
+  
+  destroy: (id) => {
+    const index = images.findIndex(img => img.id === parseInt(id));
+    if (index !== -1) {
+      images.splice(index, 1);
+      return true;
+    }
+    return false;
+  },
+  
+  max: async (field, options = {}) => {
+    if (images.length === 0) return 0;
+    return Math.max(...images.map(img => img[field] || 0));
+  }
+};

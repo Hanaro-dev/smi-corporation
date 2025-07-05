@@ -1,8 +1,7 @@
 /**
  * Rate Limiter pour les uploads d'images et autres opérations sensibles
  */
-import { setHeader, createError } from './http-utils.js';
-import { getClientIP } from './ip-utils.js';
+import { setHeader, createError, getRequestIP } from 'h3';
 
 // Map pour stocker les tentatives par IP
 const attempts = new Map();
@@ -124,7 +123,7 @@ export function checkRateLimit(ip, config = {}) {
  */
 export function rateLimitMiddleware(options = {}) {
   return (event) => {
-    const ip = getClientIP(event) || 'unknown';
+    const ip = getRequestIP(event) || 'unknown';
     const result = checkRateLimit(ip, options);
     
     if (!result.allowed) {

@@ -1,9 +1,15 @@
 /**
  * CSRF protection enhancement plugin
- * Provides additional CSRF error handling for better UX
+ * Désactivé en développement, actif seulement en production
  */
 
 export default defineNuxtPlugin(() => {
+  // Seulement en production
+  if (process.env.NODE_ENV !== 'production') {
+    console.info('🔧 CSRF protection disabled in development');
+    return;
+  }
+
   // Only run on client side
   if (import.meta.server) return;
 

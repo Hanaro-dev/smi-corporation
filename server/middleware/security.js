@@ -1,7 +1,7 @@
 /**
  * Security Middleware - Enhanced security headers and validation
  */
-import { defineEventHandler, setHeader } from '../utils/http-utils.js';
+import { defineEventHandler, setHeader, getRequestIP } from 'h3';
 
 export default defineEventHandler(async (event) => {
   // Only apply to API routes
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Rate limiting headers
-  const clientIP = getClientIP(event.node.req);
+  const clientIP = getRequestIP(event);
   const rateLimitKey = `rate_limit:${clientIP}`;
   
   // Add security audit logging for sensitive operations
@@ -32,11 +32,3 @@ export default defineEventHandler(async (event) => {
     console.log(`[SECURITY AUDIT] ${event.node.req.method} ${event.node.req.url} from ${clientIP} at ${new Date().toISOString()}`);
   }
 });
-
-function getClientIP(req) {
-  return req.headers['x-forwarded-for'] || 
-         req.headers['x-real-ip'] || 
-         req.connection?.remoteAddress || 
-         req.socket?.remoteAddress ||
-         'unknown';
-}

@@ -1,7 +1,7 @@
 /**
  * Mock Database Service - Handles mock database operations for development
  */
-import { pageDb } from '../utils/mock-db.js';
+import { pageDb, imageDb } from '../utils/mock-db.js';
 
 export class MockDatabaseService {
   constructor() {
@@ -51,6 +51,26 @@ export class MockDatabaseService {
       };
       MockModel.findAndCountAll = async (options) => pageDb.findAndCountAll(options);
       MockModel.max = async (field, options) => pageDb.max(field, options);
+    } else if (name === "Image") {
+      // Image model uses specialized imageDb
+      MockModel.findAll = async (options) => imageDb.findAll(options);
+      MockModel.findOne = async (options) => imageDb.findOne(options);
+      MockModel.findByPk = async (id) => imageDb.findByPk(id);
+      MockModel.create = async (data) => imageDb.create(data);
+      MockModel.update = async (data, options) => {
+        if (options?.where?.id) {
+          return [1, [imageDb.update(options.where.id, data)]];
+        }
+        return [0, []];
+      };
+      MockModel.destroy = async (options) => {
+        if (options?.where?.id) {
+          return imageDb.destroy(options.where.id) ? 1 : 0;
+        }
+        return 0;
+      };
+      MockModel.findAndCountAll = async (options) => imageDb.findAndCountAll(options);
+      MockModel.max = async (field, options) => imageDb.max(field, options);
     } else {
       // Generic mock model methods
       MockModel.findAll = async () => [];

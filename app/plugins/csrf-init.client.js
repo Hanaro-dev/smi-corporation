@@ -1,8 +1,15 @@
 /**
  * Plugin pour initialiser le token CSRF côté client
+ * Désactivé en développement
  */
 
 export default defineNuxtPlugin(async () => {
+  // Seulement en production
+  if (process.env.NODE_ENV !== 'production') {
+    console.info('🔧 CSRF token initialization disabled in development');
+    return;
+  }
+
   // Ne s'exécute que côté client
   if (import.meta.server) return;
 

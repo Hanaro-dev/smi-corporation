@@ -5,7 +5,7 @@ import { checkRateLimit } from './rate-limiter.js';
 import { ValidationError } from './error-handler.js';
 import { userCache, cacheKeys } from './cache.js';
 import { userDb } from './mock-db.js';
-import { createError, getCookie, getHeader } from './http-utils.js';
+import { createError, getCookie, getHeader, readBody, getQuery, setHeader, setResponseStatus, getRequestIP } from 'h3';
 
 /**
  * Rate limiting middleware
@@ -15,7 +15,7 @@ import { createError, getCookie, getHeader } from './http-utils.js';
  */
 export function rateLimit(maxRequests = 10, windowMs = 60000) {
   return (event) => {
-    const clientIP = getClientIP(event);
+    const clientIP = getRequestIP(event);
     
     const rateLimitResult = checkRateLimit(clientIP, { maxAttempts: maxRequests, windowMs });
     if (!rateLimitResult.allowed) {
@@ -250,7 +250,7 @@ export function logRequest(event) {
   const start = Date.now();
   const { method, url } = event.node.req;
   const userAgent = getHeader(event, 'user-agent');
-  const clientIP = getClientIP(event);
+  const clientIP = getRequestIP(event);
   
   console.log(`[${new Date().toISOString()}] ${method} ${url} - ${clientIP} - ${userAgent}`);
   
@@ -325,5 +325,3 @@ export function compose(...middlewares) {
   };
 }
 
-// Import helper for client IP
-export { getClientIP } from './ip-utils.js';

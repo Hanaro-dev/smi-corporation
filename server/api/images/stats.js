@@ -1,6 +1,6 @@
 import { Image, sequelize } from '../../models.js'
 import { Sequelize } from 'sequelize'
-import { getCookie, defineEventHandler, createError } from '../../utils/http-utils.js'
+import { getCookie, defineEventHandler, createError } from 'h3'
 import { sessionDb, userDb, roleDb } from '../../utils/mock-db.js'
 import { checkPermission } from '../../utils/permission-utils.js'
 

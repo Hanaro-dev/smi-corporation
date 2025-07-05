@@ -1,6 +1,5 @@
 import { Image } from '../../models.js'
-import { getCookie, getHeader, defineEventHandler, createError } from '../../utils/http-utils.js'
-import { getClientIP } from '../../utils/ip-utils.js'
+import { getCookie, getHeader, defineEventHandler, createError, getRequestIP, readBody } from 'h3'
 import { sessionDb, userDb, roleDb, auditDb } from '../../utils/mock-db.js'
 import { checkPermission } from '../../utils/permission-utils.js'
 import DOMPurify from 'dompurify'
@@ -80,7 +79,7 @@ export default defineEventHandler(async (event) => {
       userId: event.context.user.id,
       action: 'image_update',
       details: `Métadonnées d'image mises à jour: ${sanitizedTitle || image.originalFilename} (ID: ${id})`,
-      ipAddress: getClientIP(event) || 'unknown',
+      ipAddress: getRequestIP(event) || 'unknown',
       userAgent: getHeader(event, 'user-agent') || 'unknown'
     });
     

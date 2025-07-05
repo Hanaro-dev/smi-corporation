@@ -1,15 +1,64 @@
+import { defineEventHandler, createError, getMethod, readBody, getCookie } from 'h3';
 import { Permission } from "../../models.js";
-import auth from "../../middleware/auth.js";
-import { requirePermission } from "../../middleware/check-permission.js";
-import { logPermissionAction } from "../../services/audit-service.js";
+import { sessionDb, userDb, roleDb, permissionDb, auditDb } from '../../utils/mock-db.js';
+import { checkPermission } from "../../utils/permission-utils.js";
+import dotenv from "dotenv";
+
+// Charger les variables d'environnement
+dotenv.config();
+
+// Vérifier si on utilise la base de données simulée
+const useMockDb = process.env.USE_MOCK_DB === 'true';
 
 export default defineEventHandler(async (event) => {
-  await auth(event); // Protéger toutes les routes
-  const method = getMethod(event);
+  try {
+    // Authentification comme dans les autres endpoints
+    const token = getCookie(event, "auth_token");
+    
+    if (!token) {
+      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
+    }
+    
+    const session = sessionDb.findByToken(token);
+    if (!session) {
+      throw createError({ statusCode: 401, message: "Session invalide." });
+    }
+    
+    const user = await userDb.findById(session.userId);
+    if (!user) {
+      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
+    }
+
+    // Récupérer le rôle de l'utilisateur avec ses permissions
+    const role = roleDb.findByPk(user.role_id);
+    if (!role) {
+      throw createError({
+        statusCode: 500,
+        message: "Rôle utilisateur non trouvé."
+      });
+    }
+
+    // Mettre l'utilisateur dans le contexte
+    const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
+    delete userWithoutPassword.password;
+    
+    event.context.user = userWithoutPassword;
+    event.context.userRole = role;
+    event.context.permissions = role.getPermissions();
+
+    const method = getMethod(event);
 
   // GET /api/permissions - Liste des permissions
   if (method === "GET") {
+    // Vérifier les permissions de lecture
+    await checkPermission(event, "view");
+    
     try {
+      if (useMockDb) {
+        console.log("Mode base de données simulée: utilisation des données simulées pour /api/permissions");
+        return permissionDb.findAll();
+      }
+      
       const permissions = await Permission.findAll();
       return permissions;
     } catch (error) {
@@ -24,7 +73,7 @@ export default defineEventHandler(async (event) => {
   // POST /api/permissions - Création d'une permission
   if (method === "POST") {
     // Vérifier que l'utilisateur a le droit de créer des permissions
-    await requirePermission("manage_permissions")(event);
+    await checkPermission(event, "manage_permissions");
     
     const body = await readBody(event);
     
@@ -37,7 +86,33 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      // Vérifier si la permission existe déjà
+      if (useMockDb) {
+        // Vérifier si la permission existe déjà
+        const existingPermission = permissionDb.findOne({ where: { name: body.name } });
+        if (existingPermission) {
+          throw createError({
+            statusCode: 409, // Conflict
+            message: "Une permission avec ce nom existe déjà"
+          });
+        }
+
+        // Créer la permission
+        const newPermission = permissionDb.create({ name: body.name });
+        
+        // Journaliser l'action
+        const user = event.context.user;
+        auditDb.create({
+          userId: user.id,
+          action: 'permission_create',
+          details: `Permission créée: ${body.name}`,
+          ipAddress: 'unknown',
+          userAgent: 'unknown'
+        });
+        
+        return newPermission;
+      }
+      
+      // Mode base de données réelle
       const existingPermission = await Permission.findOne({ where: { name: body.name } });
       if (existingPermission) {
         throw createError({
@@ -51,13 +126,13 @@ export default defineEventHandler(async (event) => {
       
       // Journaliser l'action
       const user = event.context.user;
-      await logPermissionAction(
-        "create",
-        newPermission.id,
-        newPermission.name,
-        user.id,
-        user.name
-      );
+      auditDb.create({
+        userId: user.id,
+        action: 'permission_create',
+        details: `Permission créée: ${body.name}`,
+        ipAddress: 'unknown',
+        userAgent: 'unknown'
+      });
       
       return newPermission;
     } catch (error) {
@@ -75,4 +150,17 @@ export default defineEventHandler(async (event) => {
     statusCode: 405,
     message: "Méthode non autorisée"
   });
+  
+  } catch (error) {
+    // Intercepter les erreurs de connexion à la base de données
+    if (error.name && error.name.startsWith('Sequelize')) {
+      console.error("Erreur de base de données:", error);
+      throw createError({
+        statusCode: 503,
+        message: "Service de base de données temporairement indisponible."
+      });
+    }
+    // Laisser passer les autres erreurs
+    throw error;
+  }
 });

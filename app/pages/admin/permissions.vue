@@ -1,181 +1,408 @@
 <template>
-  <div class="permissions-manager">
-    <h1>Gestion des Rôles et Permissions</h1>
-    
-    <div class="container">
-      <!-- Gestion des rôles -->
-      <div class="roles-section">
-        <h2>Rôles</h2>
-        
-        <!-- Formulaire de création de rôle -->
-        <div class="card">
-          <h3>Créer un nouveau rôle</h3>
-          <form @submit.prevent="createRole">
-            <div class="form-group">
-              <label for="newRoleName">Nom du rôle</label>
-              <input 
-                id="newRoleName" 
-                v-model="newRoleName" 
-                required 
-                placeholder="Ex: Éditeur, Gestionnaire..."
-              >
-            </div>
-            <button type="submit" class="btn primary">Créer</button>
-          </form>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestion des Rôles et Permissions</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">Gérez les rôles utilisateurs et leurs permissions</p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <button
+          class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          @click="activeTab = activeTab === 'roles' ? 'permissions' : 'roles'"
+        >
+          <Icon :name="activeTab === 'roles' ? 'heroicons:key' : 'heroicons:user-group'" class="w-4 h-4 mr-2" />
+          {{ activeTab === 'roles' ? 'Voir permissions' : 'Voir rôles' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+            <Icon name="heroicons:user-group" class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total rôles</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ roles.length }}</p>
+          </div>
         </div>
-        
-        <!-- Liste des rôles existants -->
-        <div v-if="roles.length > 0" class="card">
-          <h3>Rôles existants</h3>
-          <div v-for="role in roles" :key="role.id" class="role-item">
-            <div class="role-header">
-              <h4>{{ role.name }}</h4>
-              <div class="role-actions">
-                <button class="btn small" @click="selectRoleForEdit(role)">Modifier</button>
-                <button class="btn small danger" @click="confirmDeleteRole(role)">Supprimer</button>
-              </div>
-            </div>
-            
-            <!-- Liste des permissions du rôle -->
-            <div class="permissions-list">
-              <h5>Permissions:</h5>
-              <div v-if="role.Permissions && role.Permissions.length > 0" class="permission-tags">
-                <span v-for="permission in role.Permissions" :key="permission.id" class="permission-tag">
-                  {{ permission.name }}
-                  <button class="remove-permission" @click="removePermission(role.id, permission.id)">&times;</button>
-                </span>
-              </div>
-              <p v-else class="no-items">Aucune permission</p>
-            </div>
-            
-            <!-- Formulaire d'ajout de permission -->
-            <div class="add-permission-form">
-              <select v-model="rolePermissions[role.id]" :disabled="!permissions.length">
-                <option value="" disabled>Ajouter une permission...</option>
-                <option 
-                  v-for="permission in getAvailablePermissions(role)" 
-                  :key="permission.id" 
-                  :value="permission.id"
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+            <Icon name="heroicons:key" class="w-5 h-5 text-green-600 dark:text-green-400" />
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total permissions</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ permissions.length }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
+            <Icon name="heroicons:link" class="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Associations</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ totalAssociations }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
+            <Icon name="heroicons:shield-check" class="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Niveau max</p>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ maxPermissionsRole }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglets -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
+      <div class="border-b border-gray-200 dark:border-gray-700 px-4">
+        <div class="flex space-x-8">
+          <button 
+            class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+            :class="activeTab === 'roles' 
+              ? 'border-blue-600 text-blue-600 dark:text-blue-400' 
+              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+            @click="activeTab = 'roles'"
+          >
+            <Icon name="heroicons:user-group" class="w-4 h-4 mr-2 inline" />
+            Rôles ({{ roles.length }})
+          </button>
+          <button 
+            class="py-4 px-1 border-b-2 font-medium text-sm transition-colors"
+            :class="activeTab === 'permissions' 
+              ? 'border-blue-600 text-blue-600 dark:text-blue-400' 
+              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
+            @click="activeTab = 'permissions'"
+          >
+            <Icon name="heroicons:key" class="w-4 h-4 mr-2 inline" />
+            Permissions ({{ permissions.length }})
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenu des onglets -->
+      <div class="p-6">
+        <!-- Onglet Rôles -->
+        <div v-if="activeTab === 'roles'" class="space-y-6">
+          <!-- Formulaire de création de rôle -->
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Créer un nouveau rôle</h3>
+            <form class="flex space-x-3" @submit.prevent="createRole">
+              <div class="flex-1">
+                <input
+                  v-model="newRoleName"
+                  type="text"
+                  placeholder="Nom du rôle (ex: Éditeur, Gestionnaire...)"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  required
                 >
-                  {{ permission.name }}
-                </option>
-              </select>
-              <button 
-                class="btn small" 
-                :disabled="!rolePermissions[role.id]" 
-                @click="addPermissionToRole(role.id)"
+              </div>
+              <button
+                type="submit"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
               >
-                Ajouter
+                <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
+                Créer
               </button>
+            </form>
+          </div>
+
+          <!-- Liste des rôles -->
+          <div v-if="roles.length > 0" class="space-y-4">
+            <div v-for="role in roles" :key="role.id" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <div class="flex items-start justify-between mb-4">
+                <div>
+                  <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ role.name }}</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ role.Permissions?.length || 0 }} permission(s) attribuée(s)</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <button
+                    class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    @click="selectRoleForEdit(role)"
+                  >
+                    <Icon name="heroicons:pencil" class="w-4 h-4 mr-1" />
+                    Modifier
+                  </button>
+                  <button
+                    class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
+                    @click="confirmDeleteRole(role)"
+                  >
+                    <Icon name="heroicons:trash" class="w-4 h-4 mr-1" />
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+
+              <!-- Permissions du rôle -->
+              <div class="mb-4">
+                <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Permissions actuelles :</h5>
+                <div v-if="role.Permissions && role.Permissions.length > 0" class="flex flex-wrap gap-2">
+                  <span 
+                    v-for="permission in role.Permissions" 
+                    :key="permission.id"
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400"
+                  >
+                    {{ permission.name }}
+                    <button
+                      class="ml-2 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200"
+                      @click="removePermission(role.id, permission.id)"
+                    >
+                      <Icon name="heroicons:x-mark" class="w-3 h-3" />
+                    </button>
+                  </span>
+                </div>
+                <p v-else class="text-sm text-gray-500 dark:text-gray-400 italic">Aucune permission attribuée</p>
+              </div>
+
+              <!-- Formulaire d'ajout de permission -->
+              <div class="flex space-x-3">
+                <select
+                  v-model="rolePermissions[role.id]"
+                  class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  :disabled="!getAvailablePermissions(role).length"
+                >
+                  <option value="" disabled>
+                    {{ getAvailablePermissions(role).length ? 'Sélectionner une permission à ajouter...' : 'Toutes les permissions sont déjà attribuées' }}
+                  </option>
+                  <option 
+                    v-for="permission in getAvailablePermissions(role)" 
+                    :key="permission.id" 
+                    :value="permission.id"
+                  >
+                    {{ permission.name }}
+                  </option>
+                </select>
+                <button
+                  class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  :disabled="!rolePermissions[role.id]"
+                  @click="addPermissionToRole(role.id)"
+                >
+                  <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
+                  Ajouter
+                </button>
+              </div>
             </div>
           </div>
+          <div v-else class="text-center py-8">
+            <Icon name="heroicons:user-group" class="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p class="text-gray-500 dark:text-gray-400">Aucun rôle défini. Créez votre premier rôle ci-dessus.</p>
+          </div>
         </div>
-        <p v-else class="no-items">Aucun rôle défini</p>
-      </div>
-      
-      <!-- Gestion des permissions -->
-      <div class="permissions-section">
-        <h2>Permissions</h2>
-        
-        <!-- Formulaire de création de permission -->
-        <div class="card">
-          <h3>Créer une nouvelle permission</h3>
-          <form @submit.prevent="createPermission">
-            <div class="form-group">
-              <label for="newPermissionName">Nom de la permission</label>
-              <input 
-                id="newPermissionName" 
-                v-model="newPermissionName" 
-                required 
-                placeholder="Ex: create_user, edit_content..."
+
+        <!-- Onglet Permissions -->
+        <div v-else class="space-y-6">
+          <!-- Formulaire de création de permission -->
+          <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Créer une nouvelle permission</h3>
+            <form class="flex space-x-3" @submit.prevent="createPermission">
+              <div class="flex-1">
+                <input
+                  v-model="newPermissionName"
+                  type="text"
+                  placeholder="Nom de la permission (ex: create_user, edit_content...)"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  required
+                >
+              </div>
+              <button
+                type="submit"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
               >
-            </div>
-            <button type="submit" class="btn primary">Créer</button>
-          </form>
-        </div>
-        
-        <!-- Liste des permissions existantes -->
-        <div v-if="permissions.length > 0" class="card">
-          <h3>Permissions existantes</h3>
-          <div v-for="permission in permissions" :key="permission.id" class="permission-item">
-            <div class="permission-name">{{ permission.name }}</div>
-            <div class="permission-actions">
-              <button class="btn small" @click="selectPermissionForEdit(permission)">Modifier</button>
-              <button class="btn small danger" @click="confirmDeletePermission(permission)">Supprimer</button>
+                <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
+                Créer
+              </button>
+            </form>
+          </div>
+
+          <!-- Liste des permissions -->
+          <div v-if="permissions.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+              v-for="permission in permissions"
+              :key="permission.id"
+              class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ permission.name }}</h4>
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Utilisée dans {{ getRolesUsingPermission(permission.id).length }} rôle(s)
+                  </p>
+                  <div v-if="getRolesUsingPermission(permission.id).length > 0" class="mt-2">
+                    <div class="flex flex-wrap gap-1">
+                      <span
+                        v-for="role in getRolesUsingPermission(permission.id)"
+                        :key="role.id"
+                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                      >
+                        {{ role.name }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex flex-col space-y-2 ml-4">
+                  <button
+                    class="inline-flex items-center px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    @click="selectPermissionForEdit(permission)"
+                  >
+                    <Icon name="heroicons:pencil" class="w-3 h-3 mr-1" />
+                    Modifier
+                  </button>
+                  <button
+                    class="inline-flex items-center px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium transition-colors"
+                    @click="confirmDeletePermission(permission)"
+                  >
+                    <Icon name="heroicons:trash" class="w-3 h-3 mr-1" />
+                    Supprimer
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+          <div v-else class="text-center py-8">
+            <Icon name="heroicons:key" class="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p class="text-gray-500 dark:text-gray-400">Aucune permission définie. Créez votre première permission ci-dessus.</p>
+          </div>
         </div>
-        <p v-else class="no-items">Aucune permission définie</p>
       </div>
     </div>
-    
-    <!-- Modals -->
-    <div v-if="editingRole" class="modal">
-      <div class="modal-content">
-        <h3>Modifier le rôle</h3>
+
+    <!-- Loading state -->
+    <div v-if="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6">
+        <div class="flex items-center">
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <span class="ml-3 text-gray-600 dark:text-gray-400">Chargement...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal d'édition de rôle -->
+    <div v-if="editingRole" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Modifier le rôle</h3>
         <form @submit.prevent="updateRole">
-          <div class="form-group">
-            <label for="editRoleName">Nom du rôle</label>
-            <input id="editRoleName" v-model="editingRole.name" required >
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom du rôle</label>
+            <input
+              v-model="editingRole.name"
+              type="text"
+              required
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            >
           </div>
-          <div class="modal-actions">
-            <button type="button" class="btn" @click="cancelEditRole">Annuler</button>
-            <button type="submit" class="btn primary">Enregistrer</button>
+          <div class="flex justify-end space-x-3">
+            <button
+              type="button"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              @click="cancelEditRole"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              Enregistrer
+            </button>
           </div>
         </form>
       </div>
     </div>
-    
-    <div v-if="editingPermission" class="modal">
-      <div class="modal-content">
-        <h3>Modifier la permission</h3>
+
+    <!-- Modal d'édition de permission -->
+    <div v-if="editingPermission" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Modifier la permission</h3>
         <form @submit.prevent="updatePermission">
-          <div class="form-group">
-            <label for="editPermissionName">Nom de la permission</label>
-            <input id="editPermissionName" v-model="editingPermission.name" required >
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom de la permission</label>
+            <input
+              v-model="editingPermission.name"
+              type="text"
+              required
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            >
           </div>
-          <div class="modal-actions">
-            <button type="button" class="btn" @click="cancelEditPermission">Annuler</button>
-            <button type="submit" class="btn primary">Enregistrer</button>
+          <div class="flex justify-end space-x-3">
+            <button
+              type="button"
+              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              @click="cancelEditPermission"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              Enregistrer
+            </button>
           </div>
         </form>
       </div>
     </div>
-    
-    <div v-if="confirmDialog.show" class="modal">
-      <div class="modal-content">
-        <h3>{{ confirmDialog.title }}</h3>
-        <p>{{ confirmDialog.message }}</p>
-        <div class="modal-actions">
-          <button type="button" class="btn" @click="confirmDialog.show = false">Annuler</button>
-          <button type="button" class="btn danger" @click="confirmDialog.onConfirm">Confirmer</button>
+
+    <!-- Modal de confirmation de suppression -->
+    <div v-if="confirmDialog.show" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">{{ confirmDialog.title }}</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">{{ confirmDialog.message }}</p>
+        <div class="flex justify-end space-x-3">
+          <button
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            @click="confirmDialog.show = false"
+          >
+            Annuler
+          </button>
+          <button
+            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+            @click="confirmDialog.onConfirm"
+          >
+            Confirmer
+          </button>
         </div>
       </div>
-    </div>
-    
-    <!-- Notifications -->
-    <div v-if="notification.show" :class="['notification', notification.type]">
-      {{ notification.message }}
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { toast } from '~/composables/useToast';
+import { ref, computed, onMounted } from "vue";
+import { toast } from "~/composables/useToast";
 
-// État de l'application
+// Configuration de la page
+definePageMeta({
+  layout: 'admin',
+  middleware: 'auth',
+  permission: 'manage_permissions'
+});
+
+const { success, error: showError, warning } = toast;
+
+// État
 const roles = ref([]);
 const permissions = ref([]);
+const isLoading = ref(false);
+const activeTab = ref('roles');
 const newRoleName = ref("");
 const newPermissionName = ref("");
 const editingRole = ref(null);
 const editingPermission = ref(null);
 const rolePermissions = ref({});
-const { success, error: showError } = toast;
 
-// Gestion des notifications et confirmations
-const notification = ref({ show: false, message: "", type: "info" });
+// Dialog de confirmation
 const confirmDialog = ref({
   show: false,
   title: "",
@@ -183,19 +410,43 @@ const confirmDialog = ref({
   onConfirm: () => {},
 });
 
-// Charger les données
-onMounted(async () => {
-  await loadData();
+// Computed properties
+const totalAssociations = computed(() => {
+  return roles.value.reduce((total, role) => {
+    return total + (role.Permissions?.length || 0);
+  }, 0);
 });
 
+const maxPermissionsRole = computed(() => {
+  if (roles.value.length === 0) return 'N/A';
+  const maxPerms = Math.max(...roles.value.map(role => role.Permissions?.length || 0));
+  const roleWithMax = roles.value.find(role => (role.Permissions?.length || 0) === maxPerms);
+  return roleWithMax ? `${roleWithMax.name} (${maxPerms})` : 'N/A';
+});
+
+// Utility functions
+const getAvailablePermissions = (role) => {
+  const rolePermissionIds = (role.Permissions || []).map(p => p.id);
+  return permissions.value.filter(p => !rolePermissionIds.includes(p.id));
+};
+
+const getRolesUsingPermission = (permissionId) => {
+  return roles.value.filter(role => 
+    (role.Permissions || []).some(p => p.id === permissionId)
+  );
+};
+
+// API functions
 const loadData = async () => {
+  isLoading.value = true;
   try {
-    // Charger les rôles avec leurs permissions
-    const rolesData = await $fetch("/api/roles");
-    roles.value = rolesData;
+    // Charger les rôles et permissions en parallèle
+    const [rolesData, permissionsData] = await Promise.all([
+      $fetch("/api/roles"),
+      $fetch("/api/permissions")
+    ]);
     
-    // Charger les permissions disponibles
-    const permissionsData = await $fetch("/api/permissions");
+    roles.value = rolesData;
     permissions.value = permissionsData;
     
     // Initialiser l'état des permissions par rôle
@@ -204,26 +455,28 @@ const loadData = async () => {
     });
   } catch (error) {
     console.error("Erreur lors du chargement des données :", error);
-    showNotification("Erreur lors du chargement des données", "error");
+    showError("Erreur lors du chargement des données");
+  } finally {
+    isLoading.value = false;
   }
 };
 
 // Gestion des rôles
 const createRole = async () => {
-  if (!newRoleName.value) return;
+  if (!newRoleName.value.trim()) return;
   
   try {
     await $fetch("/api/roles", {
       method: "POST",
-      body: { name: newRoleName.value },
+      body: { name: newRoleName.value.trim() },
     });
     
     newRoleName.value = "";
     await loadData();
-    showNotification("Rôle créé avec succès", "success");
+    success("Rôle créé avec succès");
   } catch (error) {
     console.error("Erreur lors de la création du rôle :", error);
-    showNotification("Erreur lors de la création du rôle", "error");
+    showError(error.data?.message || "Erreur lors de la création du rôle");
   }
 };
 
@@ -246,10 +499,10 @@ const updateRole = async () => {
     
     editingRole.value = null;
     await loadData();
-    showNotification("Rôle mis à jour avec succès", "success");
+    success("Rôle mis à jour avec succès");
   } catch (error) {
     console.error("Erreur lors de la mise à jour du rôle :", error);
-    showNotification("Erreur lors de la mise à jour du rôle", "error");
+    showError(error.data?.message || "Erreur lors de la mise à jour du rôle");
   }
 };
 
@@ -257,7 +510,7 @@ const confirmDeleteRole = (role) => {
   confirmDialog.value = {
     show: true,
     title: "Supprimer le rôle",
-    message: `Êtes-vous sûr de vouloir supprimer le rôle "${role.name}" ?`,
+    message: `Êtes-vous sûr de vouloir supprimer le rôle "${role.name}" ? Cette action est irréversible.`,
     onConfirm: () => deleteRole(role.id),
   };
 };
@@ -270,35 +523,30 @@ const deleteRole = async (roleId) => {
     
     confirmDialog.value.show = false;
     await loadData();
-    showNotification("Rôle supprimé avec succès", "success");
+    warning("Rôle supprimé avec succès");
   } catch (error) {
     console.error("Erreur lors de la suppression du rôle :", error);
     confirmDialog.value.show = false;
-    
-    if (error.response && error.response.status === 409) {
-      showNotification("Ce rôle est attribué à des utilisateurs et ne peut pas être supprimé", "error");
-    } else {
-      showNotification("Erreur lors de la suppression du rôle", "error");
-    }
+    showError(error.data?.message || "Erreur lors de la suppression du rôle");
   }
 };
 
 // Gestion des permissions
 const createPermission = async () => {
-  if (!newPermissionName.value) return;
+  if (!newPermissionName.value.trim()) return;
   
   try {
     await $fetch("/api/permissions", {
       method: "POST",
-      body: { name: newPermissionName.value },
+      body: { name: newPermissionName.value.trim() },
     });
     
     newPermissionName.value = "";
     await loadData();
-    showNotification("Permission créée avec succès", "success");
+    success("Permission créée avec succès");
   } catch (error) {
     console.error("Erreur lors de la création de la permission :", error);
-    showNotification("Erreur lors de la création de la permission", "error");
+    showError(error.data?.message || "Erreur lors de la création de la permission");
   }
 };
 
@@ -321,10 +569,10 @@ const updatePermission = async () => {
     
     editingPermission.value = null;
     await loadData();
-    showNotification("Permission mise à jour avec succès", "success");
+    success("Permission mise à jour avec succès");
   } catch (error) {
     console.error("Erreur lors de la mise à jour de la permission :", error);
-    showNotification("Erreur lors de la mise à jour de la permission", "error");
+    showError(error.data?.message || "Erreur lors de la mise à jour de la permission");
   }
 };
 
@@ -332,7 +580,7 @@ const confirmDeletePermission = (permission) => {
   confirmDialog.value = {
     show: true,
     title: "Supprimer la permission",
-    message: `Êtes-vous sûr de vouloir supprimer la permission "${permission.name}" ?`,
+    message: `Êtes-vous sûr de vouloir supprimer la permission "${permission.name}" ? Cette action est irréversible.`,
     onConfirm: () => deletePermission(permission.id),
   };
 };
@@ -345,26 +593,15 @@ const deletePermission = async (permissionId) => {
     
     confirmDialog.value.show = false;
     await loadData();
-    showNotification("Permission supprimée avec succès", "success");
+    warning("Permission supprimée avec succès");
   } catch (error) {
     console.error("Erreur lors de la suppression de la permission :", error);
     confirmDialog.value.show = false;
-    
-    if (error.response && error.response.status === 409) {
-      showNotification("Cette permission est attribuée à des rôles et ne peut pas être supprimée", "error");
-    } else {
-      showNotification("Erreur lors de la suppression de la permission", "error");
-    }
+    showError(error.data?.message || "Erreur lors de la suppression de la permission");
   }
 };
 
-// Gestion des permissions des rôles
-const getAvailablePermissions = (role) => {
-  // Filtrer les permissions qui ne sont pas déjà attribuées au rôle
-  const rolePermissionIds = (role.Permissions || []).map(p => p.id);
-  return permissions.value.filter(p => !rolePermissionIds.includes(p.id));
-};
-
+// Gestion des associations rôle-permission
 const addPermissionToRole = async (roleId) => {
   const permissionId = rolePermissions.value[roleId];
   if (!permissionId) return;
@@ -377,10 +614,10 @@ const addPermissionToRole = async (roleId) => {
     
     rolePermissions.value[roleId] = "";
     await loadData();
-    showNotification("Permission ajoutée avec succès", "success");
+    success("Permission ajoutée avec succès");
   } catch (error) {
     console.error("Erreur lors de l'ajout de la permission :", error);
-    showNotification("Erreur lors de l'ajout de la permission", "error");
+    showError(error.data?.message || "Erreur lors de l'ajout de la permission");
   }
 };
 
@@ -391,249 +628,14 @@ const removePermission = async (roleId, permissionId) => {
     });
     
     await loadData();
-    showNotification("Permission retirée avec succès", "success");
+    success("Permission retirée avec succès");
   } catch (error) {
     console.error("Erreur lors du retrait de la permission :", error);
-    showNotification("Erreur lors du retrait de la permission", "error");
+    showError(error.data?.message || "Erreur lors du retrait de la permission");
   }
 };
 
-// Notifications
-const showNotification = (message, type = "info") => {
-  notification.value = { show: true, message, type };
-  setTimeout(() => {
-    notification.value.show = false;
-  }, 3000);
-  
-  // Utiliser aussi le toast du système
-  if (type === 'success') success(message);
-  else showError(message);
-};
+onMounted(() => {
+  loadData();
+});
 </script>
-
-<style scoped>
-.permissions-manager {
-  padding: 1rem;
-}
-
-h1 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-}
-
-h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid #eaeaea;
-  padding-bottom: 0.5rem;
-}
-
-.container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-}
-
-.card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
-input, select {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.btn {
-  background-color: #f0f0f0;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s;
-}
-
-.btn:hover {
-  background-color: #e0e0e0;
-}
-
-.btn.primary {
-  background-color: #4caf50;
-  color: white;
-}
-
-.btn.primary:hover {
-  background-color: #3e8e41;
-}
-
-.btn.danger {
-  background-color: #f44336;
-  color: white;
-}
-
-.btn.danger:hover {
-  background-color: #d32f2f;
-}
-
-.btn.small {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
-}
-
-.role-item, .permission-item {
-  border-bottom: 1px solid #eaeaea;
-  padding: 1rem 0;
-}
-
-.role-item:last-child, .permission-item:last-child {
-  border-bottom: none;
-}
-
-.role-header, .permission-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.role-actions, .permission-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.permissions-list {
-  margin: 0.75rem 0;
-  padding-left: 1rem;
-}
-
-.permission-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.permission-tag {
-  background-color: #e0f2f1;
-  color: #00796b;
-  padding: 0.25rem 0.5rem;
-  border-radius: 16px;
-  font-size: 0.875rem;
-  display: inline-flex;
-  align-items: center;
-}
-
-.remove-permission {
-  background: none;
-  border: none;
-  color: #00796b;
-  margin-left: 0.25rem;
-  cursor: pointer;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.add-permission-form {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  align-items: center;
-}
-
-.add-permission-form select {
-  flex: 1;
-}
-
-.no-items {
-  color: #888;
-  font-style: italic;
-  margin: 0.5rem 0;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 500px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-}
-
-.notification {
-  position: fixed;
-  bottom: 1rem;
-  right: 1rem;
-  padding: 1rem;
-  border-radius: 4px;
-  color: white;
-  max-width: 300px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
-  z-index: 1001;
-}
-
-.notification.success {
-  background-color: #4caf50;
-}
-
-.notification.error {
-  background-color: #f44336;
-}
-
-.notification.info {
-  background-color: #2196f3;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(30px); }
-}
-
-@media (max-width: 768px) {
-  .container {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

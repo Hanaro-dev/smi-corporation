@@ -1,5 +1,4 @@
-import { defineEventHandler, createError, readBody, getCookie, getHeader } from "../../utils/http-utils.js";
-import { getClientIP } from "../../utils/ip-utils.js";
+import { defineEventHandler, createError, readBody, getCookie, getHeader, getRequestIP } from 'h3';
 import { Organigramme, Employee, User } from "../../models.js";
 import { sessionDb, userDb, roleDb, auditDb, organigrammeDb, employeeDb } from '../../utils/mock-db.js';
 import { checkPermission } from "../../utils/permission-utils.js";
@@ -214,7 +213,7 @@ export default defineEventHandler(async (event) => {
           userId: event.context.user.id,
           action: 'organigramme_update',
           details: `Organigramme modifié: ${body.title || organigramme.title} (ID: ${id})`,
-          ipAddress: getClientIP(event) || 'unknown',
+          ipAddress: getRequestIP(event) || 'unknown',
           userAgent: getHeader(event, 'user-agent') || 'unknown'
         });
         
@@ -271,7 +270,7 @@ export default defineEventHandler(async (event) => {
           userId: event.context.user.id,
           action: 'organigramme_delete',
           details: `Organigramme supprimé: ${organigramme.title} (ID: ${id})`,
-          ipAddress: getClientIP(event) || 'unknown',
+          ipAddress: getRequestIP(event) || 'unknown',
           userAgent: getHeader(event, 'user-agent') || 'unknown'
         });
         

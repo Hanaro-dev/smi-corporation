@@ -1,8 +1,10 @@
+import { defineEventHandler, getCookie } from 'h3';
 import { userDb, sessionDb, roleDb } from '../../utils/mock-db.js';
 
 export default defineEventHandler(async (event) => {
-  // Récupérer le token depuis le cookie
-  const token = getCookie(event, "auth_token");
+  try {
+    // Récupérer le token depuis le cookie
+    const token = getCookie(event, "auth_token");
   
   if (!token) {
     return { user: null };
@@ -41,4 +43,9 @@ export default defineEventHandler(async (event) => {
   return { 
     user: userWithoutPassword
   };
+  
+  } catch (error) {
+    console.error('Erreur dans session.get.js:', error);
+    return { user: null };
+  }
 });

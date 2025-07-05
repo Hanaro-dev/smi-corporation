@@ -2,11 +2,10 @@ import { AuthService } from '../../services/auth-service.js';
 import { validateUserLogin } from '../../utils/input-validation.js';
 import { checkRateLimit } from '../../utils/rate-limiter.js';
 import { ValidationError } from '../../utils/error-handler.js';
-import { getClientIP } from '../../utils/ip-utils.js';
-import { defineEventHandler, createError, readBody } from '../../utils/http-utils.js';
+import { getRequestIP, defineEventHandler, createError, readBody, setCookie } from 'h3';
 
 export default defineEventHandler(async (event) => {
-  const clientIP = getClientIP(event);
+  const clientIP = getRequestIP(event);
   
   // Rate limiting check
   const rateLimitResult = checkRateLimit(clientIP, { maxAttempts: 5, windowMs: 60000 });
