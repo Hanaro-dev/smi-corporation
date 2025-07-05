@@ -1,269 +1,187 @@
-import { defineEventHandler, createError, getQuery, readBody, getCookie, getHeader, getRequestIP } from 'h3';
+import { defineEventHandler, createError, getQuery, readBody } from 'h3';
 import { Organigramme, Employee, User, sequelize } from "../../models.js";
 import { Op } from "sequelize";
-import { sessionDb, userDb, roleDb, auditDb, organigrammeDb, employeeDb } from '../../utils/mock-db.js';
+import { organigrammeDb, employeeDb, userDb } from '../../utils/mock-db.js';
 import { checkPermission } from "../../utils/permission-utils.js";
-import DOMPurify from "dompurify";
+import { authenticateUser, validateIdParameter, handleDatabaseError } from '../../services/auth-middleware.js';
+import { OrganigrammeValidator } from '../../services/validation-service.js';
+import { AuditService } from '../../services/audit-service.js';
+import { HTTP_STATUS, ERROR_MESSAGES, PAGINATION } from '../../constants/api-constants.js';
 import dotenv from "dotenv";
 
-// Charger les variables d'environnement
 dotenv.config();
-
-// Vérifier si on utilise la base de données simulée
 const useMockDb = process.env.USE_MOCK_DB === 'true';
 
 export default defineEventHandler(async (event) => {
   try {
-    // Authentification obligatoire pour tous les endpoints d'organigrammes
-    const token = getCookie(event, "auth_token");
-    
-    if (!token) {
-      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
-    }
-    
-    // Rechercher la session
-    const session = sessionDb.findByToken(token);
-    if (!session) {
-      throw createError({ statusCode: 401, message: "Session invalide." });
-    }
-    
-    // Rechercher l'utilisateur
-    const user = await userDb.findById(session.userId);
-    if (!user) {
-      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
-    }
-
-    // Récupérer le rôle de l'utilisateur avec ses permissions
-    const role = roleDb.findByPk(user.role_id);
-    if (!role) {
-      throw createError({
-        statusCode: 500,
-        message: "Rôle utilisateur non trouvé."
-      });
-    }
-
-    // Mettre l'utilisateur dans le contexte
-    const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
-    delete userWithoutPassword.password;
-    
-    // Ajouter les permissions à l'utilisateur pour la fonction checkPermission
-    const permissions = role.getPermissions();
-    userWithoutPassword.permissions = permissions.map(p => p.name);
-    
-    event.context.user = userWithoutPassword;
-    event.context.userRole = role;
-    event.context.permissions = permissions;
+    // Authenticate user and set context
+    await authenticateUser(event);
 
     const method = event.node.req.method;
 
     // GET /api/organigrammes - Liste paginée des organigrammes
     if (method === "GET") {
-      // Vérifier les permissions de lecture
       await checkPermission(event, "view");
-      
-      const { page = 1, limit = 10, search = '', status = '' } = getQuery(event);
-      const offset = (page - 1) * limit;
-      
-      if (useMockDb) {
-        console.log("Mode base de données simulée: utilisation des données simulées pour /api/organigrammes");
-        let allOrganigrammes = organigrammeDb.findAll();
-        
-        // Filtrer par recherche si nécessaire
-        if (search) {
-          const searchLower = search.toLowerCase();
-          allOrganigrammes = allOrganigrammes.filter(org => 
-            org.title.toLowerCase().includes(searchLower) ||
-            (org.description && org.description.toLowerCase().includes(searchLower))
-          );
-        }
-        
-        // Filtrer par statut si spécifié
-        if (status && ['draft', 'published'].includes(status)) {
-          allOrganigrammes = allOrganigrammes.filter(org => org.status === status);
-        }
-        
-        const total = allOrganigrammes.length;
-        const startIndex = parseInt(offset);
-        const endIndex = startIndex + parseInt(limit);
-        const organigrammes = allOrganigrammes.slice(startIndex, endIndex);
-        
-        // Enrichir avec les informations utilisateur
-        const enrichedOrganigrammes = organigrammes.map(org => {
-          const orgUser = userDb.findById(org.userId);
-          return {
-            ...org,
-            user: orgUser ? {
-              id: orgUser.id,
-              name: orgUser.name,
-              username: orgUser.username
-            } : null
-          };
-        });
-        
-        return { 
-          organigrammes: enrichedOrganigrammes,
-          total,
-          page: parseInt(page),
-          totalPages: Math.ceil(total / parseInt(limit))
-        };
-      }
-      
-      // Mode base de données réelle
-      const where = {};
-      if (search) {
-        where[Op.or] = [
-          { title: { [Op.like]: `%${search}%` } },
-          { description: { [Op.like]: `%${search}%` } }
-        ];
-      }
-      if (status && ['draft', 'published'].includes(status)) {
-        where.status = status;
-      }
-      
-      const { count, rows } = await Organigramme.findAndCountAll({
-        where,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        order: [['createdAt', 'DESC']],
-        include: [
-          {
-            model: User,
-            attributes: ['id', 'name', 'username']
-          }
-        ]
-      });
-      
-      return { 
-        organigrammes: rows,
-        total: count,
-        page: parseInt(page),
-        totalPages: Math.ceil(count / limit)
-      };
+      return await getOrganigrammesList(event);
     }
 
     // POST /api/organigrammes - Créer un nouvel organigramme
     if (method === "POST") {
-      // Vérifier les permissions de gestion des organigrammes
       await checkPermission(event, "manage_organigrammes");
-      
-      const body = await readBody(event);
-      
-      // Validation des données d'entrée
-      const errors = validateOrganigrammeInput(body);
-      if (Object.keys(errors).length > 0) {
-        throw createError({ statusCode: 400, message: errors });
-      }
-      
-      // Sanitiser les données
-      const sanitizedTitle = DOMPurify.sanitize(body.title.trim());
-      const sanitizedDescription = body.description ? DOMPurify.sanitize(body.description.trim()) : null;
-      
-      try {
-        let newOrganigramme;
-        
-        if (useMockDb) {
-          // Générer un slug automatiquement
-          const slug = generateSlugFromTitle(sanitizedTitle);
-          
-          // Vérifier l'unicité du slug
-          const existingOrg = organigrammeDb.findOne({ where: { slug } });
-          if (existingOrg) {
-            throw createError({
-              statusCode: 400,
-              message: { slug: "Cette URL d'organigramme est déjà utilisée." }
-            });
-          }
-          
-          newOrganigramme = organigrammeDb.create({
-            title: sanitizedTitle,
-            description: sanitizedDescription,
-            slug,
-            status: body.status || 'draft',
-            userId: event.context.user.id
-          });
-        } else {
-          // Créer l'organigramme avec la vraie base de données
-          newOrganigramme = await Organigramme.create({
-            title: sanitizedTitle,
-            description: sanitizedDescription,
-            status: body.status || 'draft',
-            userId: event.context.user.id
-          });
-        }
-        
-        // Enregistrer l'activité dans les logs d'audit
-        await auditDb.create({
-          userId: event.context.user.id,
-          action: 'organigramme_create',
-          details: `Organigramme créé: ${sanitizedTitle}`,
-          ipAddress: getRequestIP(event) || 'unknown',
-          userAgent: getHeader(event, 'user-agent') || 'unknown'
-        });
-        
-        return newOrganigramme;
-      } catch (error) {
-        if (error.statusCode) {
-          throw error; // Re-throw createError instances
-        }
-        console.error('Erreur lors de la création de l\'organigramme:', error);
-        throw createError({
-          statusCode: 500,
-          message: "Erreur lors de la création de l'organigramme."
-        });
-      }
+      return await createOrganigramme(event);
     }
 
-    // Méthode non supportée
-    throw createError({ statusCode: 405, message: "Méthode non autorisée." });
+    throw createError({ 
+      statusCode: HTTP_STATUS.METHOD_NOT_ALLOWED, 
+      message: ERROR_MESSAGES.GENERIC.METHOD_NOT_ALLOWED 
+    });
     
   } catch (error) {
-    // Intercepter les erreurs de connexion à la base de données
-    if (error.name && error.name.startsWith('Sequelize')) {
-      console.error("Erreur de base de données:", error);
-      throw createError({
-        statusCode: 503,
-        message: "Service de base de données temporairement indisponible."
-      });
-    }
-    // Laisser passer les autres erreurs
-    throw error;
+    handleDatabaseError(error, "gestion des organigrammes");
   }
 });
 
 /**
- * Valide les données d'entrée pour un organigramme
- * @param {Object} data - Données à valider
- * @returns {Object} Erreurs de validation
+ * Get paginated list of organigrammes
  */
-function validateOrganigrammeInput(data) {
-  const errors = {};
+async function getOrganigrammesList(event) {
+  const { page = 1, limit = PAGINATION.DEFAULT_LIMIT, search = '', status = '' } = getQuery(event);
+  const offset = (page - 1) * limit;
   
-  if (!data.title || typeof data.title !== 'string' || data.title.trim().length === 0) {
-    errors.title = "Le titre est requis.";
-  } else if (data.title.trim().length < 3 || data.title.trim().length > 255) {
-    errors.title = "Le titre doit contenir entre 3 et 255 caractères.";
+  try {
+    if (useMockDb) {
+      return await getOrganigrammesFromMockDb(search, status, offset, limit, page);
+    }
+    return await getOrganigrammesFromRealDb(search, status, offset, limit, page);
+  } catch (error) {
+    handleDatabaseError(error, "récupération des organigrammes");
   }
-  
-  if (data.description && typeof data.description !== 'string') {
-    errors.description = "La description doit être une chaîne de caractères.";
-  }
-  
-  if (data.status && !['draft', 'published'].includes(data.status)) {
-    errors.status = "Le statut doit être 'draft' ou 'published'.";
-  }
-  
-  return errors;
 }
 
 /**
- * Génère un slug à partir du titre
- * @param {string} title - Titre à convertir
- * @returns {string} Slug généré
+ * Create new organigramme
  */
-function generateSlugFromTitle(title) {
-  return title
-    .toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+async function createOrganigramme(event) {
+  const body = await readBody(event);
+  
+  // Validate input
+  const errors = OrganigrammeValidator.validate(body);
+  if (Object.keys(errors).length > 0) {
+    throw createError({ statusCode: HTTP_STATUS.BAD_REQUEST, message: errors });
+  }
+  
+  // Sanitize data
+  const sanitizedData = OrganigrammeValidator.sanitize(body);
+  
+  try {
+    let newOrganigramme;
+    
+    if (useMockDb) {
+      // Check slug uniqueness
+      const existingOrg = organigrammeDb.findOne({ where: { slug: sanitizedData.slug } });
+      if (existingOrg) {
+        throw createError({
+          statusCode: HTTP_STATUS.CONFLICT,
+          message: { slug: ERROR_MESSAGES.VALIDATION.SLUG_EXISTS }
+        });
+      }
+      
+      newOrganigramme = organigrammeDb.create({
+        ...sanitizedData,
+        userId: event.context.user.id
+      });
+    } else {
+      newOrganigramme = await Organigramme.create({
+        ...sanitizedData,
+        userId: event.context.user.id
+      });
+    }
+    
+    // Log audit event
+    await AuditService.logOrganigrammeCreate(event, newOrganigramme, event.context.user.id);
+    
+    return newOrganigramme;
+  } catch (error) {
+    handleDatabaseError(error, "création de l'organigramme");
+  }
+}
+
+/**
+ * Get organigrammes from mock database
+ */
+async function getOrganigrammesFromMockDb(search, status, offset, limit, page) {
+  let allOrganigrammes = organigrammeDb.findAll();
+  
+  // Apply search filter
+  if (search) {
+    const searchLower = search.toLowerCase();
+    allOrganigrammes = allOrganigrammes.filter(org => 
+      org.title.toLowerCase().includes(searchLower) ||
+      (org.description && org.description.toLowerCase().includes(searchLower))
+    );
+  }
+  
+  // Apply status filter
+  if (status && ['draft', 'published'].includes(status)) {
+    allOrganigrammes = allOrganigrammes.filter(org => org.status === status);
+  }
+  
+  const total = allOrganigrammes.length;
+  const organigrammes = allOrganigrammes.slice(offset, offset + limit);
+  
+  // Enrich with user information
+  const enrichedOrganigrammes = organigrammes.map(org => {
+    const orgUser = userDb.findById(org.userId);
+    return {
+      ...org,
+      user: orgUser ? {
+        id: orgUser.id,
+        name: orgUser.name,
+        username: orgUser.username
+      } : null
+    };
+  });
+  
+  return { 
+    organigrammes: enrichedOrganigrammes,
+    total,
+    page: parseInt(page),
+    totalPages: Math.ceil(total / limit)
+  };
+}
+
+/**
+ * Get organigrammes from real database
+ */
+async function getOrganigrammesFromRealDb(search, status, offset, limit, page) {
+  const where = {};
+  
+  if (search) {
+    where[Op.or] = [
+      { title: { [Op.like]: `%${search}%` } },
+      { description: { [Op.like]: `%${search}%` } }
+    ];
+  }
+  
+  if (status && ['draft', 'published'].includes(status)) {
+    where.status = status;
+  }
+  
+  const { count, rows } = await Organigramme.findAndCountAll({
+    where,
+    limit: parseInt(limit),
+    offset: parseInt(offset),
+    order: [['createdAt', 'DESC']],
+    include: [{
+      model: User,
+      attributes: ['id', 'name', 'username']
+    }]
+  });
+  
+  return { 
+    organigrammes: rows,
+    total: count,
+    page: parseInt(page),
+    totalPages: Math.ceil(count / limit)
+  };
 }

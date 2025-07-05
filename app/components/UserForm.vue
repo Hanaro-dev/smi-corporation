@@ -1,80 +1,165 @@
 <template>
-  <form @submit.prevent="handleSubmit">
-    <div>
-      <label for="name" class="block text-sm font-medium text-gray-700"
-        >Nom</label
+  <form class="space-y-6" novalidate @submit.prevent="onSubmit">
+    <FormField
+      id="name"
+      v-model="formData.name"
+      :error="errors.name || localErrors.name"
+      :required="true"
+      label="Nom"
+      placeholder="Entrez le nom de l'utilisateur"
+      autocomplete="name"
+      @blur="validateField('name')"
+    />
+    
+    <FormField
+      id="email"
+      v-model="formData.email"
+      :error="errors.email || localErrors.email"
+      :required="true"
+      type="email"
+      label="Email"
+      placeholder="utilisateur@exemple.com"
+      autocomplete="email"
+      @blur="validateField('email')"
+    />
+    
+    <FormField
+      id="role"
+      v-model="formData.role_id"
+      :error="errors.role || localErrors.role"
+      :required="true"
+      type="select"
+      label="Rôle"
+      :options="roleOptions"
+      placeholder="Choisissez un rôle"
+      @change="validateField('role')"
+    />
+    
+    <div class="flex items-center justify-between pt-4">
+      <UButton
+        v-if="showCancelButton"
+        type="button"
+        variant="ghost"
+        @click="onCancel"
       >
-      <input
-        id="name"
-        v-model="formData.name"
-        placeholder="Nom"
-        aria-describedby="name-error"
-        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" >
-      <span
-        v-if="errors.name"
-        id="name-error"
-        class="text-red-600 text-sm ml-2">
-        {{ errors.name }}
-      </span>
-    </div>
-    <div>
-      <label for="role" class="block text-sm font-medium text-gray-700"
-        >Rôle</label
+        Annuler
+      </UButton>
+      
+      <UButton
+        type="submit"
+        :loading="isSubmitting"
+        :disabled="!isFormValid"
+        color="primary"
       >
-      <select
-        id="role"
-        v-model="formData.role_id"
-        aria-describedby="role-error"
-        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-        <option value="" disabled>Choisissez un rôle</option>
-        <option v-for="role in roles" :key="role.id" :value="role.id">
-          {{ role.name }}
-        </option>
-      </select>
-      <span
-        v-if="errors.role"
-        id="role-error"
-        class="text-red-600 text-sm ml-2">
-        {{ errors.role }}
-      </span>
+        {{ submitLabel }}
+      </UButton>
     </div>
-    <button
-      type="submit"
-      class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-      {{ submitLabel }}
-    </button>
   </form>
 </template>
 
-<script setup>
-import { ref, watch } from 'vue';
+<script setup lang="ts">
+import { ref, computed, watch, nextTick } from 'vue';
+import type { User, Role, ValidationErrors } from '~/types';
 
-const props = defineProps({
-  user: {
-    type: Object,
-    required: true
-  },
-  errors: {
-    type: Object,
-    default: () => ({})
-  },
-  submitLabel: {
-    type: String,
-    default: "Soumettre"
-  },
-  handleSubmit: {
-    type: Function,
-    required: true
-  },
-  roles: {
-    type: Array,
-    default: () => ([])
-  }
+// Props with proper TypeScript definitions
+interface Props {
+  user: Partial<User>;
+  errors?: ValidationErrors;
+  submitLabel?: string;
+  roles?: Role[];
+  isSubmitting?: boolean;
+  showCancelButton?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  errors: () => ({}),
+  submitLabel: 'Soumettre',
+  roles: () => [],
+  isSubmitting: false,
+  showCancelButton: false
 });
 
-const formData = ref({ ...props.user });
+// Emits with proper typing
+const emit = defineEmits<{
+  submit: [formData: Partial<User>];
+  cancel: [];
+}>();
 
+// Reactive state
+const formData = ref<Partial<User>>({ ...props.user });
+const localErrors = ref<ValidationErrors>({});
+
+// Computed properties
+const roleOptions = computed(() => 
+  props.roles.map(role => ({
+    value: role.id,
+    label: role.name,
+    disabled: role.disabled || false
+  }))
+);
+
+const isFormValid = computed(() => {
+  const hasRequiredFields = !!(formData.value.name && formData.value.email && formData.value.role_id);
+  const hasNoErrors = Object.keys(localErrors.value).length === 0;
+  return hasRequiredFields && hasNoErrors && !props.isSubmitting;
+});
+
+// Validation composable
+const { validateField: validateSingleField, clearErrors } = useFormValidation();
+
+// Methods
+const validateField = async (field: keyof User) => {
+  try {
+    clearErrors(field);
+    await validateSingleField(field, formData.value[field]);
+    localErrors.value = { ...localErrors.value };
+    delete localErrors.value[field];
+  } catch (error: any) {
+    localErrors.value = { ...localErrors.value, [field]: error.message };
+  }
+};
+
+const validateForm = async (): Promise<boolean> => {
+  localErrors.value = {};
+  
+  const fieldsToValidate: (keyof User)[] = ['name', 'email', 'role_id'];
+  const validationPromises = fieldsToValidate.map(field => validateField(field));
+  
+  await Promise.allSettled(validationPromises);
+  
+  return Object.keys(localErrors.value).length === 0;
+};
+
+const onSubmit = async () => {
+  const isValid = await validateForm();
+  
+  if (isValid) {
+    emit('submit', formData.value);
+  } else {
+    // Focus first field with error
+    await nextTick();
+    const firstErrorField = Object.keys(localErrors.value)[0];
+    if (firstErrorField) {
+      const element = document.getElementById(firstErrorField);
+      element?.focus();
+    }
+  }
+};
+
+const onCancel = () => {
+  emit('cancel');
+};
+
+// Watchers
 watch(() => props.user, (newUser) => {
   formData.value = { ...newUser };
+  localErrors.value = {};
+}, { deep: true });
+
+watch(() => props.errors, (newErrors) => {
+  // Clear local errors when parent errors change
+  if (newErrors && Object.keys(newErrors).length === 0) {
+    localErrors.value = {};
+  }
 }, { deep: true });
 </script>
