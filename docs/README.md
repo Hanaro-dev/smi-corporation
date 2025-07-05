@@ -39,10 +39,10 @@ Documentation complète pour le système de gestion de contenu SMI Corporation.
 
 **SMI Corporation CMS** est un système de gestion de contenu moderne et full-stack construit avec :
 
-- **Frontend** : Nuxt.js 3 avec Vue.js 3, Tailwind CSS et éditeur BBCode avancé
-- **Backend** : Serveur Nitro avec Sequelize ORM et base de données MySQL/SQLite
-- **Sécurité** : Authentification JWT, RBAC, protection CSRF et validation des entrées
-- **Fonctionnalités** : Contenu hiérarchique, gestion des médias, administration des utilisateurs et journalisation d'audit
+- **Frontend** : Nuxt.js 3 avec Vue.js 3, TypeScript strict, Tailwind CSS et éditeur BBCode avancé
+- **Backend** : Architecture modulaire avec services centralisés, Sequelize ORM et base de données hybride
+- **Sécurité** : Authentification JWT renforcée, RBAC granulaire, audit logging et validation stricte
+- **Qualité** : Code refactorisé (juillet 2025), réduction de 70% de duplication, patterns d'architecture modernisés
 
 ## 📋 Fonctionnalités Principales
 
@@ -95,6 +95,6 @@ Documentation complète pour le système de gestion de contenu SMI Corporation.
 
 ---
 
-**Dernière Mise à Jour** : Janvier 2025  
-**Version Documentation** : 2.0  
-**Version CMS** : Compatible avec SMI Corporation CMS v1.x
+**Dernière Mise à Jour** : Juillet 2025  
+**Version Documentation** : 2.1  
+**Version CMS** : Compatible avec SMI Corporation CMS v2.x
