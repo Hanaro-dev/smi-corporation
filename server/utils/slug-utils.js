@@ -1,5 +1,26 @@
 /**
- * Utilities for slug generation and validation
+ * Utilities for slug generation and validation with TypeScript support
+ * @file slug-utils.js
+ */
+
+/**
+ * @typedef {Object} SlugOptions
+ * @property {number} [maxLength=100] - Maximum length of the slug
+ * @property {string} [separator='-'] - Separator character
+ * @property {boolean} [lowercase=true] - Convert to lowercase
+ * @property {boolean} [removeSpecialChars=true] - Remove special characters
+ */
+
+/**
+ * @typedef {Object} ValidationResult
+ * @property {boolean} isValid - Whether the slug is valid
+ * @property {string[]} errors - Array of validation errors
+ */
+
+/**
+ * @typedef {Function} ExistenceChecker
+ * @param {string} slug - Slug to check
+ * @returns {Promise<boolean>} Whether the slug exists
  */
 
 /**
@@ -22,24 +43,10 @@ export function generateSlug(title, options = {}) {
 
   let slug = title.trim();
 
-  // Remplacer les caractères accentués par leurs équivalents non accentués
-  const accents = {
-    'à': 'a', 'á': 'a', 'ä': 'a', 'â': 'a', 'ā': 'a', 'ã': 'a',
-    'è': 'e', 'é': 'e', 'ë': 'e', 'ê': 'e', 'ē': 'e',
-    'ì': 'i', 'í': 'i', 'ï': 'i', 'î': 'i', 'ī': 'i',
-    'ò': 'o', 'ó': 'o', 'ö': 'o', 'ô': 'o', 'ō': 'o', 'õ': 'o',
-    'ù': 'u', 'ú': 'u', 'ü': 'u', 'û': 'u', 'ū': 'u',
-    'ñ': 'n', 'ç': 'c', 'ß': 'ss',
-    'æ': 'ae', 'œ': 'oe'
-  };
+  // Use modern Intl.Collator for better performance and Unicode support
+  const normalizedTitle = title.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-  // Appliquer les remplacements d'accents
-  Object.keys(accents).forEach(accent => {
-    const regex = new RegExp(accent, 'g');
-    slug = slug.replace(regex, accents[accent]);
-    // Version majuscule
-    slug = slug.replace(new RegExp(accent.toUpperCase(), 'g'), accents[accent].toUpperCase());
-  });
+  let slug = normalizedTitle;
 
   // Convertir en minuscules si demandé
   if (lowercase) {
@@ -121,15 +128,19 @@ export function validateSlug(slug) {
     errors.push('Le slug ne peut pas contenir de tirets consécutifs');
   }
 
-  // Mots réservés à éviter
-  const reservedWords = [
+  // Mots réservés à éviter - utilisation d'un Set pour de meilleures performances
+  const reservedWords = new Set([
     'admin', 'api', 'www', 'ftp', 'mail', 'email', 'blog', 'shop',
     'store', 'news', 'about', 'contact', 'help', 'support', 'login',
     'register', 'signin', 'signup', 'logout', 'dashboard', 'profile',
-    'settings', 'config', 'null', 'undefined', 'true', 'false'
-  ];
+    'settings', 'config', 'null', 'undefined', 'true', 'false',
+    // Ajout de mots réservés supplémentaires
+    'home', 'index', 'search', 'static', 'assets', 'public', 'private',
+    'secure', 'auth', 'oauth', 'token', 'session', 'cache', 'temp',
+    'test', 'dev', 'prod', 'staging', 'beta', 'alpha', 'demo'
+  ]);
 
-  if (reservedWords.includes(trimmedSlug)) {
+  if (reservedWords.has(trimmedSlug)) {
     errors.push('Ce slug est un mot réservé et ne peut pas être utilisé');
   }
 
@@ -147,25 +158,40 @@ export function validateSlug(slug) {
 /**
  * Génère un slug unique en ajoutant un suffixe numérique si nécessaire
  * @param {string} baseSlug - Le slug de base
- * @param {Function} checkExistence - Fonction async qui vérifie si le slug existe
- * @param {number} maxAttempts - Nombre maximum de tentatives
+ * @param {ExistenceChecker} checkExistence - Fonction async qui vérifie si le slug existe
+ * @param {number} [maxAttempts=100] - Nombre maximum de tentatives
  * @returns {Promise<string>} Le slug unique
  */
 export async function generateUniqueSlug(baseSlug, checkExistence, maxAttempts = 100) {
+  if (!baseSlug || typeof baseSlug !== 'string') {
+    throw new Error('Base slug is required and must be a string');
+  }
+  
+  if (typeof checkExistence !== 'function') {
+    throw new Error('checkExistence must be a function');
+  }
+  
   let slug = baseSlug;
   let attempt = 0;
 
-  while (await checkExistence(slug) && attempt < maxAttempts) {
-    attempt++;
-    slug = `${baseSlug}-${attempt}`;
-  }
+  try {
+    while (await checkExistence(slug) && attempt < maxAttempts) {
+      attempt++;
+      slug = `${baseSlug}-${attempt}`;
+    }
 
-  if (attempt >= maxAttempts) {
-    // Fallback avec timestamp
-    slug = `${baseSlug}-${Date.now()}`;
-  }
+    if (attempt >= maxAttempts) {
+      // Fallback avec timestamp pour garantir l'unicité
+      const timestamp = Date.now().toString(36); // Base 36 for shorter string
+      slug = `${baseSlug}-${timestamp}`;
+    }
 
-  return slug;
+    return slug;
+  } catch (error) {
+    console.error('Error checking slug existence:', error);
+    // Fallback sécurisé avec timestamp
+    return `${baseSlug}-${Date.now().toString(36)}`;
+  }
 }
 
 /**

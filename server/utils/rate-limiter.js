@@ -13,19 +13,48 @@ const DEFAULT_CONFIG = {
   blockDurationMs: 60 * 60 * 1000 // Blocage pendant 1 heure après dépassement
 };
 
+// Optimized cleanup - only run periodically instead of on every request
+let lastCleanup = 0;
+const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
 /**
- * Nettoie les anciennes entrées du rate limiter
+ * Nettoie les anciennes entrées du rate limiter (optimisé)
  */
 const cleanupOldEntries = () => {
   const now = Date.now();
+  let removedCount = 0;
+  
   for (const [ip, data] of attempts.entries()) {
-    if (now - data.firstAttempt > DEFAULT_CONFIG.windowMs && !data.blocked) {
-      attempts.delete(ip);
+    let shouldRemove = false;
+    
+    // Remove non-blocked entries outside window
+    if (!data.blocked && now - data.firstAttempt > DEFAULT_CONFIG.windowMs) {
+      shouldRemove = true;
     }
-    // Débloquer les IPs après la période de blocage
-    if (data.blocked && now - data.blockedAt > DEFAULT_CONFIG.blockDurationMs) {
-      attempts.delete(ip);
+    // Remove blocked IPs after block duration
+    else if (data.blocked && now - data.blockedAt > DEFAULT_CONFIG.blockDurationMs) {
+      shouldRemove = true;
     }
+    
+    if (shouldRemove) {
+      attempts.delete(ip);
+      removedCount++;
+    }
+  }
+  
+  if (removedCount > 0) {
+    console.log(`Rate limiter cleanup: removed ${removedCount} entries, ${attempts.size} remaining`);
+  }
+};
+
+/**
+ * Conditional cleanup - only runs if enough time has passed
+ */
+const conditionalCleanup = () => {
+  const now = Date.now();
+  if (now - lastCleanup > CLEANUP_INTERVAL) {
+    cleanupOldEntries();
+    lastCleanup = now;
   }
 };
 
@@ -39,8 +68,8 @@ export function checkRateLimit(ip, config = {}) {
   const settings = { ...DEFAULT_CONFIG, ...config };
   const now = Date.now();
   
-  // Nettoyer les anciennes entrées
-  cleanupOldEntries();
+  // Nettoyer les anciennes entrées (optimisé)
+  conditionalCleanup();
   
   // Récupérer ou créer l'entrée pour cette IP
   let ipData = attempts.get(ip);
@@ -173,20 +202,48 @@ export const imageDeletionRateLimit = {
  * @param {string} ip - Adresse IP à réinitialiser
  */
 export function resetRateLimit(ip) {
-  attempts.delete(ip);
+  if (ip) {
+    attempts.delete(ip);
+  } else {
+    // Reset all if no IP specified
+    attempts.clear();
+    lastCleanup = Date.now();
+  }
 }
+
+/**
+ * Force immediate cleanup (useful for maintenance)
+ */
+export function forceCleanup() {
+  cleanupOldEntries();
+  lastCleanup = Date.now();
+}
+
+// Periodic cleanup to prevent memory leaks
+const cleanupTimer = setInterval(() => {
+  cleanupOldEntries();
+  lastCleanup = Date.now();
+}, CLEANUP_INTERVAL);
+
+// Cleanup on process exit
+process.on('exit', () => clearInterval(cleanupTimer));
+process.on('SIGTERM', () => clearInterval(cleanupTimer));
+process.on('SIGINT', () => clearInterval(cleanupTimer));
 
 /**
  * Obtient les statistiques actuelles du rate limiting
  * @returns {Object} Statistiques
  */
 export function getRateLimitStats() {
+  // Force cleanup for accurate stats
   cleanupOldEntries();
+  lastCleanup = Date.now();
   
   const stats = {
     totalTrackedIPs: attempts.size,
     blockedIPs: 0,
-    activeConnections: 0
+    activeConnections: 0,
+    memoryUsage: attempts.size * 150 // Rough estimate per entry
   };
   
   for (const [ip, data] of attempts.entries()) {

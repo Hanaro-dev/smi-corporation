@@ -1,6 +1,7 @@
 // Enhanced security utilities
 
 import crypto from 'crypto';
+import { setHeader } from 'h3';
 import { config } from './env-validation.js';
 
 /**

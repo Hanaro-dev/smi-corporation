@@ -112,10 +112,12 @@ const validateField = async (field: keyof User) => {
   try {
     clearErrors(field);
     await validateSingleField(field, formData.value[field]);
-    localErrors.value = { ...localErrors.value };
-    delete localErrors.value[field];
-  } catch (error: any) {
-    localErrors.value = { ...localErrors.value, [field]: error.message };
+    // Remove the field error by creating a new object without it
+    const { [field]: _, ...restErrors } = localErrors.value;
+    localErrors.value = restErrors;
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Validation error';
+    localErrors.value = { ...localErrors.value, [field]: errorMessage };
   }
 };
 
