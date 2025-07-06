@@ -42,8 +42,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineEmits } from 'vue';
-import { toast } from '~/composables/useToast';
+import { ref, defineEmits } from 'vue';
 
 // Import FilePond and plugins
 import vueFilePond from 'vue-filepond';
@@ -104,7 +103,7 @@ const serverOptions = {
         const parsedError = JSON.parse(response);
         uploadError.value = parsedError.statusMessage || 'Erreur lors du téléchargement';
         emit('upload-error', parsedError);
-      } catch (error) {
+      } catch (_error) {
         uploadError.value = 'Erreur lors du téléchargement';
         emit('upload-error', { message: 'Erreur lors du téléchargement' });
       }
@@ -129,18 +128,17 @@ const handleFilePondInit = () => {
   console.log('FilePond instance initialized');
 };
 
-const handleProcessFile = (error, file) => {
+const handleProcessFile = (error, _file) => {
   if (error) {
     console.error('Error uploading file:', error);
-    addToast('Erreur lors du téléchargement de l\'image', 'error', 4000);
     return;
   }
   
-  addToast('Image téléchargée avec succès', 'success', 4000);
+  console.log('Image uploaded successfully');
   uploadProgress.value = 0;
 };
 
-const handleFileAdded = (error, file) => {
+const handleFileAdded = (error, _file) => {
   if (error) {
     console.error('Error adding file:', error.message);
     return;
@@ -148,14 +146,14 @@ const handleFileAdded = (error, file) => {
   uploadError.value = null;
 };
 
-const handleFileRemoved = (error, file) => {
+const handleFileRemoved = (error, _file) => {
   if (error) {
     console.error('Error removing file:', error.message);
     return;
   }
 };
 
-const handleError = (error, file, status) => {
+const handleError = (error, _file, _status) => {
   console.error('FilePond error:', error);
   uploadError.value = error.message || 'Une erreur est survenue lors du téléchargement';
   addToast(uploadError.value, 'error', 4000);

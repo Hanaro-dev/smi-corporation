@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestion des Organigrammes</h1>
         <p class="text-gray-600 dark:text-gray-400 mt-1">Créez et gérez les organigrammes de l'entreprise</p>
       </div>
-      <div class="flex items-center space-x-3">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <button
           class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           @click="viewMode = viewMode === 'list' ? 'grid' : 'list'"
@@ -75,17 +75,17 @@
             >
           </div>
         </div>
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-col sm:flex-row gap-3">
           <select
             v-model="statusFilter"
-            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            class="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="all">Tous les statuts</option>
             <option value="published">Publié</option>
             <option value="draft">Brouillon</option>
           </select>
           <button
-            class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+            class="w-full sm:w-auto px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
             @click="clearFilters"
           >
             Effacer
@@ -97,7 +97,7 @@
     <!-- Loading state -->
     <div v-if="isLoading" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8">
       <div class="flex items-center justify-center">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
         <span class="ml-3 text-gray-600 dark:text-gray-400">Chargement des organigrammes...</span>
       </div>
     </div>
@@ -160,9 +160,9 @@
               </p>
             </div>
             
-            <div class="flex items-center space-x-2 ml-4">
+            <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0 sm:ml-4">
               <button
-                class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                class="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 @click="editOrganigramme(organigramme)"
               >
                 <Icon name="heroicons:pencil" class="w-4 h-4 mr-1" />
@@ -170,7 +170,7 @@
               </button>
               <button
                 v-if="organigramme.status === 'draft'"
-                class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors"
+                class="inline-flex items-center justify-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors"
                 @click="updateStatus(organigramme.id, 'published')"
               >
                 <Icon name="heroicons:eye" class="w-4 h-4 mr-1" />
@@ -178,14 +178,14 @@
               </button>
               <button
                 v-else
-                class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
+                class="inline-flex items-center justify-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
                 @click="updateStatus(organigramme.id, 'draft')"
               >
                 <Icon name="heroicons:eye-slash" class="w-4 h-4 mr-1" />
                 Dépublier
               </button>
               <button
-                class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
+                class="inline-flex items-center justify-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
                 @click="confirmDelete(organigramme)"
               >
                 <Icon name="heroicons:trash" class="w-4 h-4 mr-1" />
@@ -235,31 +235,31 @@
             <div class="flex space-x-1">
               <button
                 class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                @click="editOrganigramme(organigramme)"
                 title="Modifier"
+                @click="editOrganigramme(organigramme)"
               >
                 <Icon name="heroicons:pencil" class="w-4 h-4" />
               </button>
               <button
                 v-if="organigramme.status === 'draft'"
                 class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors"
-                @click="updateStatus(organigramme.id, 'published')"
                 title="Publier"
+                @click="updateStatus(organigramme.id, 'published')"
               >
                 <Icon name="heroicons:eye" class="w-4 h-4" />
               </button>
               <button
                 v-else
                 class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-yellow-600 dark:hover:text-yellow-400 transition-colors"
-                @click="updateStatus(organigramme.id, 'draft')"
                 title="Dépublier"
+                @click="updateStatus(organigramme.id, 'draft')"
               >
                 <Icon name="heroicons:eye-slash" class="w-4 h-4" />
               </button>
               <button
                 class="p-1.5 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                @click="confirmDelete(organigramme)"
                 title="Supprimer"
+                @click="confirmDelete(organigramme)"
               >
                 <Icon name="heroicons:trash" class="w-4 h-4" />
               </button>
@@ -296,7 +296,7 @@
               rows="3"
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
               :class="{ 'border-red-500': errors.description }"
-            ></textarea>
+            />
             <span v-if="errors.description" class="text-red-500 text-sm">{{ errors.description }}</span>
           </div>
           
@@ -470,7 +470,7 @@ const createOrganigramme = async () => {
   errorMessage.value = '';
   
   try {
-    const response = await $fetch('/api/organigrammes', {
+    await $fetch('/api/organigrammes', {
       method: 'POST',
       body: formData.value
     });
@@ -505,7 +505,7 @@ const updateOrganigramme = async () => {
   errorMessage.value = '';
   
   try {
-    const response = await $fetch(`/api/organigrammes/${selectedOrganigramme.value.id}`, {
+    await $fetch(`/api/organigrammes/${selectedOrganigramme.value.id}`, {
       method: 'PUT',
       body: formData.value
     });
@@ -570,6 +570,7 @@ onMounted(() => {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -577,6 +578,7 @@ onMounted(() => {
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

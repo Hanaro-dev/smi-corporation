@@ -47,8 +47,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { toast } from '~/composables/useToast';
+import { useRoute } from 'vue-router';
 
 definePageMeta({
   layout: 'admin',
@@ -56,7 +55,6 @@ definePageMeta({
 });
 
 const route = useRoute();
-const router = useRouter();
 const { addToast } = useToast();
 
 const imageId = ref(null);

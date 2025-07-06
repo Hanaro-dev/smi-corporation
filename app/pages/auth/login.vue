@@ -85,7 +85,6 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useApi } from "~/composables/useApi";
 import { toast } from "~/composables/useToast";
 const email = ref("");
 const password = ref("");

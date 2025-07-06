@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestion des Pages</h1>
         <p class="text-gray-600 dark:text-gray-400 mt-1">Créez et gérez le contenu de votre site</p>
       </div>
-      <div class="flex items-center space-x-3">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <button
           class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           @click="viewMode = viewMode === 'list' ? 'tree' : 'list'"
@@ -38,17 +38,17 @@
             >
           </div>
         </div>
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-col sm:flex-row gap-3">
           <select
             v-model="statusFilter"
-            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            class="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="all">Tous les statuts</option>
             <option value="published">Publié</option>
             <option value="draft">Brouillon</option>
           </select>
           <button
-            class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+            class="w-full sm:w-auto px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
             @click="clearFilters"
           >
             Effacer
@@ -104,71 +104,71 @@
           <Icon name="heroicons:document-text" class="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p class="text-gray-500 dark:text-gray-400">Aucune page ne correspond à vos critères</p>
         </div>
-        <div v-for="page in filteredPages" :key="page.id" class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-          <div v-if="editId !== page.id" class="flex items-start justify-between">
+        <div v-for="pageItem in filteredPages" :key="pageItem.id" class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+          <div v-if="editId !== pageItem.id" class="flex items-start justify-between">
             <div class="flex-1">
               <div class="flex items-center space-x-3 mb-2">
-                <h4 class="text-lg font-semibold text-gray-900 dark:text-white" :class="{'opacity-70': page.status === 'draft'}">
-                  {{ page.title }}
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white" :class="{'opacity-70': pageItem.status === 'draft'}">
+                  {{ pageItem.title }}
                 </h4>
                 <span 
                   class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  :class="page.status === 'published' 
+                  :class="pageItem.status === 'published' 
                     ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
                     : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'"
                 >
-                  <Icon :name="page.status === 'published' ? 'heroicons:eye' : 'heroicons:pencil-square'" class="w-3 h-3 mr-1" />
-                  {{ page.status === 'published' ? 'Publié' : 'Brouillon' }}
+                  <Icon :name="pageItem.status === 'published' ? 'heroicons:eye' : 'heroicons:pencil-square'" class="w-3 h-3 mr-1" />
+                  {{ pageItem.status === 'published' ? 'Publié' : 'Brouillon' }}
                 </span>
-                <span v-if="page.parentId" class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                <span v-if="pageItem.parentId" class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
                   <Icon name="heroicons:arrow-up-right" class="w-3 h-3 mr-1" />
-                  {{ getParentTitle(page.parentId) }}
+                  {{ getParentTitle(pageItem.parentId) }}
                 </span>
               </div>
               
               <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-2">
                 <span class="flex items-center">
                   <Icon name="heroicons:link" class="w-4 h-4 mr-1" />
-                  /{{ page.slug }}
+                  /{{ pageItem.slug }}
                 </span>
                 <span class="flex items-center">
                   <Icon name="heroicons:calendar" class="w-4 h-4 mr-1" />
-                  {{ formatDate(page.updatedAt || page.createdAt) }}
+                  {{ formatDate(pageItem.updatedAt || pageItem.createdAt) }}
                 </span>
               </div>
               
               <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                {{ truncateContent(sanitizedContent(page.content)) }}
+                {{ truncateContent(sanitizedContent(pageItem.content)) }}
               </p>
             </div>
             
-            <div class="flex items-center space-x-2 ml-4">
+            <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-0 sm:ml-4">
               <button
-                class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                @click="startEdit(page)"
+                class="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                @click="startEdit(pageItem)"
               >
                 <Icon name="heroicons:pencil" class="w-4 h-4 mr-1" />
                 Modifier
               </button>
               <button
-                v-if="page.status === 'draft'"
-                class="inline-flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors"
-                @click="updateStatus(page.id, 'published')"
+                v-if="pageItem.status === 'draft'"
+                class="inline-flex items-center justify-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors"
+                @click="updateStatus(pageItem.id, 'published')"
               >
                 <Icon name="heroicons:eye" class="w-4 h-4 mr-1" />
                 Publier
               </button>
               <button
                 v-else
-                class="inline-flex items-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
-                @click="updateStatus(page.id, 'draft')"
+                class="inline-flex items-center justify-center px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md text-sm font-medium transition-colors"
+                @click="updateStatus(pageItem.id, 'draft')"
               >
                 <Icon name="heroicons:eye-slash" class="w-4 h-4 mr-1" />
                 Dépublier
               </button>
               <button
-                class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
-                @click="confirmDelete(page)"
+                class="inline-flex items-center justify-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
+                @click="confirmDelete(pageItem)"
               >
                 <Icon name="heroicons:trash" class="w-4 h-4 mr-1" />
                 Supprimer
@@ -177,7 +177,7 @@
           </div>
           
           <!-- Formulaire d'édition -->
-          <form v-else class="space-y-3" @submit.prevent="updatePage(page.id)">
+          <form v-else class="space-y-3" @submit.prevent="updatePage(pageItem.id)">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Titre</label>
               <input
@@ -302,9 +302,9 @@
         </div>
         <ul v-else class="space-y-2">
           <PageTreeItem 
-            v-for="page in treePages" 
-            :key="page.id" 
-            :page="page"
+            v-for="pageItem in treePages" 
+            :key="pageItem.id" 
+            :page="pageItem"
             @edit="startEdit"
             @delete="confirmDelete"
             @update-status="updateStatus"
@@ -350,8 +350,8 @@
               class="w-full px-3 py-2 border rounded-md"
             >
               <option :value="null">Aucune (page racine)</option>
-              <option v-for="page in pages" :key="page.id" :value="page.id">
-                {{ page.title }}
+              <option v-for="pageOption in pages" :key="pageOption.id" :value="pageOption.id">
+                {{ pageOption.title }}
               </option>
             </select>
           </div>
@@ -476,7 +476,7 @@ definePageMeta({
 });
 
 // Hook BBCode pour la validation et la gestion des tags personnalisés
-const { getAvailableBBCodes, validateBBCode } = useBBCode();
+const { getAvailableBBCodes } = useBBCode();
 
 // État pour la gestion du BBCode dans les formulaires
 const useBBCodeMode = ref(false);
@@ -751,7 +751,7 @@ const createPage = async () => {
       contentToSave = html2bbcode(newContent.value);
     }
     // Envoi de la requête avec le contenu préparé
-    const res = await $fetch("/api/pages", {
+    await $fetch("/api/pages", {
       method: "POST",
       body: {
         title: newTitle.value,
@@ -848,7 +848,7 @@ const updatePage = async (id) => {
       contentToSave = html2bbcode(editContent.value);
     }
     // Envoi de la requête avec le contenu préparé
-    const res = await $fetch(`/api/pages/${id}`, {
+    await $fetch(`/api/pages/${id}`, {
       method: "PUT",
       body: {
         title: editTitle.value,

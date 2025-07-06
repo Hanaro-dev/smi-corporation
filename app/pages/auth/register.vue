@@ -103,7 +103,7 @@ const handleRegister = async () => {
   error.value = "";
   loading.value = true;
   try {
-    const response = await api.post("/api/auth/register", {
+    await api.post("/api/auth/register", {
       username: username.value,
       email: email.value,
       password: password.value,

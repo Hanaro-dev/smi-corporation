@@ -10,7 +10,7 @@
       autocomplete="name"
       @blur="validateField('name')"
     />
-    
+
     <FormField
       id="email"
       v-model="formData.email"
@@ -22,7 +22,7 @@
       autocomplete="email"
       @blur="validateField('email')"
     />
-    
+
     <FormField
       id="role"
       v-model="formData.role_id"
@@ -34,7 +34,7 @@
       placeholder="Choisissez un rôle"
       @change="validateField('role')"
     />
-    
+
     <div class="flex items-center justify-between pt-4">
       <UButton
         v-if="showCancelButton"
@@ -44,7 +44,7 @@
       >
         Annuler
       </UButton>
-      
+
       <UButton
         type="submit"
         :loading="isSubmitting"
@@ -58,8 +58,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
-import type { User, Role, ValidationErrors } from '~/types';
+import { ref, computed, watch, nextTick } from "vue";
+import type { User, Role, ValidationErrors } from "~/types";
 
 // Props with proper TypeScript definitions
 interface Props {
@@ -73,10 +73,10 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   errors: () => ({}),
-  submitLabel: 'Soumettre',
+  submitLabel: "Soumettre",
   roles: () => [],
   isSubmitting: false,
-  showCancelButton: false
+  showCancelButton: false,
 });
 
 // Emits with proper typing
@@ -90,53 +90,91 @@ const formData = ref<Partial<User>>({ ...props.user });
 const localErrors = ref<ValidationErrors>({});
 
 // Computed properties
-const roleOptions = computed(() => 
-  props.roles.map(role => ({
+const roleOptions = computed(() =>
+  props.roles.map((role) => ({
     value: role.id,
     label: role.name,
-    disabled: role.disabled || false
+    disabled: role.disabled || false,
   }))
 );
 
 const isFormValid = computed(() => {
-  const hasRequiredFields = !!(formData.value.name && formData.value.email && formData.value.role_id);
+  const hasRequiredFields = !!(
+    formData.value.name &&
+    formData.value.email &&
+    formData.value.role_id
+  );
   const hasNoErrors = Object.keys(localErrors.value).length === 0;
   return hasRequiredFields && hasNoErrors && !props.isSubmitting;
 });
 
-// Validation composable
-const { validateField: validateSingleField, clearErrors } = useFormValidation();
-
 // Methods
 const validateField = async (field: keyof User) => {
-  try {
-    clearErrors(field);
-    await validateSingleField(field, formData.value[field]);
-    // Remove the field error by creating a new object without it
-    const { [field]: _, ...restErrors } = localErrors.value;
-    localErrors.value = restErrors;
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Validation error';
+  // Clear existing error for this field
+  const { [field]: _, ...restErrors } = localErrors.value;
+  localErrors.value = restErrors;
+
+  const value = formData.value[field];
+  let errorMessage = "";
+
+  // Basic validation logic
+  switch (field) {
+    case "name":
+      if (!value || typeof value !== "string" || value.trim().length < 2) {
+        errorMessage = "Le nom doit contenir au moins 2 caractères";
+      }
+      break;
+    case "email":
+      if (!value || typeof value !== "string") {
+        errorMessage = "L'email est requis";
+      } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) {
+          errorMessage = "Format d'email invalide";
+        }
+      }
+      break;
+    case "username":
+      if (
+        value &&
+        typeof value === "string" &&
+        value.length > 0 &&
+        value.length < 3
+      ) {
+        errorMessage =
+          "Le nom d'utilisateur doit contenir au moins 3 caractères";
+      }
+      break;
+    case "role_id":
+      if (!value) {
+        errorMessage = "Le rôle est requis";
+      }
+      break;
+  }
+
+  if (errorMessage) {
     localErrors.value = { ...localErrors.value, [field]: errorMessage };
   }
 };
 
 const validateForm = async (): Promise<boolean> => {
   localErrors.value = {};
-  
-  const fieldsToValidate: (keyof User)[] = ['name', 'email', 'role_id'];
-  const validationPromises = fieldsToValidate.map(field => validateField(field));
-  
+
+  const fieldsToValidate: (keyof User)[] = ["name", "email", "role_id"];
+  const validationPromises = fieldsToValidate.map((field) =>
+    validateField(field)
+  );
+
   await Promise.allSettled(validationPromises);
-  
+
   return Object.keys(localErrors.value).length === 0;
 };
 
 const onSubmit = async () => {
   const isValid = await validateForm();
-  
+
   if (isValid) {
-    emit('submit', formData.value);
+    emit("submit", formData.value);
   } else {
     // Focus first field with error
     await nextTick();
@@ -149,19 +187,27 @@ const onSubmit = async () => {
 };
 
 const onCancel = () => {
-  emit('cancel');
+  emit("cancel");
 };
 
 // Watchers
-watch(() => props.user, (newUser) => {
-  formData.value = { ...newUser };
-  localErrors.value = {};
-}, { deep: true });
-
-watch(() => props.errors, (newErrors) => {
-  // Clear local errors when parent errors change
-  if (newErrors && Object.keys(newErrors).length === 0) {
+watch(
+  () => props.user,
+  (newUser) => {
+    formData.value = { ...newUser };
     localErrors.value = {};
-  }
-}, { deep: true });
+  },
+  { deep: true }
+);
+
+watch(
+  () => props.errors,
+  (newErrors) => {
+    // Clear local errors when parent errors change
+    if (newErrors && Object.keys(newErrors).length === 0) {
+      localErrors.value = {};
+    }
+  },
+  { deep: true }
+);
 </script>

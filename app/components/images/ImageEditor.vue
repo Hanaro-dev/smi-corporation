@@ -154,7 +154,6 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { toast } from '~/composables/useToast';
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
@@ -278,7 +277,7 @@ const saveMetadata = async () => {
   
   try {
     // Envoyer les données à l'API
-    const response = await $fetch(`/api/images/${image.value.id}`, {
+    await $fetch(`/api/images/${image.value.id}`, {
       method: 'PATCH',
       body: {
         title: form.value.title,

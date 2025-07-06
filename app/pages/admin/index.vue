@@ -132,7 +132,7 @@ v-for="action in module.actions" :key="action.name"
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
 

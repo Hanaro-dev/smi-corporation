@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();

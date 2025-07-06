@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestion des Utilisateurs</h1>
         <p class="text-gray-600 dark:text-gray-400 mt-1">Gérez les comptes utilisateurs et leurs permissions</p>
       </div>
-      <div class="flex items-center space-x-3">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <button
           class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           @click="exportUsers"
@@ -99,10 +99,10 @@
             >
           </div>
         </div>
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-col sm:flex-row gap-3">
           <select
             v-model="roleFilter"
-            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            class="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="all">Tous les rôles</option>
             <option value="admin">Administrateur</option>
@@ -111,14 +111,14 @@
           </select>
           <select
             v-model="statusFilter"
-            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            class="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="all">Tous les statuts</option>
             <option value="active">Actif</option>
             <option value="inactive">Inactif</option>
           </select>
           <button
-            class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+            class="w-full sm:w-auto px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
             @click="clearFilters"
           >
             Effacer
@@ -185,24 +185,26 @@
               </div>
             </div>
             
-            <div class="flex items-center space-x-2">
-              <span class="text-sm text-gray-500 dark:text-gray-400 mr-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span class="text-sm text-gray-500 dark:text-gray-400 sm:mr-4">
                 Dernière connexion: {{ formatDate(user.lastLogin) }}
               </span>
-              <button
-                class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                @click="editUser(user)"
-              >
-                <Icon name="heroicons:pencil" class="w-4 h-4 mr-1" />
-                Modifier
-              </button>
-              <button
-                class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
-                @click="confirmDeleteUser(user)"
-              >
-                <Icon name="heroicons:trash" class="w-4 h-4 mr-1" />
-                Supprimer
-              </button>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <button
+                  class="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  @click="editUser(user)"
+                >
+                  <Icon name="heroicons:pencil" class="w-4 h-4 mr-1" />
+                  Modifier
+                </button>
+                <button
+                  class="inline-flex items-center justify-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
+                  @click="confirmDeleteUser(user)"
+                >
+                  <Icon name="heroicons:trash" class="w-4 h-4 mr-1" />
+                  Supprimer
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -296,17 +298,17 @@
             <span class="text-red-800 dark:text-red-200 text-sm">{{ errorMessage }}</span>
           </div>
           
-          <div class="flex justify-end space-x-3 pt-4">
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
             <button
               type="button"
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               @click="showCreateForm = false; selectedUser = null; formData = { name: '', email: '', role_id: 3, status: 'active' }; errors = {}; errorMessage = ''"
             >
               Annuler
             </button>
             <button
               type="submit"
-              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              class="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
               {{ selectedUser ? 'Mettre à jour' : 'Créer' }}
             </button>
@@ -322,15 +324,15 @@
         <p class="text-gray-600 dark:text-gray-400 mb-6">
           Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{{ userToDelete?.name }}</strong> ? Cette action est irréversible.
         </p>
-        <div class="flex justify-end space-x-3">
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
           <button
-            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             @click="showDeleteConfirm = false; userToDelete = null"
           >
             Annuler
           </button>
           <button
-            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+            class="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
             @click="deleteUser(userToDelete?.id)"
           >
             Supprimer

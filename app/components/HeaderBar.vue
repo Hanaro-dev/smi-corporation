@@ -29,7 +29,7 @@
         
         <!-- Actions utilisateur -->
         <div class="flex gap-4 items-center">
-          <ColorModePicker />
+          <ThemeSelector />
           
           <!-- Lien de connexion pour utilisateurs non connectés -->
           <div v-if="!isAuthenticated">
@@ -49,7 +49,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
-import ColorModePicker from '~/components/ColorModePicker.vue'
+import ThemeSelector from '~/components/ThemeSelector.vue'
 import UserMenu from '~/components/UserMenu.vue'
 
 const auth = useAuthStore()

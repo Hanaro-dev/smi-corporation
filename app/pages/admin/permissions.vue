@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestion des Rôles et Permissions</h1>
         <p class="text-gray-600 dark:text-gray-400 mt-1">Gérez les rôles utilisateurs et leurs permissions</p>
       </div>
-      <div class="flex items-center space-x-3">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <button
           class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           @click="activeTab = activeTab === 'roles' ? 'permissions' : 'roles'"
@@ -99,7 +99,7 @@
           <!-- Formulaire de création de rôle -->
           <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Créer un nouveau rôle</h3>
-            <form class="flex space-x-3" @submit.prevent="createRole">
+            <form class="flex flex-col sm:flex-row gap-3" @submit.prevent="createRole">
               <div class="flex-1">
                 <input
                   v-model="newRoleName"
@@ -111,7 +111,7 @@
               </div>
               <button
                 type="submit"
-                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
               >
                 <Icon name="heroicons:plus" class="w-4 h-4 mr-2" />
                 Créer
@@ -127,16 +127,16 @@
                   <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ role.name }}</h4>
                   <p class="text-sm text-gray-500 dark:text-gray-400">{{ role.Permissions?.length || 0 }} permission(s) attribuée(s)</p>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex flex-col sm:flex-row gap-2">
                   <button
-                    class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    class="inline-flex items-center justify-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     @click="selectRoleForEdit(role)"
                   >
                     <Icon name="heroicons:pencil" class="w-4 h-4 mr-1" />
                     Modifier
                   </button>
                   <button
-                    class="inline-flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
+                    class="inline-flex items-center justify-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors"
                     @click="confirmDeleteRole(role)"
                   >
                     <Icon name="heroicons:trash" class="w-4 h-4 mr-1" />
@@ -282,7 +282,7 @@
     <div v-if="isLoading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white dark:bg-gray-800 rounded-lg p-6">
         <div class="flex items-center">
-          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
           <span class="ml-3 text-gray-600 dark:text-gray-400">Chargement...</span>
         </div>
       </div>

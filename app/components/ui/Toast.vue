@@ -176,7 +176,7 @@ const startTimer = () => {
   }
 }
 
-const pauseTimer = () => {
+const _pauseTimer = () => {
   if (timer) {
     clearTimeout(timer)
     timer = null
@@ -187,7 +187,7 @@ const pauseTimer = () => {
   }
 }
 
-const resumeTimer = () => {
+const _resumeTimer = () => {
   if (!props.persistent && !timer) {
     const remainingTime = (progress.value / 100) * props.duration
     timer = setTimeout(() => {

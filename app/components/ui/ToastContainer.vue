@@ -3,40 +3,40 @@
     <!-- Top Right -->
     <div class="absolute top-4 right-4 space-y-2">
       <Toast
-        v-for="toast in topRightToasts"
-        :key="toast.id"
-        v-bind="toast"
-        @close="removeToast(toast.id)"
+        v-for="toastItem in topRightToasts"
+        :key="toastItem.id"
+        v-bind="toastItem"
+        @close="removeToast(toastItem.id)"
       />
     </div>
     
     <!-- Top Left -->
     <div class="absolute top-4 left-4 space-y-2">
       <Toast
-        v-for="toast in topLeftToasts"
-        :key="toast.id"
-        v-bind="toast"
-        @close="removeToast(toast.id)"
+        v-for="toastItem in topLeftToasts"
+        :key="toastItem.id"
+        v-bind="toastItem"
+        @close="removeToast(toastItem.id)"
       />
     </div>
     
     <!-- Bottom Right -->
     <div class="absolute bottom-4 right-4 space-y-2">
       <Toast
-        v-for="toast in bottomRightToasts"
-        :key="toast.id"
-        v-bind="toast"
-        @close="removeToast(toast.id)"
+        v-for="toastItem in bottomRightToasts"
+        :key="toastItem.id"
+        v-bind="toastItem"
+        @close="removeToast(toastItem.id)"
       />
     </div>
     
     <!-- Bottom Left -->
     <div class="absolute bottom-4 left-4 space-y-2">
       <Toast
-        v-for="toast in bottomLeftToasts"
-        :key="toast.id"
-        v-bind="toast"
-        @close="removeToast(toast.id)"
+        v-for="toastItem in bottomLeftToasts"
+        :key="toastItem.id"
+        v-bind="toastItem"
+        @close="removeToast(toastItem.id)"
       />
     </div>
   </div>

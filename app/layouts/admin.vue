@@ -10,17 +10,19 @@
       <!-- Header -->
       <div class="p-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between">
-          <div v-if="!sidebarCollapsed" class="flex items-center space-x-3">
-            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+          <!-- Logo toujours visible -->
+          <div class="flex items-center" :class="sidebarCollapsed ? 'justify-center w-full' : 'space-x-3'">
+            <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <span class="text-white font-bold text-sm">SMI</span>
             </div>
-            <span class="font-semibold text-gray-800 dark:text-gray-200">Administration</span>
+            <span v-if="!sidebarCollapsed" class="font-semibold text-gray-800 dark:text-gray-200">Administration</span>
           </div>
           <button 
+            v-if="!sidebarCollapsed"
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             @click="toggleSidebar"
           >
-            <Icon :name="sidebarCollapsed ? 'heroicons:chevron-right' : 'heroicons:chevron-left'" class="w-4 h-4 text-gray-600 dark:text-gray-400" />
+            <Icon name="heroicons:chevron-left" class="w-4 h-4 text-gray-600 dark:text-gray-400" />
           </button>
         </div>
       </div>
@@ -31,14 +33,15 @@
           <NuxtLink
             :to="item.to"
             :class="[
-              'group flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+              'group flex items-center rounded-lg text-sm font-medium transition-all duration-200',
+              sidebarCollapsed ? 'px-2 py-3' : 'px-3 py-2.5',
               'hover:bg-gray-100 dark:hover:bg-gray-700',
               'focus:outline-none focus:ring-2 focus:ring-blue-500'
             ]"
             active-class="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md"
             inactive-class="text-gray-700 dark:text-gray-300"
           >
-            <Icon :name="item.icon" :class="['w-5 h-5 transition-colors', sidebarCollapsed ? 'mx-auto' : 'mr-3']" />
+            <Icon :name="item.icon" :class="['transition-all duration-200', sidebarCollapsed ? 'w-6 h-6 mx-auto' : 'w-5 h-5 mr-3']" />
             <span v-if="!sidebarCollapsed" class="truncate">{{ item.label }}</span>
             <div v-if="item.badge && !sidebarCollapsed" class="ml-auto">
               <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{{ item.badge }}</span>
@@ -61,22 +64,24 @@
           <NuxtLink
             to="/admin/profile"
             :class="[
-              'group flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+              'group flex items-center rounded-lg text-sm font-medium transition-colors',
+              sidebarCollapsed ? 'px-2 py-3' : 'px-3 py-2',
               'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
             ]"
           >
-            <Icon name="heroicons:user-circle" :class="['w-5 h-5', sidebarCollapsed ? 'mx-auto' : 'mr-3']" />
+            <Icon name="heroicons:user-circle" :class="['transition-all duration-200', sidebarCollapsed ? 'w-6 h-6 mx-auto' : 'w-5 h-5 mr-3']" />
             <span v-if="!sidebarCollapsed">Profil</span>
           </NuxtLink>
           
           <button
             :class="[
-              'group flex items-center w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+              'group flex items-center w-full rounded-lg text-sm font-medium transition-colors',
+              sidebarCollapsed ? 'px-2 py-3' : 'px-3 py-2',
               'hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400'
             ]"
             @click="logout"
           >
-            <Icon name="heroicons:arrow-right-on-rectangle" :class="['w-5 h-5', sidebarCollapsed ? 'mx-auto' : 'mr-3']" />
+            <Icon name="heroicons:arrow-right-on-rectangle" :class="['transition-all duration-200', sidebarCollapsed ? 'w-6 h-6 mx-auto' : 'w-5 h-5 mr-3']" />
             <span v-if="!sidebarCollapsed">Déconnexion</span>
           </button>
         </div>
@@ -84,12 +89,21 @@
     </aside>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col overflow-hidden">
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+      <!-- Floating toggle button when collapsed -->
+      <button 
+        v-if="sidebarCollapsed"
+        class="absolute left-4 top-4 z-40 p-2 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 border border-gray-200 dark:border-gray-700"
+        @click="toggleSidebar"
+      >
+        <Icon name="heroicons:bars-3" class="w-5 h-5 text-gray-600 dark:text-gray-400" />
+      </button>
+      
       <!-- Header -->
       <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div class="flex items-center justify-between">
           <!-- Breadcrumb -->
-          <nav class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+          <nav class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400" :class="sidebarCollapsed ? 'ml-14' : ''">
             <NuxtLink to="/admin" class="hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
               Administration
             </NuxtLink>
@@ -99,6 +113,9 @@
 
           <!-- User Info -->
           <div class="flex items-center space-x-4">
+            <!-- Theme Selector -->
+            <ThemeSelector />
+            
             <!-- Notifications -->
             <button class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
               <Icon name="heroicons:bell" class="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -131,19 +148,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '~/stores/auth'
 import { useRoute, useRouter } from 'vue-router'
 import ToastContainer from '~/components/ui/ToastContainer.vue'
+import ThemeSelector from '~/components/ThemeSelector.vue'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const { user } = storeToRefs(auth)
 
-// Sidebar state
-const sidebarCollapsed = ref(false)
+// Sidebar state - collapsed by default
+const sidebarCollapsed = ref(true)
+
+// Load saved state from localStorage
+onMounted(() => {
+  const savedState = localStorage.getItem('sidebarCollapsed')
+  if (savedState !== null) {
+    sidebarCollapsed.value = savedState === 'true'
+  }
+})
 
 // Menu items
 const menuItems = [
@@ -211,6 +237,8 @@ const userRole = computed(() => {
 // Methods
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
+  // Save state to localStorage
+  localStorage.setItem('sidebarCollapsed', sidebarCollapsed.value.toString())
 }
 
 const logout = async () => {

@@ -15,7 +15,7 @@
           <div>
             <h2 class="text-xl font-semibold text-gray-800 dark:text-white">{{ userName }}</h2>
             <p class="text-gray-600 dark:text-gray-300">{{ user?.email }}</p>
-            <div class="mt-2 flex space-x-2">
+            <div class="mt-2 flex flex-wrap gap-2">
               <span
 v-for="permission in userPermissions" :key="permission" 
                     class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-medium rounded">
@@ -74,17 +74,17 @@ v-for="permission in userPermissions" :key="permission"
           </div>
           
           <!-- Boutons -->
-          <div class="flex justify-end space-x-4 pt-4">
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4">
             <button 
               type="button" 
-              class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" 
+              class="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" 
               @click="resetForm"
             >
               Annuler
             </button>
             <button 
               type="submit" 
-              class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              class="w-full sm:w-auto px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               :disabled="isSubmitting"
             >
               <span v-if="isSubmitting">Mise à jour...</span>

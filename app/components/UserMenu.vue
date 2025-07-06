@@ -102,9 +102,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '~/stores/auth';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
 const authStore = useAuthStore();
 const { $auth } = useNuxtApp();
 

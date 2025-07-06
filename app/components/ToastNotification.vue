@@ -1,23 +1,23 @@
 <template>
   <div class="fixed top-4 right-4 z-[1000]">
     <div
-      v-for="toast in toasts"
-      :key="toast.id"
+      v-for="toastItem in toasts"
+      :key="toastItem.id"
       :class="[
         'flex items-center mb-2 px-4 py-3 rounded text-white font-bold shadow-lg animate-fade-in',
-        toast.type === 'success' && 'bg-green-600',
-        toast.type === 'error' && 'bg-red-600',
-        toast.type === 'info' && 'bg-blue-600',
-        toast.type === 'warning' && 'bg-orange-500'
+        toastItem.type === 'success' && 'bg-green-600',
+        toastItem.type === 'error' && 'bg-red-600',
+        toastItem.type === 'info' && 'bg-blue-600',
+        toastItem.type === 'warning' && 'bg-orange-500'
       ]"
     >
       <span class="mr-2 text-xl">
-        <i v-if="toast.type === 'success'" class="fas fa-check-circle" />
-        <i v-else-if="toast.type === 'error'" class="fas fa-times-circle" />
-        <i v-else-if="toast.type === 'info'" class="fas fa-info-circle" />
-        <i v-else-if="toast.type === 'warning'" class="fas fa-exclamation-circle" />
+        <i v-if="toastItem.type === 'success'" class="fas fa-check-circle" />
+        <i v-else-if="toastItem.type === 'error'" class="fas fa-times-circle" />
+        <i v-else-if="toastItem.type === 'info'" class="fas fa-info-circle" />
+        <i v-else-if="toastItem.type === 'warning'" class="fas fa-exclamation-circle" />
       </span>
-      <span class="flex-1">{{ toast.message }}</span>
+      <span class="flex-1">{{ toastItem.message }}</span>
     </div>
   </div>
 </template>

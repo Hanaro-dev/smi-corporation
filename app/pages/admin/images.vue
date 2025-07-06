@@ -1,14 +1,14 @@
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Gestion des Images</h1>
         <p class="text-gray-600 dark:text-gray-400 mt-1">
           Téléchargez, organisez et gérez les images utilisées sur le site
         </p>
       </div>
-      <div class="flex items-center space-x-3">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <button
           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
           @click="activeTab = 'upload'"
@@ -104,10 +104,10 @@
             >
           </div>
         </div>
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-col sm:flex-row gap-3">
           <select
             v-model="sortBy"
-            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            class="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="created_desc">Plus récent</option>
             <option value="created_asc">Plus ancien</option>
@@ -118,7 +118,7 @@
           </select>
           <select
             v-model="formatFilter"
-            class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            class="w-full sm:w-auto px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
           >
             <option value="all">Tous les formats</option>
             <option v-for="format in stats.formats" :key="format.name" :value="format.name">
@@ -272,7 +272,7 @@ const handleImageUpdated = () => {
 };
 
 // Gérer le progrès de téléchargement
-const handleUploadProgress = (progress) => {
+const handleUploadProgress = (_progress) => {
   // Optionnel : afficher le progrès
 };
 

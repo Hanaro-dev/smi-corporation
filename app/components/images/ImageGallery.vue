@@ -1,9 +1,9 @@
 <template>
   <div class="image-gallery">
     <div class="mb-4">
-      <div class="flex justify-between items-center mb-4">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
         <h3 class="text-lg font-semibold">Galerie d'images ({{ totalImages }})</h3>
-        <div class="flex items-center space-x-2">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
           <div class="text-sm text-gray-600">
             Espace utilisé: {{ formatSize(totalSpaceUsed) }}
           </div>
@@ -20,8 +20,8 @@
       </div>
 
       <!-- Filtres -->
-      <div class="flex flex-wrap gap-2 mb-4">
-        <div class="flex-1 min-w-[200px]">
+      <div class="flex flex-col sm:flex-row flex-wrap gap-2 mb-4">
+        <div class="flex-1 sm:min-w-[200px]">
           <input 
             v-model="filters.search" 
             type="text" 
@@ -30,10 +30,10 @@
             @input="debouncedSearch"
           >
         </div>
-        <div>
+        <div class="w-full sm:w-auto">
           <select 
             v-model="filters.format" 
-            class="px-3 py-2 border rounded"
+            class="w-full px-3 py-2 border rounded"
             @change="applyFilters"
           >
             <option value="">Tous les formats</option>
@@ -44,10 +44,10 @@
             <option value="svg">SVG</option>
           </select>
         </div>
-        <div>
+        <div class="w-full sm:w-auto">
           <select 
             v-model="filters.date" 
-            class="px-3 py-2 border rounded"
+            class="w-full px-3 py-2 border rounded"
             @change="applyFilters"
           >
             <option value="">Toutes dates</option>
@@ -58,7 +58,7 @@
           </select>
         </div>
         <button 
-          class="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300" 
+          class="w-full sm:w-auto px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300" 
           @click="resetFilters"
         >
           Réinitialiser
@@ -174,15 +174,15 @@
       <div class="bg-white rounded-lg shadow-lg p-6 max-w-md mx-4">
         <h3 class="text-lg font-medium mb-2">Confirmer la suppression</h3>
         <p class="mb-4">Voulez-vous vraiment supprimer cette image ? Cette action est irréversible.</p>
-        <div class="flex justify-end gap-2">
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
           <button 
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300" 
+            class="w-full sm:w-auto px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300" 
             @click="showDeleteConfirm = false"
           >
             Annuler
           </button>
           <button 
-            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700" 
+            class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700" 
             @click="deleteImage"
           >
             Supprimer
@@ -196,7 +196,6 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { toast } from '~/composables/useToast';
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 
 const props = defineProps({

@@ -240,7 +240,7 @@ export const useBBCode = () => {
       return DOMPurify.sanitize(html, {
         ADD_TAGS: ['div', 'span', 'nav'], // Éléments HTML supplémentaires autorisés
         ADD_ATTR: ['data-id', 'data-ids', 'data-field', 'class'], // Attributs personnalisés
-        ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i // URLs sécurisées
+        ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i // URLs sécurisées
       });
     } catch (error) {
       console.error('Erreur lors du parsing BBCode:', error);
