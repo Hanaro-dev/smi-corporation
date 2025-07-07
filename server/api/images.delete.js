@@ -24,40 +24,7 @@ export default defineEventHandler(async (event) => {
     }
     
     // 2. Authentification et vérification des permissions
-    const token = getCookie(event, "auth_token");
-    
-    if (!token) {
-      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
-    }
-    
-    // Rechercher la session
-    const session = sessionDb.findByToken(token);
-    if (!session) {
-      throw createError({ statusCode: 401, message: "Session invalide." });
-    }
-    
-    // Rechercher l'utilisateur
-    const user = await userDb.findById(session.userId);
-    if (!user) {
-      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
-    }
-
-    // Récupérer le rôle de l'utilisateur avec ses permissions
-    const role = roleDb.findByPk(user.role_id);
-    if (!role) {
-      throw createError({
-        statusCode: 500,
-        message: "Rôle utilisateur non trouvé."
-      });
-    }
-
-    // Mettre l'utilisateur dans le contexte
-    const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
-    delete userWithoutPassword.password;
-    
-    event.context.user = userWithoutPassword;
-    event.context.userRole = role;
-    event.context.permissions = role.getPermissions();
+    await authenticateUser(event);
 
     // Vérifier les permissions
     await checkPermission(event, "manage_media");
@@ -67,7 +34,7 @@ export default defineEventHandler(async (event) => {
     // Vérifier si un ID ou une URL a été fourni
     if (!body.id && !body.url) {
       throw createError({
-        statusCode: 400,
+        statusCode: HTTP_STATUS.BAD_REQUEST,
         statusMessage: "ID ou URL de l'image requis pour la suppression.",
       })
     }
@@ -82,7 +49,7 @@ export default defineEventHandler(async (event) => {
     
     if (!image) {
       throw createError({
-        statusCode: 404,
+        statusCode: HTTP_STATUS.NOT_FOUND,
         statusMessage: "Image non trouvée.",
       })
     }
@@ -153,7 +120,7 @@ export default defineEventHandler(async (event) => {
     
     // Sinon, créer une erreur 500
     throw createError({
-      statusCode: 500,
+      statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
       statusMessage: "Une erreur est survenue lors de la suppression de l'image.",
     })
   }

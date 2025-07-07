@@ -1,14 +1,15 @@
-import { defineEventHandler, createError, getMethod, readBody, getCookie, getQuery } from 'h3';
-import { ERROR_MESSAGES } from "../constants/messages";
-import { requirePermission } from "../middleware/check-permission.js";
+import { defineEventHandler, createError, getMethod, readBody, getQuery } from 'h3';
 import { validateUser, validateLoginInput } from "../utils/validators";
 import jwt from 'jsonwebtoken';
 import { userDb, sessionDb, roleDb, auditDb } from "../utils/mock-db.js";
 import { checkPermission } from "../utils/permission-utils.js";
+import { authenticateUser, handleDatabaseError } from "../services/auth-middleware.js";
+import { HTTP_STATUS, ERROR_MESSAGES } from "../constants/api-constants.js";
 
 export default defineEventHandler(async (event) => {
-  const method = getMethod(event);
-  const route = event.node.req.url;
+  try {
+    const method = getMethod(event);
+    const route = event.node.req.url;
 
   // Route pour la connexion (POST /api/users/login)
   if (method === "POST" && route.endsWith("/login")) {
@@ -22,8 +23,8 @@ export default defineEventHandler(async (event) => {
     const user = userDb.findByEmail(body.email);
     if (!user || !userDb.verifyPassword(body.password, user.password)) {
       throw createError({
-        statusCode: 401,
-        message: ERROR_MESSAGES.INVALID_CREDENTIALS || "Email ou mot de passe incorrect.",
+        statusCode: HTTP_STATUS.UNAUTHORIZED,
+        message: ERROR_MESSAGES.AUTH.INVALID_CREDENTIALS,
       });
     }
 
@@ -73,28 +74,9 @@ export default defineEventHandler(async (event) => {
 
   // GET /api/users (Liste des utilisateurs - Protégé)
   if (method === "GET") {
-    // Authentification comme dans pages.js
-    const token = getCookie(event, "auth_token");
-    
-    if (!token) {
-      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
-    }
-    
-    const session = sessionDb.findByToken(token);
-    if (!session) {
-      throw createError({ statusCode: 401, message: "Session invalide." });
-    }
-    
-    const authUser = await userDb.findById(session.userId);
-    if (!authUser) {
-      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
-    }
-    
-    // Vérifier les permissions
-    const userRole = roleDb.findByPk(authUser.role_id);
-    if (!userRole || !userRole.hasPermission('manage_users')) {
-      throw createError({ statusCode: 403, message: "Permission insuffisante." });
-    }
+    // Authentification centralisée
+    await authenticateUser(event);
+    await checkPermission(event, "manage_users");
     
     const { page = 1, limit = 10, role_id } = getQuery(event);
     const offset = (page - 1) * limit;
@@ -124,42 +106,8 @@ export default defineEventHandler(async (event) => {
 
   // POST /api/users (Création d'un utilisateur)
   if (method === "POST") {
-    // Pour la création d'utilisateurs, vérifier l'authentification et la permission
-    // Authentification comme dans les autres endpoints
-    const token = getCookie(event, "auth_token");
-    
-    if (!token) {
-      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
-    }
-    
-    const session = sessionDb.findByToken(token);
-    if (!session) {
-      throw createError({ statusCode: 401, message: "Session invalide." });
-    }
-    
-    const authUser = await userDb.findById(session.userId);
-    if (!authUser) {
-      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
-    }
-
-    // Récupérer le rôle de l'utilisateur avec ses permissions
-    const role = roleDb.findByPk(authUser.role_id);
-    if (!role) {
-      throw createError({
-        statusCode: 500,
-        message: "Rôle utilisateur non trouvé."
-      });
-    }
-
-    // Mettre l'utilisateur dans le contexte
-    const userWithoutPassword = authUser.toJSON ? authUser.toJSON() : { ...authUser };
-    delete userWithoutPassword.password;
-    
-    event.context.user = userWithoutPassword;
-    event.context.userRole = role;
-    event.context.permissions = role.getPermissions();
-
-    // Vérifier les permissions
+    // Authentification centralisée et vérification des permissions
+    await authenticateUser(event);
     await checkPermission(event, "manage_users");
     
     const body = await readBody(event);
@@ -218,41 +166,8 @@ export default defineEventHandler(async (event) => {
 
   // DELETE /api/users (Suppression d'un utilisateur par ID dans les paramètres)
   if (method === "DELETE") {
-    // Authentification comme dans les autres endpoints
-    const token = getCookie(event, "auth_token");
-    
-    if (!token) {
-      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
-    }
-    
-    const session = sessionDb.findByToken(token);
-    if (!session) {
-      throw createError({ statusCode: 401, message: "Session invalide." });
-    }
-    
-    const authUser = await userDb.findById(session.userId);
-    if (!authUser) {
-      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
-    }
-
-    // Récupérer le rôle de l'utilisateur avec ses permissions
-    const role = roleDb.findByPk(authUser.role_id);
-    if (!role) {
-      throw createError({
-        statusCode: 500,
-        message: "Rôle utilisateur non trouvé."
-      });
-    }
-
-    // Mettre l'utilisateur dans le contexte
-    const userWithoutPassword = authUser.toJSON ? authUser.toJSON() : { ...authUser };
-    delete userWithoutPassword.password;
-    
-    event.context.user = userWithoutPassword;
-    event.context.userRole = role;
-    event.context.permissions = role.getPermissions();
-
-    // Vérifier les permissions
+    // Authentification centralisée et vérification des permissions
+    await authenticateUser(event);
     await checkPermission(event, "manage_users");
     
     const { id } = getQuery(event);
@@ -316,5 +231,9 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  throw createError({ statusCode: 405, message: "Méthode non autorisée." });
+  throw createError({ statusCode: HTTP_STATUS.METHOD_NOT_ALLOWED, message: ERROR_MESSAGES.GENERIC.METHOD_NOT_ALLOWED });
+  
+  } catch (error) {
+    handleDatabaseError(error, "gestion des utilisateurs");
+  }
 });

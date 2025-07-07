@@ -14,46 +14,13 @@ const useMockDb = process.env.USE_MOCK_DB === 'true';
 export default defineEventHandler(async (event) => {
   try {
     // Authentification obligatoire
-    const token = getCookie(event, "auth_token");
-    
-    if (!token) {
-      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
-    }
-    
-    // Rechercher la session
-    const session = sessionDb.findByToken(token);
-    if (!session) {
-      throw createError({ statusCode: 401, message: "Session invalide." });
-    }
-    
-    // Rechercher l'utilisateur
-    const user = await userDb.findById(session.userId);
-    if (!user) {
-      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
-    }
-
-    // Récupérer le rôle de l'utilisateur avec ses permissions
-    const role = roleDb.findByPk(user.role_id);
-    if (!role) {
-      throw createError({
-        statusCode: 500,
-        message: "Rôle utilisateur non trouvé."
-      });
-    }
-
-    // Mettre l'utilisateur dans le contexte
-    const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
-    delete userWithoutPassword.password;
-    
-    event.context.user = userWithoutPassword;
-    event.context.userRole = role;
-    event.context.permissions = role.getPermissions();
+    await authenticateUser(event);
 
     const method = event.node.req.method;
     const organigrammeId = event.context.params.id;
     
     if (!organigrammeId || !/^\d+$/.test(organigrammeId)) {
-      throw createError({ statusCode: 400, message: "ID d'organigramme invalide." });
+      throw createError({ statusCode: HTTP_STATUS.BAD_REQUEST, message: "ID d'organigramme invalide." });
     }
 
     // Vérifier que l'organigramme existe
@@ -62,7 +29,7 @@ export default defineEventHandler(async (event) => {
       : await Organigramme.findByPk(organigrammeId);
     
     if (!organigramme) {
-      throw createError({ statusCode: 404, message: "Organigramme non trouvé." });
+      throw createError({ statusCode: HTTP_STATUS.NOT_FOUND, message: "Organigramme non trouvé." });
     }
 
     // POST /api/organigrammes/:id/employees - Ajouter un employé
@@ -75,7 +42,7 @@ export default defineEventHandler(async (event) => {
       // Validation des données d'entrée
       const errors = validateEmployeeInput(body);
       if (Object.keys(errors).length > 0) {
-        throw createError({ statusCode: 400, message: errors });
+        throw createError({ statusCode: HTTP_STATUS.BAD_REQUEST, message: errors });
       }
       
       try {
@@ -93,7 +60,7 @@ export default defineEventHandler(async (event) => {
           
           if (!parent || parent.organigrammeId !== parseInt(organigrammeId)) {
             throw createError({
-              statusCode: 400,
+              statusCode: HTTP_STATUS.BAD_REQUEST,
               message: { parentId: "Le parent spécifié n'existe pas dans cet organigramme." }
             });
           }
@@ -101,7 +68,7 @@ export default defineEventHandler(async (event) => {
           // Vérifier le niveau de profondeur (max 10 niveaux)
           if (parent.level >= 9) {
             throw createError({
-              statusCode: 400,
+              statusCode: HTTP_STATUS.BAD_REQUEST,
               message: { parentId: "Le niveau de profondeur maximal (10) serait dépassé." }
             });
           }
@@ -158,7 +125,7 @@ export default defineEventHandler(async (event) => {
         }
         console.error('Erreur lors de la création de l\'employé:', error);
         throw createError({
-          statusCode: 500,
+          statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
           message: "Erreur lors de la création de l'employé."
         });
       }
@@ -193,14 +160,14 @@ export default defineEventHandler(async (event) => {
       } catch (error) {
         console.error('Erreur lors de la récupération des employés:', error);
         throw createError({
-          statusCode: 500,
+          statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
           message: "Erreur lors de la récupération des employés."
         });
       }
     }
 
     // Méthode non supportée
-    throw createError({ statusCode: 405, message: "Méthode non autorisée." });
+    throw createError({ statusCode: HTTP_STATUS.METHOD_NOT_ALLOWED, message: "Méthode non autorisée." });
     
   } catch (error) {
     // Intercepter les erreurs de connexion à la base de données

@@ -6,27 +6,7 @@ import { checkPermission } from '../../utils/permission-utils.js'
 export default defineEventHandler(async (event) => {
   try {
     // 1. Authentification (lecture seule pour les images publiques, mais on vérifie quand même)
-    const token = getCookie(event, "auth_token");
-    
-    // Pour la lecture, on peut permettre l'accès sans authentification pour les images publiques
-    // Mais dans un contexte sécurisé, on pourrait exiger l'authentification
-    if (token) {
-      // Rechercher la session
-      const session = sessionDb.findByToken(token);
-      if (session) {
-        // Rechercher l'utilisateur
-        const user = await userDb.findById(session.userId);
-        if (user) {
-          // Récupérer le rôle de l'utilisateur avec ses permissions
-          const role = roleDb.findByPk(user.role_id);
-          if (role) {
-            // Mettre l'utilisateur dans le contexte
-            const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
-            delete userWithoutPassword.password;
-            
-            event.context.user = userWithoutPassword;
-            event.context.userRole = role;
-            event.context.permissions = role.getPermissions();
+    await authenticateUser(event);
           }
         }
       }
@@ -52,7 +32,7 @@ export default defineEventHandler(async (event) => {
     // Vérifier si l'image existe
     if (!image) {
       throw createError({
-        statusCode: 404,
+        statusCode: HTTP_STATUS.NOT_FOUND,
         statusMessage: 'Image non trouvée'
       })
     }
@@ -101,7 +81,7 @@ export default defineEventHandler(async (event) => {
     
     // Sinon, créer une erreur 500
     throw createError({
-      statusCode: 500,
+      statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
       statusMessage: "Une erreur est survenue lors de la récupération de l'image"
     })
   }
