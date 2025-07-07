@@ -50,7 +50,7 @@ export default defineNuxtConfig({
 
   css: [
     "~/assets/css/main.css",
-    "@fortawesome/fontawesome-free/css/all.min.css",
+    // FontAwesome supprimé - remplacé par @nuxt/icon et imports sélectifs
   ],
 
   colorMode: {
@@ -77,10 +77,10 @@ export default defineNuxtConfig({
     "nuxt-csurf",
   ],
 
-  // Configuration Nuxt UI avec Tailwind Typography
+  // Configuration Nuxt UI avec Tailwind Typography et icônes optimisées
   ui: {
     global: true,
-    icons: ['heroicons', 'lucide']
+    icons: ['heroicons', 'lucide', 'svg-spinners'] // Ajout spinners pour loading
   },
 
   // Performance optimizations
@@ -90,10 +90,61 @@ export default defineNuxtConfig({
   },
 
 
-  // Build optimizations
+  // Build optimizations avec tree-shaking TipTap
   build: {
-    transpile:
-      process.env.NODE_ENV === "production" ? ["vue-toastification"] : [],
+    transpile: process.env.NODE_ENV === "production" ? ["vue-toastification"] : [],
+  },
+
+  // Optimisations Vite pour bundles
+  vite: {
+    optimizeDeps: {
+      // Forcer le tree-shaking des extensions TipTap non utilisées
+      exclude: ['@tiptap/starter-kit'],
+      include: [
+        '@tiptap/core',
+        '@tiptap/vue-3',
+        '@tiptap/extension-document',
+        '@tiptap/extension-paragraph',
+        '@tiptap/extension-text',
+        '@tiptap/extension-bold',
+        '@tiptap/extension-italic',
+        '@tiptap/extension-strike',
+        '@tiptap/extension-history'
+      ]
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Séparer TipTap dans son propre chunk
+            'tiptap-core': ['@tiptap/core', '@tiptap/vue-3'],
+            'tiptap-basic': [
+              '@tiptap/extension-document',
+              '@tiptap/extension-paragraph',
+              '@tiptap/extension-text',
+              '@tiptap/extension-bold',
+              '@tiptap/extension-italic',
+              '@tiptap/extension-strike',
+              '@tiptap/extension-history'
+            ],
+            // Extensions avancées chargées à la demande
+            'tiptap-advanced': [
+              '@tiptap/extension-heading',
+              '@tiptap/extension-bullet-list',
+              '@tiptap/extension-ordered-list',
+              '@tiptap/extension-list-item',
+              '@tiptap/extension-blockquote',
+              '@tiptap/extension-code-block',
+              '@tiptap/extension-horizontal-rule'
+            ],
+            // Séparation des utilitaires d'images
+            'image-processing': [
+              'sharp'
+            ]
+          }
+        }
+      }
+    }
   },
 
   // CSRF protection configuration - Désactivé en développement
