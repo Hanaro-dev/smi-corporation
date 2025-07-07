@@ -226,7 +226,7 @@ if (!isMainThread) {
 
 } else {
   // Mode principal - utilitaires pour créer des workers
-  export class ImageWorker {
+  class ImageWorker {
     static async processVariants(imageBuffer, filename, outputDir) {
       return new Promise((resolve, reject) => {
         const worker = new Worker(new URL(import.meta.url), {
@@ -306,4 +306,6 @@ if (!isMainThread) {
       });
     }
   }
+  
+  module.exports = { ImageWorker };
 }

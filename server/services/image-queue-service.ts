@@ -3,7 +3,7 @@
  * Gère la concurrence et évite la surcharge du système
  */
 import { EventEmitter } from 'events';
-import { ImageWorker } from '../workers/image-processor.js';
+const { ImageWorker } = require('../workers/image-processor.js');
 import type { ProcessingJob, ProcessingResult, QueueStats } from '../types/index.js';
 
 interface ProcessingJob {
