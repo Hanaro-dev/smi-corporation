@@ -2,7 +2,8 @@
  * API simplifiée pour les images (compatible mode mock)
  */
 import { getCookie, defineEventHandler, createError, getQuery } from 'h3'
-import { sessionDb, userDb, imageDb } from '../utils/mock-db.js'
+import { sessionDb, userDb } from '../utils/mock-db-optimized.js';
+import { imageDb } from '../utils/mock-db.js'
 
 export default defineEventHandler(async (event) => {
   try {

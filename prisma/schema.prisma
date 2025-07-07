@@ -1,0 +1,201 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  username  String   @unique
+  password  String
+  roleId    Int      @map("role_id")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  role          Role            @relation(fields: [roleId], references: [id])
+  sessions      Session[]
+  pages         Page[]
+  images        Image[]
+  organigrammes Organigramme[]
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           Int @id @default(autoincrement())
+  roleId       Int @map("role_id")
+  permissionId Int @map("permission_id")
+
+  // Relations
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    Int      @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Page {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  content     String?
+  excerpt     String?
+  status      String   @default("draft") // draft, published
+  parentId    Int?     @map("parent_id")
+  userId      Int      @map("user_id")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user     User   @relation(fields: [userId], references: [id])
+  parent   Page?  @relation("PageHierarchy", fields: [parentId], references: [id])
+  children Page[] @relation("PageHierarchy")
+
+  @@map("pages")
+}
+
+model Image {
+  id           Int      @id @default(autoincrement())
+  filename     String
+  originalName String   @map("original_name")
+  url          String
+  mimeType     String   @map("mime_type")
+  size         Int
+  width        Int?
+  height       Int?
+  alt          String?
+  description  String?
+  userId       Int      @map("user_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user     User           @relation(fields: [userId], references: [id])
+  variants ImageVariant[]
+
+  @@map("images")
+}
+
+model ImageVariant {
+  id       Int    @id @default(autoincrement())
+  imageId  Int    @map("image_id")
+  type     String // thumbnail, small, medium, large
+  url      String
+  width    Int?
+  height   Int?
+  size     Int?
+
+  // Relations
+  image Image @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([imageId, type])
+  @@map("image_variants")
+}
+
+model Organigramme {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  description String?
+  status      String   @default("draft") // draft, published
+  userId      Int      @map("user_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user      User       @relation(fields: [userId], references: [id])
+  employees Employee[]
+
+  @@map("organigrammes")
+}
+
+model Employee {
+  id              Int     @id @default(autoincrement())
+  organigrammeId  Int     @map("organigramme_id")
+  parentId        Int?    @map("parent_id")
+  name            String
+  position        String
+  email           String?
+  phone           String?
+  level           Int     @default(1)
+  order           Int     @default(0)
+  isActive        Boolean @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  organigramme Organigramme @relation(fields: [organigrammeId], references: [id], onDelete: Cascade)
+  parent       Employee?    @relation("EmployeeHierarchy", fields: [parentId], references: [id])
+  children     Employee[]   @relation("EmployeeHierarchy")
+
+  @@map("employees")
+}
+
+model AuditLog {
+  id           Int      @id @default(autoincrement())
+  action       String
+  resourceType String   @map("resource_type")
+  resourceId   Int?     @map("resource_id")
+  userId       Int?     @map("user_id")
+  details      String?  // JSON string
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}

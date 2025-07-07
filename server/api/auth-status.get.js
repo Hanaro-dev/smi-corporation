@@ -2,7 +2,7 @@
  * Endpoint pour tester l'état de l'authentification
  */
 import { defineEventHandler, getCookie } from 'h3'
-import { sessionDb, userDb, roleDb } from '../utils/mock-db.js'
+import { sessionDb, userDb, roleDb } from '../utils/mock-db-optimized.js'
 
 export default defineEventHandler(async (event) => {
   try {

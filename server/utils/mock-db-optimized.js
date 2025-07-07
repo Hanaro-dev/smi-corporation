@@ -577,9 +577,5 @@ export {
   useMockDb, 
   hashPassword as mockHashPassword, 
   comparePassword,
-  initializeMaps,
-  userDbOptimized,
-  roleDbOptimized,
-  permissionDbOptimized,
-  sessionDbOptimized
+  initializeMaps
 };

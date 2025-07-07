@@ -1,4 +1,5 @@
-import { roleDb, permissionDb, auditDb } from '../utils/mock-db.js';
+import { roleDb, permissionDb } from '../utils/mock-db-optimized.js';
+import { auditDb } from '../utils/mock-db.js';
 import { defineEventHandler, createError, getMethod } from 'h3';
 
 /**

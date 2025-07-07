@@ -1,6 +1,7 @@
 // Authentication service layer
 import jwt from 'jsonwebtoken';
-import { userDb, sessionDb, roleDb, auditDb } from '../utils/mock-db.js';
+import { userDb, sessionDb, roleDb } from '../utils/mock-db-optimized.js';
+import { auditDb } from '../utils/mock-db.js';
 import { authConfig, appSettings } from '../config/index.js';
 import { ValidationError, AuthenticationError, NotFoundError } from '../utils/error-handler.js';
 import { userRepository } from '../repositories/index.js';

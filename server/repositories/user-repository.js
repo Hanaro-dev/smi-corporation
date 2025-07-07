@@ -1,6 +1,6 @@
 // User repository with user-specific operations
 import { BaseRepository } from './base-repository.js'
-import { userDb, roleDb } from '../utils/mock-db.js'
+import { userDb, roleDb } from '../utils/mock-db-optimized.js'
 import { ConflictError } from '../utils/error-handler.js'
 import { userCache, cacheKeys, invalidateUserCache } from '../utils/cache.js'
 

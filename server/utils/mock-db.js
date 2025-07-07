@@ -314,7 +314,7 @@ let auditLogs = [];
 console.log("Mock DB initialisé en mode", useMockDb ? "simulation" : "compatibilité");
 
 // Fonctions pour manipuler les utilisateurs
-export const userDb = {
+export const userDbLegacy = {
   findByEmail: async (email) => {
     await initializeUsers();
     return users.find(user => user.email === email);
@@ -418,7 +418,7 @@ export const userDb = {
 };
 
 // Fonctions pour gérer les rôles
-export const roleDb = {
+export const roleDbLegacy = {
   findAll: (options = {}) => {
     let result = [...roles];
     
@@ -546,7 +546,7 @@ export const roleDb = {
 };
 
 // Fonctions pour gérer les permissions
-export const permissionDb = {
+export const permissionDbLegacy = {
   findAll: () => {
     return [...permissions];
   },
@@ -613,7 +613,7 @@ export const permissionDb = {
 };
 
 // Fonctions pour gérer les sessions avec expiration
-export const sessionDb = {
+export const sessionDbLegacy = {
   create: (userId, token, expiresIn = 604800000) => { // 1 semaine par défaut
     const expiresAt = new Date(Date.now() + expiresIn);
     

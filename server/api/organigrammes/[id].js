@@ -1,6 +1,7 @@
 import { defineEventHandler, createError, readBody, getCookie, getHeader, getRequestIP } from 'h3';
 import { Organigramme, Employee, User } from "../../models.js";
-import { sessionDb, userDb, roleDb, auditDb, organigrammeDb, employeeDb } from '../../utils/mock-db.js';
+import { sessionDb, userDb, roleDb } from '../../utils/mock-db-optimized.js';
+import { auditDb, organigrammeDb, employeeDb } from '../../utils/mock-db.js';
 import { checkPermission } from "../../utils/permission-utils.js";
 import DOMPurify from "dompurify";
 import dotenv from "dotenv";

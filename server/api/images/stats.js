@@ -1,7 +1,7 @@
 import { Image, sequelize } from '../../models.js'
 import { Sequelize } from 'sequelize'
 import { getCookie, defineEventHandler, createError } from 'h3'
-import { sessionDb, userDb, roleDb } from '../../utils/mock-db.js'
+import { sessionDb, userDb, roleDb } from '../../utils/mock-db-optimized.js'
 import { checkPermission } from '../../utils/permission-utils.js'
 
 export default defineEventHandler(async (event) => {

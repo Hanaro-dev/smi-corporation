@@ -1,6 +1,6 @@
 import { createError } from 'h3';
 import { Role, Permission } from "../models.js";
-import { userDb } from "./mock-db.js";
+import { userDb } from "./mock-db-optimized.js";
 
 /**
  * Vérifie si l'utilisateur connecté possède une permission spécifique

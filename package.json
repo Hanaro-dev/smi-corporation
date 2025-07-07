@@ -51,7 +51,7 @@
     "dompurify": "^3.2.6",
     "filepond": "^4.32.8",
     "filepond-plugin-file-validate-size": "^2.2.8",
-    "filepond-plugin-file-validate-type": "^1.3.0",
+    "filepond-plugin-file-validate-type": "^1.2.9",
     "filepond-plugin-image-crop": "^2.0.6",
     "filepond-plugin-image-preview": "^4.6.14",
     "h3": "^1.13.0",
@@ -73,7 +73,9 @@
     "vue-filepond": "^7.0.4",
     "vue-router": "^4.5.1",
     "yup": "^1.6.1",
-    "zod": "^3.25.67"
+    "zod": "^3.25.67",
+    "prisma": "^6.11.1",
+    "@prisma/client": "^6.11.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",

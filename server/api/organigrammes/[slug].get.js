@@ -1,6 +1,7 @@
 import { defineEventHandler, createError } from 'h3';
 import { Organigramme, Employee, User } from "../../models.js";
-import { organigrammeDb, employeeDb, userDb } from '../../utils/mock-db.js';
+import { userDb } from '../../utils/mock-db-optimized.js';
+import { organigrammeDb, employeeDb } from '../../utils/mock-db.js';
 import dotenv from "dotenv";
 
 // Charger les variables d'environnement

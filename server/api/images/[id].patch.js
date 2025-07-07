@@ -1,6 +1,7 @@
 import { Image } from '../../models.js'
 import { getCookie, getHeader, defineEventHandler, createError, getRequestIP, readBody } from 'h3'
-import { sessionDb, userDb, roleDb, auditDb } from '../../utils/mock-db.js'
+import { sessionDb, userDb, roleDb } from '../../utils/mock-db-optimized.js';
+import { auditDb } from '../../utils/mock-db.js'
 import { checkPermission } from '../../utils/permission-utils.js'
 import DOMPurify from 'dompurify'
 

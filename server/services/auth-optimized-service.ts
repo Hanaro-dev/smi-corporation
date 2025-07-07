@@ -5,7 +5,7 @@
 import { createError, getCookie } from 'h3';
 import { HTTP_STATUS, ERROR_MESSAGES } from '../constants/api-constants.js';
 import { authCache } from './auth-cache-service.js';
-import { sessionDb, userDb, roleDb } from '../utils/mock-db.js';
+import { sessionDb, userDb, roleDb } from '../utils/mock-db-optimized.js';
 import type { AuthenticatedEvent, User, Role, Permission } from '../types/index.js';
 
 interface OptimizedAuthResult {

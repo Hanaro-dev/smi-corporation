@@ -1,4 +1,4 @@
-import { userDb, sessionDb, roleDb } from '../utils/mock-db.js';
+import { userDb, sessionDb, roleDb } from '../utils/mock-db-optimized.js';
 import { defineEventHandler, createError, getCookie } from 'h3';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';

@@ -3,7 +3,7 @@
  * Centralized authentication logic for API endpoints
  */
 import { createError, getCookie } from 'h3';
-import { sessionDb, userDb, roleDb } from '../utils/mock-db.js';
+import { sessionDb, userDb, roleDb } from '../utils/mock-db-optimized.js';
 import { HTTP_STATUS, ERROR_MESSAGES } from '../constants/api-constants.js';
 import type { AuthenticatedEvent, User, Role, Permission, ApiResponse } from '../types/index.js';
 

@@ -4,7 +4,7 @@ import { config } from './env-validation.js';
 import { checkRateLimit } from './rate-limiter.js';
 import { ValidationError } from './error-handler.js';
 import { userCache, cacheKeys } from './cache.js';
-import { userDb } from './mock-db.js';
+import { userDb } from './mock-db-optimized.js';
 import { createError, getCookie, getHeader, readBody, getQuery, setHeader, setResponseStatus, getRequestIP } from 'h3';
 
 /**

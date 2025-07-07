@@ -1,7 +1,8 @@
 import { defineEventHandler, createError, getQuery, readBody } from 'h3';
 import { Organigramme, Employee, User, sequelize } from "../../models.js";
 import { Op } from "sequelize";
-import { organigrammeDb, employeeDb, userDb } from '../../utils/mock-db.js';
+import { userDb } from '../../utils/mock-db-optimized.js';
+import { organigrammeDb, employeeDb } from '../../utils/mock-db.js';
 import { checkPermission } from "../../utils/permission-utils.js";
 import { authenticateUser, validateIdParameter, handleDatabaseError } from '../../services/auth-middleware.js';
 import { OrganigrammeValidator } from '../../services/validation-service.js';
