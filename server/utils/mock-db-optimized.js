@@ -569,6 +569,5 @@ export {
   useMockDb, 
   hashPassword, 
   comparePassword,
-  getUserWithRoleAndPermissions,
   initializeMaps
 };

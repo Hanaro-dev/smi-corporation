@@ -2,7 +2,8 @@ import { AuthService } from '../../services/auth-service.js';
 import { validateUserLogin } from '../../utils/input-validation.js';
 import { checkRateLimit } from '../../utils/rate-limiter.js';
 import { ValidationError } from '../../utils/error-handler.js';
-import { userDb, roleDb, sessionDb, auditDb } from '../../utils/mock-db.js';
+import { userDb, roleDb, sessionDb } from '../../utils/mock-db-optimized.js';
+import { auditDb } from '../../utils/mock-db.js';
 import { getRequestIP, defineEventHandler, createError, readBody, setCookie } from 'h3';
 import jwt from 'jsonwebtoken';
 import config from '../../config/index.js';
@@ -67,7 +68,11 @@ export default defineEventHandler(async (event: AuthenticatedEvent) => {
     );
     
     // Enregistrer la session avec durée de vie configurable
-    sessionDb.create(user.id, token, config.auth.sessionMaxAge);
+    sessionDb.create({
+      userId: user.id,
+      token: token,
+      expiresAt: new Date(Date.now() + config.auth.sessionMaxAge).toISOString()
+    });
     
     // Préparer la réponse utilisateur sans le mot de passe
     const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
