@@ -1,7 +1,9 @@
-import { defineEventHandler, getCookie, H3Event } from 'h3';
+import { defineEventHandler, getCookie } from 'h3';
 import { userDb, sessionDb, roleDb } from '../../utils/mock-db.js';
 
-export default defineEventHandler(async (event: H3Event) => {
+import type { AuthenticatedEvent, ApiResponse, User } from '../../types/index.js';
+
+export default defineEventHandler(async (event: AuthenticatedEvent) => {
   try {
     // Récupérer le token depuis le cookie
     const token = getCookie(event, "auth_token");
