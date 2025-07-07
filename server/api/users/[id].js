@@ -1,19 +1,22 @@
 import { validateUser } from "../../utils/validators.js";
-import { ERROR_MESSAGES } from "../../constants/messages.js";
-import auth from "../../middleware/auth.js";
+import { ERROR_MESSAGES, HTTP_STATUS } from "../../constants/api-constants.js";
 import { requirePermission } from "../../middleware/check-permission.js";
 import { userDb, roleDb, sessionDb, auditDb } from "../../utils/mock-db.js";
+import { authenticateUser, handleDatabaseError } from "../../services/auth-middleware.js";
+import { defineEventHandler, createError, getMethod, readBody } from "h3";
 
 export default defineEventHandler(async (event) => {
-  await auth(event); // Protéger toutes les méthodes de ce handler
+  try {
+    // Authentification centralisée
+    await authenticateUser(event);
   const method = getMethod(event);
   const userId = event.context.params.id;
 
   // Vérifier si l'ID est un nombre valide
   if (isNaN(parseInt(userId))) {
     throw createError({
-      statusCode: 400,
-      message: "L'ID utilisateur doit être un nombre.",
+      statusCode: HTTP_STATUS.BAD_REQUEST,
+      message: ERROR_MESSAGES.VALIDATION.INVALID_ID,
     });
   }
 
@@ -22,8 +25,8 @@ export default defineEventHandler(async (event) => {
 
   if (!user) {
     throw createError({
-      statusCode: 404,
-      message: ERROR_MESSAGES.USER_NOT_FOUND || "Utilisateur non trouvé.",
+      statusCode: HTTP_STATUS.NOT_FOUND,
+      message: ERROR_MESSAGES.AUTH.USER_NOT_FOUND,
     });
   }
 
@@ -216,5 +219,10 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  throw createError({ statusCode: 405, message: "Méthode non autorisée." });
+  throw createError({ statusCode: HTTP_STATUS.METHOD_NOT_ALLOWED, message: ERROR_MESSAGES.GENERIC.METHOD_NOT_ALLOWED });
+  
+  } catch (error) {
+    // Utiliser le gestionnaire d'erreurs centralisé
+    handleDatabaseError(error, "gestion des utilisateurs");
+  }
 });

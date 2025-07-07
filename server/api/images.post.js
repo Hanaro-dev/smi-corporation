@@ -6,11 +6,13 @@ import sharp from "sharp";
 import { fileTypeFromBuffer } from "file-type";
 import sizeOf from "image-size";
 import { Image, ImageVariant } from "../models.js";
-import { getCookie, getHeader, defineEventHandler, createError, getRequestIP, readMultipartFormData } from 'h3';
-import { sessionDb, userDb, roleDb, auditDb } from '../utils/mock-db.js';
+import { getHeader, defineEventHandler, createError, getRequestIP, readMultipartFormData } from 'h3';
+import { auditDb } from '../utils/mock-db.js';
 import { checkPermission } from "../utils/permission-utils.js";
 import DOMPurify from "dompurify";
 import { checkRateLimit, imageUploadRateLimit } from "../utils/rate-limiter.js";
+import { authenticateUser, handleDatabaseError } from "../services/auth-middleware.js";
+import { HTTP_STATUS, ERROR_MESSAGES } from "../constants/api-constants.js";
 
 // Configuration
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -47,43 +49,8 @@ export default defineEventHandler(async (event) => {
       });
     }
     
-    // 2. Authentification et vérification des permissions
-    const token = getCookie(event, "auth_token");
-    
-    if (!token) {
-      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
-    }
-    
-    // Rechercher la session
-    const session = sessionDb.findByToken(token);
-    if (!session) {
-      throw createError({ statusCode: 401, message: "Session invalide." });
-    }
-    
-    // Rechercher l'utilisateur
-    const user = await userDb.findById(session.userId);
-    if (!user) {
-      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
-    }
-
-    // Récupérer le rôle de l'utilisateur avec ses permissions
-    const role = roleDb.findByPk(user.role_id);
-    if (!role) {
-      throw createError({
-        statusCode: 500,
-        message: "Rôle utilisateur non trouvé."
-      });
-    }
-
-    // Mettre l'utilisateur dans le contexte
-    const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
-    delete userWithoutPassword.password;
-    
-    event.context.user = userWithoutPassword;
-    event.context.userRole = role;
-    event.context.permissions = role.getPermissions();
-
-    // Vérifier les permissions
+    // 2. Authentification centralisée et vérification des permissions
+    await authenticateUser(event);
     await checkPermission(event, "manage_media");
     
     // 2. Récupérer et valider les données du formulaire
@@ -308,17 +275,7 @@ export default defineEventHandler(async (event) => {
     };
     
   } catch (error) {
-    console.error("Erreur lors du traitement de l'image:", error);
-    
-    // Si l'erreur est déjà une erreur HTTP, la propager
-    if (error.statusCode) {
-      throw error;
-    }
-    
-    // Sinon, créer une erreur 500
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Une erreur est survenue lors du traitement de l'image.",
-    });
+    // Utiliser le gestionnaire d'erreurs centralisé
+    handleDatabaseError(error, "traitement des images");
   }
 });

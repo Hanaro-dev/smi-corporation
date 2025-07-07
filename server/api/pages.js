@@ -1,12 +1,14 @@
-import { defineEventHandler, createError, getQuery, readBody, getCookie, getMethod } from 'h3';
+import { defineEventHandler, createError, getQuery, readBody, getMethod } from 'h3';
 import DOMPurify from "dompurify";
 import { validatePageInput } from "../utils/validators";
 import { Page, sequelize } from "../models.js";
 import dotenv from "dotenv";
-import { pageDb, userDb, sessionDb, roleDb, auditDb } from '../utils/mock-db.js';
+import { pageDb, auditDb } from '../utils/mock-db.js';
 import { Op as SequelizeOp } from "sequelize";
 import { checkPermission } from "../utils/permission-utils.js";
 import { generateSlug, validateSlug, generateUniqueSlug } from "../utils/slug-utils.js";
+import { authenticateUser, handleDatabaseError } from "../services/auth-middleware.js";
+import { HTTP_STATUS, ERROR_MESSAGES } from "../constants/api-constants.js";
 
 // Charger les variables d'environnement
 dotenv.config();
@@ -57,41 +59,8 @@ const handleDbConnectionError = (error) => {
 
 export default defineEventHandler(async (event) => {
   try {
-    // Authentification comme dans session.get.js
-    const token = getCookie(event, "auth_token");
-    
-    if (!token) {
-      throw createError({ statusCode: 401, message: "Token d'authentification requis." });
-    }
-    
-    // Rechercher la session
-    const session = sessionDb.findByToken(token);
-    if (!session) {
-      throw createError({ statusCode: 401, message: "Session invalide." });
-    }
-    
-    // Rechercher l'utilisateur
-    const user = await userDb.findById(session.userId);
-    if (!user) {
-      throw createError({ statusCode: 401, message: "Utilisateur non trouvé." });
-    }
-
-    // Récupérer le rôle de l'utilisateur avec ses permissions
-    const role = roleDb.findByPk(user.role_id);
-    if (!role) {
-      throw createError({
-        statusCode: 500,
-        message: "Rôle utilisateur non trouvé."
-      });
-    }
-
-    // Mettre l'utilisateur dans le contexte
-    const userWithoutPassword = user.toJSON ? user.toJSON() : { ...user };
-    delete userWithoutPassword.password;
-    
-    event.context.user = userWithoutPassword;
-    event.context.userRole = role;
-    event.context.permissions = role.getPermissions();
+    // Authentification centralisée
+    await authenticateUser(event);
 
   const method = event.node.req.method;
   const url = new URL(event.node.req.url, `http://${event.node.req.headers.host}`);
@@ -151,8 +120,8 @@ export default defineEventHandler(async (event) => {
     } catch (error) {
       console.error('Erreur lors de la récupération de la liste des pages:', error);
       throw createError({
-        statusCode: 500,
-        message: "Erreur lors de la récupération de la liste des pages."
+        statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        message: ERROR_MESSAGES.PAGES.FETCH_ERROR
       });
     }
   }
@@ -194,8 +163,8 @@ export default defineEventHandler(async (event) => {
     } catch (error) {
       console.error('Erreur lors de la récupération des pages publiées:', error);
       throw createError({
-        statusCode: 500,
-        message: "Erreur lors de la récupération des pages publiées."
+        statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        message: ERROR_MESSAGES.PAGES.FETCH_ERROR
       });
     }
   }
@@ -276,7 +245,7 @@ export default defineEventHandler(async (event) => {
         const page = pageDb.findOne({ where: { slug } });
         
         if (!page) {
-          throw createError({ statusCode: 404, message: "Page non trouvée." });
+          throw createError({ statusCode: HTTP_STATUS.NOT_FOUND, message: ERROR_MESSAGES.PAGES.NOT_FOUND });
         }
         
         return page;
@@ -314,7 +283,7 @@ export default defineEventHandler(async (event) => {
       if (useMockDb) {
         const page = pageDb.findByPk(id);
         if (!page) {
-          throw createError({ statusCode: 404, message: "Page non trouvée." });
+          throw createError({ statusCode: HTTP_STATUS.NOT_FOUND, message: ERROR_MESSAGES.PAGES.NOT_FOUND });
         }
         return page;
       }
@@ -437,8 +406,8 @@ export default defineEventHandler(async (event) => {
       }
       console.error('Erreur lors de la création de la page:', error);
       throw createError({
-        statusCode: 500,
-        message: "Erreur lors de la création de la page."
+        statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        message: ERROR_MESSAGES.PAGES.CREATE_ERROR
       });
     }
   }
@@ -576,8 +545,8 @@ export default defineEventHandler(async (event) => {
       }
       console.error('Erreur lors de la mise à jour de la page:', error);
       throw createError({
-        statusCode: 500,
-        message: "Erreur lors de la mise à jour de la page."
+        statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        message: ERROR_MESSAGES.PAGES.UPDATE_ERROR
       });
     }
   }
@@ -763,8 +732,8 @@ export default defineEventHandler(async (event) => {
       
       if (hasChildren) {
         throw createError({ 
-          statusCode: 400, 
-          message: "Cette page a des enfants. Veuillez d'abord supprimer ou déplacer les pages enfants." 
+          statusCode: HTTP_STATUS.BAD_REQUEST, 
+          message: ERROR_MESSAGES.PAGES.HAS_CHILDREN
         });
       }
       
@@ -818,11 +787,7 @@ export default defineEventHandler(async (event) => {
   throw createError({ statusCode: 404, message: "Route non trouvée." });
   
   } catch (error) {
-    // Intercepter les erreurs de connexion à la base de données
-    if (error.name && error.name.startsWith('Sequelize')) {
-      throw handleDbConnectionError(error);
-    }
-    // Laisser passer les autres erreurs
-    throw error;
+    // Utiliser le gestionnaire d'erreurs centralisé
+    handleDatabaseError(error, "gestion des pages");
   }
 });

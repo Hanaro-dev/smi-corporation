@@ -43,6 +43,29 @@ export const ERROR_MESSAGES = {
     NOT_FOUND: "Ressource non trouvée.",
     METHOD_NOT_ALLOWED: "Méthode non autorisée.",
     INTERNAL_ERROR: "Erreur interne du serveur."
+  },
+  PAGES: {
+    NOT_FOUND: "Page non trouvée.",
+    FETCH_ERROR: "Erreur lors de la récupération des pages.",
+    CREATE_ERROR: "Erreur lors de la création de la page.",
+    UPDATE_ERROR: "Erreur lors de la mise à jour de la page.",
+    DELETE_ERROR: "Erreur lors de la suppression de la page.",
+    HAS_CHILDREN: "Cette page a des enfants. Veuillez d'abord supprimer ou déplacer les pages enfants."
+  },
+  IMAGES: {
+    NOT_FOUND: "Image non trouvée.",
+    UPLOAD_ERROR: "Erreur lors du téléchargement de l'image.",
+    PROCESSING_ERROR: "Erreur lors du traitement de l'image.",
+    DELETE_ERROR: "Erreur lors de la suppression de l'image.",
+    INVALID_FORMAT: "Format d'image non autorisé.",
+    SIZE_EXCEEDED: "La taille de l'image dépasse la limite autorisée."
+  },
+  USERS: {
+    NOT_FOUND: "Utilisateur non trouvé.",
+    CREATE_ERROR: "Erreur lors de la création de l'utilisateur.",
+    UPDATE_ERROR: "Erreur lors de la mise à jour de l'utilisateur.",
+    DELETE_ERROR: "Erreur lors de la suppression de l'utilisateur.",
+    CANNOT_DELETE_SELF: "Vous ne pouvez pas supprimer votre propre compte."
   }
 };
 
