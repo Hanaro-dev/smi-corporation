@@ -1,3 +1,58 @@
 {
-  "extends": "../.nuxt/tsconfig.server.json"
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "../node_modules/@types",
+      "./types"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["../*"],
+      "@/*": ["../*"],
+      "#constants/*": ["./constants/*"],
+      "#services/*": ["./services/*"],
+      "#utils/*": ["./utils/*"],
+      "#types/*": ["./types/*"],
+      "#models/*": ["./models/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.js",
+    "./types/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.test.js",
+    "../.nuxt",
+    "../dist",
+    "../node_modules"
+  ]
 }

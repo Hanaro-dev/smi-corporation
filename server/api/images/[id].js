@@ -1,16 +1,12 @@
 import { Image, ImageVariant, User } from '../../models.js'
 import { getCookie, defineEventHandler, createError } from 'h3'
-import { sessionDb, userDb, roleDb } from '../../utils/mock-db.js'
-import { checkPermission } from '../../utils/permission-utils.js'
+import { HTTP_STATUS, ERROR_MESSAGES } from '../../constants/api-constants.js'
+import { authenticateUser, handleDatabaseError } from '../../services/auth-middleware.js'
 
 export default defineEventHandler(async (event) => {
   try {
     // 1. Authentification (lecture seule pour les images publiques, mais on vérifie quand même)
     await authenticateUser(event);
-          }
-        }
-      }
-    }
     
     const id = event.context.params.id
     
@@ -72,17 +68,6 @@ export default defineEventHandler(async (event) => {
       variants: jsonImage.variants
     }
   } catch (error) {
-    console.error(`Erreur lors de la récupération de l'image (ID: ${event.context.params.id}):`, error)
-    
-    // Si l'erreur est déjà une erreur HTTP, la propager
-    if (error.statusCode) {
-      throw error
-    }
-    
-    // Sinon, créer une erreur 500
-    throw createError({
-      statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-      statusMessage: "Une erreur est survenue lors de la récupération de l'image"
-    })
+    handleDatabaseError(error, "récupération de l'image");
   }
 })
