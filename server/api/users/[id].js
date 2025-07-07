@@ -1,7 +1,8 @@
 import { validateUser } from "../../utils/validators.js";
 import { ERROR_MESSAGES, HTTP_STATUS } from "../../constants/api-constants.js";
 import { requirePermission } from "../../middleware/check-permission.js";
-import { userDb, roleDb, sessionDb, auditDb } from "../../utils/mock-db.js";
+import { userDb, roleDb, sessionDb } from "../../utils/mock-db-optimized.js";
+import { auditDb } from "../../utils/mock-db.js";
 import { authenticateUser, handleDatabaseError } from "../../services/auth-middleware.js";
 import { defineEventHandler, createError, getMethod, readBody } from "h3";
 

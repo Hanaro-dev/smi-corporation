@@ -1,4 +1,5 @@
-import { userDb, auditDb } from '../../utils/mock-db.js';
+import { userDb } from '../../utils/mock-db-optimized.js';
+import { auditDb } from '../../utils/mock-db.js';
 import { validateUserRegistration, sanitizeInput } from '../../utils/input-validation.js';
 import { checkRateLimit } from '../../utils/rate-limiter.js';
 import { ValidationError } from '../../utils/error-handler.js';

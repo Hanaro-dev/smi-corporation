@@ -333,7 +333,7 @@ export const getUserWithRoleAndPermissions = async (userId) => {
 // ========================================
 
 // Service Session optimisé
-export const sessionDb = {
+export const sessionDbOptimized = {
   // OPTIMISATION: findByToken avec Map O(1) au lieu de O(n)
   findByToken: (token) => {
     performanceStats.queryCount++;
@@ -388,7 +388,7 @@ export const sessionDb = {
 };
 
 // Service User optimisé  
-export const userDb = {
+export const userDbOptimized = {
   // OPTIMISATION: findById avec accès direct O(1)
   findById: async (id) => {
     performanceStats.queryCount++;
@@ -452,7 +452,7 @@ export const userDb = {
 };
 
 // Service Role optimisé
-export const roleDb = {
+export const roleDbOptimized = {
   // OPTIMISATION: findByPk avec Map O(1)
   findByPk: (id) => {
     performanceStats.queryCount++;
@@ -509,7 +509,7 @@ export const roleDb = {
 };
 
 // Service Permission optimisé
-export const permissionDb = {
+export const permissionDbOptimized = {
   getAll: () => {
     performanceStats.queryCount++;
     return Array.from(permissionsMap.values());
@@ -564,10 +564,22 @@ initializeMaps();
 console.log('🎯 Mock Database optimisée initialisée avec succès');
 console.log(`📊 Performance: ${getPerformanceStats().mapsSize.permissions} permissions, ${getPerformanceStats().mapsSize.roles} rôles indexés`);
 
+// Exports compatibles avec noms standard (pour éviter conflits)
+export {
+  userDbOptimized as userDb,
+  roleDbOptimized as roleDb, 
+  permissionDbOptimized as permissionDb,
+  sessionDbOptimized as sessionDb
+};
+
 // Export des nouvelles méthodes optimisées
 export { 
   useMockDb, 
-  hashPassword, 
+  hashPassword as mockHashPassword, 
   comparePassword,
-  initializeMaps
+  initializeMaps,
+  userDbOptimized,
+  roleDbOptimized,
+  permissionDbOptimized,
+  sessionDbOptimized
 };

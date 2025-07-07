@@ -1,6 +1,7 @@
 import { defineEventHandler, createError, getMethod, readBody } from 'h3';
 import { Permission } from "../../models.js";
-import { permissionDb, auditDb } from '../../utils/mock-db.js';
+import { permissionDb } from '../../utils/mock-db-optimized.js';
+import { auditDb } from '../../utils/mock-db.js';
 import { checkPermission } from "../../utils/permission-utils.js";
 import { authenticateUser, handleDatabaseError } from "../../services/auth-middleware.js";
 import { HTTP_STATUS, ERROR_MESSAGES } from "../../constants/api-constants.js";

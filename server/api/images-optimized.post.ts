@@ -5,14 +5,12 @@
 import { defineEventHandler, readMultipartFormData, createError } from 'h3';
 import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
-import { authenticateUser, handleDatabaseError } from '../services/auth-middleware-optimized.js';
+import { authenticateUser, handleDatabaseError } from '../services/auth-middleware-optimized.ts';
 import { imageProcessingQueue } from '../services/image-queue-service.js';
 import { HTTP_STATUS, ERROR_MESSAGES } from '../constants/api-constants.js';
-import { models } from '../models.js';
+import { Image, ImageVariant } from '../models.js';
 import crypto from 'crypto';
-import type { AuthenticatedEvent, ApiResponse, Image } from '../types/index.js';
-
-const { Image, ImageVariant } = models;
+import type { AuthenticatedEvent, ApiResponse, Image as ImageType } from '../types/index.js';
 
 // Configuration de l'upload
 const UPLOAD_CONFIG = {

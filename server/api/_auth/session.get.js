@@ -1,5 +1,5 @@
 import { defineEventHandler, getCookie } from 'h3';
-import { userDb, sessionDb, roleDb } from '../../utils/mock-db.js';
+import { userDb, sessionDb, roleDb } from '../../utils/mock-db-optimized.js';
 
 export default defineEventHandler(async (event) => {
   try {

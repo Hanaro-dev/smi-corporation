@@ -1,4 +1,5 @@
-import { sessionDb, auditDb } from '../../utils/mock-db.js';
+import { sessionDb } from '../../utils/mock-db-optimized.js';
+import { auditDb } from '../../utils/mock-db.js';
 import auth from '../../middleware/auth.js';
 
 export default defineEventHandler(async (event) => {
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event) => {
       );
       
       // Supprimer la session
-      sessionDb.delete(token);
+      sessionDb.deleteByToken(token);
     }
     
     // Supprimer le cookie d'authentification

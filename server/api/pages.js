@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import { pageDb, auditDb } from '../utils/mock-db.js';
 import { Op as SequelizeOp } from "sequelize";
 import { checkPermission } from "../utils/permission-utils.js";
-import { generateSlug, validateSlug, generateUniqueSlug } from "../utils/slug-utils.js";
+import { generateSlug, validateSlug, generateUniqueSlug } from "../utils/slug-utils.ts";
 import { authenticateUser, handleDatabaseError } from "../services/auth-middleware.js";
 import { HTTP_STATUS, ERROR_MESSAGES } from "../constants/api-constants.js";
 

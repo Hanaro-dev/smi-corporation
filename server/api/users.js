@@ -1,7 +1,8 @@
 import { defineEventHandler, createError, getMethod, readBody, getQuery } from 'h3';
 import { validateUser, validateLoginInput } from "../utils/validators";
 import jwt from 'jsonwebtoken';
-import { userDb, sessionDb, roleDb, auditDb } from "../utils/mock-db.js";
+import { userDb, sessionDb, roleDb } from "../utils/mock-db-optimized.js";
+import { auditDb } from "../utils/mock-db.js";
 import { checkPermission } from "../utils/permission-utils.js";
 import { authenticateUser, handleDatabaseError } from "../services/auth-middleware.js";
 import { HTTP_STATUS, ERROR_MESSAGES } from "../constants/api-constants.js";
